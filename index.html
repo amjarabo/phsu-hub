@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHSU Operations Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#00999A;--teal-dark:#024748;--teal-xd:#012E2F;--teal-light:#E0F5F5;--teal-mid:#5DCAA5;
+  --orange:#F7951D;--orange-d:#C4721A;--orange-light:#FEF3E8;
+  --white:#FFFFFF;--bg:#F2F4F7;--bg2:#E8EAEF;--bg3:#DDE0E8;
+  --border:#D8DBE4;--border2:#C8CCd8;
+  --text:#141720;--text2:#4A5068;--text3:#8A90A4;
+  --green:#1D9E75;--red:#D84040;--amber:#E8920A;
+  --shadow:0 2px 8px rgba(2,71,72,.08),0 1px 2px rgba(2,71,72,.04);
+  --shadow-lg:0 8px 32px rgba(2,71,72,.12),0 2px 8px rgba(2,71,72,.06);
+  --r:8px;--rl:12px;--rxl:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--teal);text-decoration:none}
+button,input,select,textarea{font-family:inherit}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── LAYOUT ── */
+.shell{display:flex;flex-direction:column;min-height:100vh}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--teal-xd);height:58px;display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(255,255,255,.07)}
+.tb-brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.tb-logo{width:34px;height:34px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Crimson Pro',serif;font-size:15px;font-weight:600;color:#fff;letter-spacing:.5px}
+.tb-name{font-size:15px;font-weight:600;color:#fff;letter-spacing:-.2px}
+.tb-sep{width:1px;height:22px;background:rgba(255,255,255,.15)}
+.tb-sub{font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.2px}
+.tb-pills{display:flex;gap:5px;margin-left:auto;flex-wrap:wrap}
+.tb-pill{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:500;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.65);cursor:pointer;background:rgba(255,255,255,.05);transition:all .15s;white-space:nowrap}
+.tb-pill:hover{background:rgba(255,255,255,.12);color:#fff}
+.tb-pill.connected::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--teal-mid)}
+.tb-pill.blocked::before{content:'';width:5px;height:5px;border-radius:50%;background:#E24B4A}
+
+/* ── SIDEBAR + MAIN ── */
+.body-wrap{display:flex;flex:1;overflow:hidden}
+.sidebar{width:210px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto}
+.sb-section{padding:16px 12px 8px}
+.sb-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;padding:0 8px;margin-bottom:6px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r);cursor:pointer;color:var(--text2);font-size:12px;font-weight:500;transition:all .15s;user-select:none}
+.sb-item:hover{background:var(--bg);color:var(--text)}
+.sb-item.active{background:var(--teal-light);color:var(--teal-dark);font-weight:600}
+.sb-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--teal);color:#fff;font-size:9px;padding:1px 6px;border-radius:10px;font-weight:600}
+.sb-badge-warn{background:var(--amber)}
+.sb-divider{height:1px;background:var(--border);margin:8px 12px}
+
+/* ── CONTENT ── */
+.main{flex:1;overflow-y:auto;padding:24px;background:var(--bg)}
+.panel{display:none;animation:fadein .2s ease}
+.panel.active{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TYPOGRAPHY ── */
+.page-title{font-size:20px;font-weight:700;color:var(--teal-dark);letter-spacing:-.3px;margin-bottom:4px}
+.page-sub{font-size:12px;color:var(--text2);margin-bottom:20px}
+.sec-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;margin-top:2px}
+
+/* ── CARDS ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:18px;box-shadow:var(--shadow)}
+.card-sm{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.card-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
+
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.ga{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.ga-lg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--white);color:var(--text);transition:all .15s}
+.btn:hover{background:var(--bg);border-color:var(--teal);color:var(--teal-dark)}
+.btn-p{background:var(--teal);color:#fff;border-color:var(--teal);box-shadow:0 2px 6px rgba(0,153,154,.3)}
+.btn-p:hover{background:var(--teal-dark);border-color:var(--teal-dark);box-shadow:none;color:#fff}
+.abar{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+
+/* ── PILLS / STATUS ── */
+.pill{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.1px}
+.p-a{background:#E0F5F0;color:#085041}.p-r{background:var(--orange-light);color:#8A4A10}.p-b{background:#FDEAEA;color:#A32D2D}.p-d{background:#EAF3DE;color:#3B6D11}.p-v{background:#E6F1FB;color:#185FA5}.p-g{background:var(--bg2);color:var(--text2)}
+
+/* ── SEARCH / FILTER ── */
+.search-wrap{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.search-input{flex:1;min-width:200px;max-width:320px;padding:8px 14px 8px 36px;border-radius:var(--r);border:1px solid var(--border);background:var(--white);font-size:13px;color:var(--text);transition:border .15s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238A90A4' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center}
+.search-input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,153,154,.1)}
+.fbtn{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--text2);transition:all .15s}
+.fbtn:hover,.fbtn.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+
+/* ── STAT CARDS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.stat{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--teal)}
+.stat-v{font-size:32px;font-weight:300;color:var(--teal-dark);font-family:'Crimson Pro',serif;line-height:1.1}
+.stat-l{font-size:11px;font-weight:600;color:var(--text2);margin-top:4px}
+.stat-s{font-size:10px;color:var(--text3);margin-top:2px}
+
+/* ── STAFF CARDS ── */
+.s-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:11px}
+.s-card{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:15px;cursor:pointer;transition:all .15s;position:relative}
+.s-card:hover{border-color:var(--teal);box-shadow:var(--shadow);transform:translateY(-1px)}
+.s-top{display:flex;align-items:flex-start;gap:11px;margin-bottom:10px}
+.av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;letter-spacing:.5px}
+.av-exec{background:var(--teal-dark);color:#fff}
+.av-dir{background:var(--teal-light);color:var(--teal-dark)}
+.av-mkt{background:var(--orange-light);color:var(--orange-d)}
+.av-it{background:#E6F1FB;color:#185FA5}
+.av-tel{background:#E8F0FE;color:#1A56DB}
+.av-adm{background:#E0F5F0;color:#0F6E56}
+.av-gen{background:var(--bg2);color:var(--text2)}
+.s-name{font-size:13px;font-weight:700;color:var(--text);line-height:1.3}
+.s-title{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.4}
+.s-email{font-size:11px;color:var(--teal);margin-bottom:7px}
+.s-tags{display:flex;gap:4px;flex-wrap:wrap}
+.s-tag{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--bg2);color:var(--text2);font-weight:500}
+.s-tag-teal{background:var(--teal-light);color:var(--teal-dark)}
+.s-count{font-size:12px;color:var(--text2);margin-bottom:12px}
+
+/* ── ORG CHART ── */
+.org-scroll{overflow-x:auto;padding-bottom:16px}
+.org-tree{display:flex;flex-direction:column;align-items:center;min-width:1100px}
+.o-level{display:flex;justify-content:center;gap:10px}
+.o-conn{height:20px;display:flex;justify-content:center;align-items:stretch}
+.o-vline{width:1px;background:var(--border2)}
+.o-node{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:9px 13px;min-width:148px;max-width:195px;text-align:center;cursor:pointer;transition:all .15s}
+.o-node:hover{border-color:var(--teal);box-shadow:0 2px 8px rgba(0,153,154,.15);transform:translateY(-1px)}
+.o-node.root{background:var(--teal-dark);border-color:var(--teal-dark)}
+.o-node.root .o-n{color:#fff}.o-node.root .o-t{color:rgba(255,255,255,.6)}.o-node.root .o-e{color:rgba(255,255,255,.4)}
+.o-node.vp{border-top:2px solid var(--teal)}
+.o-node.dir{border-top:2px solid var(--orange)}
+.o-node.staff{border-top:2px solid var(--bg3)}
+.o-node.tbd{border-style:dashed;opacity:.65}
+.o-n{font-size:11px;font-weight:700;color:var(--text);line-height:1.3}
+.o-t{font-size:10px;color:var(--text2);margin-top:3px;line-height:1.3}
+.o-e{font-size:9px;color:var(--teal);margin-top:4px;display:block}
+.o-leg{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.o-leg-i{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+.o-leg-bar{width:18px;height:3px;border-radius:2px}
+
+/* ── PROGRAMS ── */
+.prog-card{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;cursor:pointer;transition:all .15s}
+.prog-card:hover{border-color:var(--teal);box-shadow:var(--shadow);transform:translateY(-1px)}
+.prog-head{padding:14px 16px;border-bottom:1px solid var(--border)}
+.prog-degree{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px}
+.prog-name{font-size:13px;font-weight:700;color:var(--text);line-height:1.4}
+.prog-body{padding:12px 16px}
+.prog-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--bg2);font-size:11px}
+.prog-row:last-child{border-bottom:none}
+.prog-key{color:var(--text2);font-weight:500}
+.prog-val{color:var(--text);font-weight:600;text-align:right;max-width:60%}
+.prog-campuses{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
+.campus-tag{padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.ct-ponce{background:#E0F5F0;color:#085041}
+.ct-stl{background:#E6F1FB;color:#185FA5}
+.ct-sj{background:#EEEDFE;color:#3C3489}
+.ct-bvi{background:var(--orange-light);color:var(--orange-d)}
+.ct-online{background:var(--bg2);color:var(--text2)}
+.prog-filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+
+/* ── PROJECTS / GANTT ── */
+.p-row{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:7px;display:grid;grid-template-columns:1fr 210px 110px 68px;gap:14px;align-items:center;cursor:pointer;transition:all .15s}
+.p-row:hover{border-color:var(--teal);box-shadow:var(--shadow)}
+.p-task{font-size:13px;font-weight:700;color:var(--text)}
+.p-own{font-size:11px;color:var(--text2);margin-top:2px}
+.pbar{height:5px;background:var(--bg2);border-radius:3px;margin-bottom:3px}
+.pfill{height:5px;border-radius:3px}
+.plbl{font-size:10px;color:var(--text3)}
+.gscroll{overflow-x:auto}
+.ginner{min-width:920px}
+.g-row{display:flex;align-items:center;margin-bottom:5px}
+.g-lbl{width:230px;flex-shrink:0;padding-right:14px}
+.g-task{font-size:12px;font-weight:700;color:var(--text)}
+.g-own{font-size:10px;color:var(--text2)}
+.g-track{flex:1;height:28px;background:var(--bg);border-radius:4px;position:relative}
+.g-bar{position:absolute;top:3px;height:22px;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden}
+.gbt{background:var(--teal)}.gbo{background:var(--orange)}.gbb{background:#185FA5}.gbg{background:#888}.gbgr{background:var(--green)}
+.g-today{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--red);border-radius:1px;z-index:5}
+.g-tlbl{position:absolute;top:-16px;font-size:9px;color:var(--red);transform:translateX(-50%);font-weight:700;white-space:nowrap}
+.g-months{display:flex;margin-bottom:8px;margin-left:230px}
+.gm{flex:1;font-size:10px;color:var(--text3);text-align:center;padding:3px 0;border-left:1px solid var(--border)}
+.g-leg{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.g-li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.g-ld{width:10px;height:10px;border-radius:2px}
+
+/* ── RACI ── */
+.rscroll{overflow-x:auto}
+.rtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:1100px}
+.rtbl th{padding:8px 10px;text-align:left;background:var(--bg);border-bottom:2px solid var(--border2);font-weight:700;font-size:10px;color:var(--text2);white-space:nowrap;line-height:1.4;position:sticky;top:0;z-index:10}
+.rtbl th.c{text-align:center;min-width:72px}
+.rtbl td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.rtbl tr:hover td{background:var(--bg)}
+.rb{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:10px;font-weight:800}
+.rb-R{background:var(--teal-light);color:var(--teal-dark)}.rb-A{background:var(--teal-dark);color:#fff}.rb-C{background:var(--orange-light);color:#8A4A10}.rb-I{background:var(--bg2);color:var(--text2)}
+.r-leg{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.r-li{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2)}
+
+/* ── PROCESSES ── */
+.proc-row{background:var(--white);border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px;overflow:hidden;transition:border-color .15s}
+.proc-row:hover{border-color:var(--teal)}
+.proc-hdr{display:flex;align-items:center;gap:10px;padding:11px 15px;cursor:pointer;transition:background .12s}
+.proc-hdr:hover{background:var(--bg)}
+.proc-ico{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.proc-body{padding:0 15px 12px 55px;border-top:1px solid var(--border);display:none}
+.proc-body.open{display:block}
+.proc-steps{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding-top:10px}
+.proc-step{padding:3px 10px;background:var(--teal-light);border-radius:12px;font-size:11px;color:var(--teal-dark);font-weight:600}
+.proc-arr{color:var(--text3);font-size:10px}
+
+/* ── DOCS ── */
+.d-card{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:15px;cursor:pointer;transition:all .15s}
+.d-card:hover{border-color:var(--teal);box-shadow:var(--shadow);transform:translateY(-1px)}
+.d-ico{font-size:20px;margin-bottom:8px}
+.d-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;line-height:1.4}
+.d-meta{font-size:11px;color:var(--text2)}
+
+/* ── INTEGRATIONS ── */
+.i-card{background:var(--white);border:1px solid var(--border);border-radius:var(--rl);padding:15px;cursor:pointer;transition:all .15s}
+.i-card:hover{border-color:var(--teal);box-shadow:var(--shadow)}
+.i-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.i-logo{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.i-name{font-size:13px;font-weight:700;color:var(--text)}
+.i-type{font-size:10px;color:var(--text2)}
+.i-list{list-style:none}
+.i-list li{font-size:11px;color:var(--text2);padding:2px 0}
+.i-list li::before{content:'→ ';color:var(--teal)}
+.i-status{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px}
+.is-l{background:var(--teal-light);color:#085041}.is-p{background:var(--orange-light);color:#8A4A10}.is-b{background:#FDEAEA;color:#A32D2D}
+
+/* ── NEW ITEM MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(1,46,47,.5);z-index:999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.modal-bg.hidden{display:none}
+.modal{background:var(--white);border-radius:var(--rxl);padding:28px;width:90%;max-width:500px;box-shadow:var(--shadow-lg)}
+.modal-title{font-size:16px;font-weight:700;color:var(--teal-dark);margin-bottom:18px}
+.modal-close{float:right;cursor:pointer;color:var(--text3);font-size:20px;line-height:1;margin-top:-2px}
+.form-row{margin-bottom:14px}
+.form-label{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.4px}
+.form-input,.form-select,.form-textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;color:var(--text);background:var(--white);transition:border .15s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,153,154,.1)}
+.form-textarea{resize:vertical;min-height:80px;font-family:inherit}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){.stats-row,.g3,.g4{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.body-wrap{flex-direction:column}.sidebar{width:100%;height:auto;position:static;flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);padding:8px}.sb-section{padding:4px}.sb-label{display:none}.sb-item{white-space:nowrap;padding:6px 10px;font-size:11px}.sb-item .sb-icon{display:none}.p-row{grid-template-columns:1fr 80px}.p-row>*:nth-child(3),.p-row>*:nth-child(4){display:none}.tb-pills{display:none}.stats-row{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+@media(max-width:500px){.g2,.stats-row{grid-template-columns:1fr}.main{padding:14px}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">P</div>
+    <div class="tb-name">PHSU Ops Hub</div>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-sub">Ponce Health Sciences University · psm.edu</div>
+  <div class="tb-pills">
+    <div class="tb-pill connected">Outlook</div>
+    <div class="tb-pill connected">SharePoint</div>
+    <div class="tb-pill connected">OneDrive</div>
+    <div class="tb-pill connected">Salesforce</div>
+    <div class="tb-pill connected">Element451</div>
+    <div class="tb-pill blocked">Fabric (OAuth)</div>
+    <div class="tb-pill">Anthology</div>
+  </div>
+</header>
+
+<div class="body-wrap">
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sb-section">
+    <div class="sb-label">Overview</div>
+    <div class="sb-item active" data-tab="dashboard"><div class="sb-icon">⊞</div>Dashboard</div>
+    <div class="sb-item" data-tab="programs"><div class="sb-icon">🎓</div>Programs<div class="sb-badge">13</div></div>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">People</div>
+    <div class="sb-item" data-tab="staff"><div class="sb-icon">👥</div>Staff Directory<div class="sb-badge">41</div></div>
+    <div class="sb-item" data-tab="org"><div class="sb-icon">🏛</div>Org Chart</div>
+    <div class="sb-item" data-tab="raci"><div class="sb-icon">📋</div>RACI Matrix</div>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">Projects</div>
+    <div class="sb-item" data-tab="projects"><div class="sb-icon">📌</div>Projects<div class="sb-badge sb-badge-warn">7</div></div>
+    <div class="sb-item" data-tab="gantt"><div class="sb-icon">📅</div>Gantt Timeline</div>
+    <div class="sb-item" data-tab="processes"><div class="sb-icon">⬡</div>Processes</div>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-section">
+    <div class="sb-label">Resources</div>
+    <div class="sb-item" data-tab="docs"><div class="sb-icon">📁</div>Documents</div>
+    <div class="sb-item" data-tab="integrations"><div class="sb-icon">⚡</div>Integrations</div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<div class="panel active" id="panel-dashboard">
+  <div class="page-title">Good morning — PHSU Operations Hub</div>
+  <div class="page-sub">Ponce Health Sciences University · Ponce PR · San Juan PR · St. Louis MO · Tortola BVI</div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-v">13</div><div class="stat-l">Academic Programs</div><div class="stat-s">4 campuses · online options</div></div>
+    <div class="stat"><div class="stat-v">41</div><div class="stat-l">Staff in Directory</div><div class="stat-s">from Element451</div></div>
+    <div class="stat"><div class="stat-v">7</div><div class="stat-l">Active Projects</div><div class="stat-s">1 blocked · 1 at risk</div></div>
+    <div class="stat" style="--teal:var(--amber)"><div class="stat-v">500+</div><div class="stat-l">Graduates Annually</div><div class="stat-s">90%+ underrepresented minorities</div></div>
+  </div>
+  <div class="g2" style="gap:20px;align-items:start">
+    <div>
+      <div class="sec-label">Project Status</div>
+      <div id="dash-projs" class="card" style="padding:0 2px"></div>
+      <div style="margin-top:16px">
+        <div class="sec-label">Upcoming Milestones</div>
+        <div class="card" style="padding:0 2px" id="dash-milestones"></div>
+      </div>
+    </div>
+    <div>
+      <div class="sec-label">Quick Navigation</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div class="card-sm" style="cursor:pointer;text-align:center;padding:16px" onclick="switchTab('programs')"><div style="font-size:24px;margin-bottom:6px">🎓</div><div style="font-size:12px;font-weight:700;color:var(--teal-dark)">Programs</div><div style="font-size:10px;color:var(--text2);margin-top:2px">13 programs · 4 campuses</div></div>
+        <div class="card-sm" style="cursor:pointer;text-align:center;padding:16px" onclick="switchTab('staff')"><div style="font-size:24px;margin-bottom:6px">👥</div><div style="font-size:12px;font-weight:700;color:var(--teal-dark)">Staff Directory</div><div style="font-size:10px;color:var(--text2);margin-top:2px">41 staff · searchable</div></div>
+        <div class="card-sm" style="cursor:pointer;text-align:center;padding:16px" onclick="switchTab('org')"><div style="font-size:24px;margin-bottom:6px">🏛</div><div style="font-size:12px;font-weight:700;color:var(--teal-dark)">Org Chart</div><div style="font-size:10px;color:var(--text2);margin-top:2px">Full hierarchy</div></div>
+        <div class="card-sm" style="cursor:pointer;text-align:center;padding:16px" onclick="switchTab('raci')"><div style="font-size:24px;margin-bottom:6px">📋</div><div style="font-size:12px;font-weight:700;color:var(--teal-dark)">RACI Matrix</div><div style="font-size:10px;color:var(--text2);margin-top:2px">Accountability map</div></div>
+      </div>
+      <div class="sec-label">Campuses</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="card-sm"><div style="font-size:10px;font-weight:700;color:var(--teal);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Ponce, PR — Main</div><div style="font-size:11px;color:var(--text2)">MD · DMD · PsyD · PhD · BSN · MPH · DrPH · MSMS · MSSP</div></div>
+        <div class="card-sm"><div style="font-size:10px;font-weight:700;color:#185FA5;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">St. Louis, MO</div><div style="font-size:11px;color:var(--text2)">MD · PsyD · MSMS · BSN (Spring 2026)</div></div>
+        <div class="card-sm"><div style="font-size:10px;font-weight:700;color:#3C3489;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">San Juan, PR</div><div style="font-size:11px;color:var(--text2)">PsyD · MSMS · MSSP · MPH</div></div>
+        <div class="card-sm"><div style="font-size:10px;font-weight:700;color:var(--orange-d);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Tortola, BVI</div><div style="font-size:11px;color:var(--text2)">MD (International) · MSMS pathway</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PROGRAMS ═══════════ -->
+<div class="panel" id="panel-programs">
+  <div class="page-title">Academic Programs</div>
+  <div class="page-sub">All programs, campuses, durations, tuition, and admissions info</div>
+  <div class="prog-filter-bar">
+    <button class="fbtn on" data-pf="all" onclick="setProgFilter(this,'all')">All Programs</button>
+    <button class="fbtn" data-pf="Ponce" onclick="setProgFilter(this,'Ponce')">Ponce PR</button>
+    <button class="fbtn" data-pf="St. Louis" onclick="setProgFilter(this,'St. Louis')">St. Louis</button>
+    <button class="fbtn" data-pf="San Juan" onclick="setProgFilter(this,'San Juan')">San Juan</button>
+    <button class="fbtn" data-pf="BVI" onclick="setProgFilter(this,'BVI')">BVI</button>
+    <button class="fbtn" data-pf="Online" onclick="setProgFilter(this,'Online')">Online</button>
+  </div>
+  <div class="ga-lg" id="prog-grid"></div>
+</div>
+
+<!-- ═══════════ STAFF ═══════════ -->
+<div class="panel" id="panel-staff">
+  <div class="page-title">Staff Directory</div>
+  <div class="page-sub">41 staff from Element451 · psm.edu · Click any card to email</div>
+  <div class="search-wrap">
+    <input class="search-input" type="text" id="sf-q" placeholder="Search name, title, department, email..." oninput="filterStaff()">
+    <button class="fbtn on" data-sc="all" onclick="setCampus(this,'all')">All</button>
+    <button class="fbtn" data-sc="Puerto Rico" onclick="setCampus(this,'Puerto Rico')">Puerto Rico</button>
+    <button class="fbtn" data-sc="St. Louis" onclick="setCampus(this,'St. Louis')">St. Louis</button>
+    <button class="fbtn" data-sc="BVI" onclick="setCampus(this,'BVI')">BVI</button>
+    <button class="fbtn" data-sc="Global" onclick="setCampus(this,'Global')">Global</button>
+  </div>
+  <div class="s-count" id="sf-count"></div>
+  <div class="s-grid" id="sf-grid"></div>
+</div>
+
+<!-- ═══════════ ORG CHART ═══════════ -->
+<div class="panel" id="panel-org">
+  <div class="page-title">Org Chart</div>
+  <div class="page-sub">Organizational hierarchy — add missing VP/Dean names as you get them</div>
+  <div class="o-leg">
+    <div class="o-leg-i"><div class="o-leg-bar" style="background:var(--teal-dark);width:24px;height:4px;border-radius:2px"></div>President</div>
+    <div class="o-leg-i"><div class="o-leg-bar" style="background:var(--teal);width:18px;height:3px;border-radius:2px"></div>C-Suite / VP</div>
+    <div class="o-leg-i"><div class="o-leg-bar" style="background:var(--orange);width:18px;height:3px;border-radius:2px"></div>Director / Manager</div>
+    <div class="o-leg-i"><div class="o-leg-bar" style="background:var(--bg3);width:18px;height:3px;border-radius:2px"></div>Staff</div>
+  </div>
+  <div class="org-scroll" id="org-wrap"></div>
+</div>
+
+<!-- ═══════════ PROJECTS ═══════════ -->
+<div class="panel" id="panel-projects">
+  <div class="page-title">Projects</div>
+  <div class="page-sub">Active, at-risk, and blocked initiatives</div>
+  <div class="abar">
+    <button class="btn btn-p" onclick="openModal('project')">+ New Project</button>
+    <button class="btn">↑ Export Excel</button>
+    <button class="btn">⟳ Sync Planner</button>
+  </div>
+  <div id="proj-list"></div>
+  <div style="margin-top:22px">
+    <div class="sec-label">April 2025 Milestones</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap" id="milestones"></div>
+  </div>
+</div>
+
+<!-- ═══════════ GANTT ═══════════ -->
+<div class="panel" id="panel-gantt">
+  <div class="page-title">Gantt Timeline · 2025</div>
+  <div class="page-sub">Full project timeline across all active initiatives</div>
+  <div class="abar">
+    <button class="btn btn-p" onclick="openModal('project')">+ Add Project</button>
+    <button class="btn">↑ Export</button>
+    <button class="btn">⟳ Sync MS Project</button>
+  </div>
+  <div class="g-leg">
+    <div class="g-li"><div class="g-ld" style="background:var(--teal)"></div>In progress</div>
+    <div class="g-li"><div class="g-ld" style="background:var(--orange)"></div>At risk</div>
+    <div class="g-li"><div class="g-ld" style="background:var(--red)"></div>Blocked</div>
+    <div class="g-li"><div class="g-ld" style="background:var(--green)"></div>Complete</div>
+  </div>
+  <div class="gscroll"><div class="ginner">
+    <div class="g-months" id="gmonths"></div>
+    <div id="grows"></div>
+  </div></div>
+</div>
+
+<!-- ═══════════ RACI ═══════════ -->
+<div class="panel" id="panel-raci">
+  <div class="page-title">RACI Matrix</div>
+  <div class="page-sub">Responsibility assignment across all key processes and stakeholders</div>
+  <div class="abar">
+    <button class="btn btn-p" onclick="openModal('raci')">+ Add Process</button>
+    <button class="btn">↑ Export Excel</button>
+  </div>
+  <div class="r-leg">
+    <div class="r-li"><span class="rb rb-R">R</span> Responsible — does the work</div>
+    <div class="r-li"><span class="rb rb-A">A</span> Accountable — owns the outcome</div>
+    <div class="r-li"><span class="rb rb-C">C</span> Consulted — provides input</div>
+    <div class="r-li"><span class="rb rb-I">I</span> Informed — kept in the loop</div>
+  </div>
+  <div class="rscroll">
+    <table class="rtbl">
+      <thead><tr>
+        <th style="width:165px">Process</th>
+        <th style="width:85px">Dept</th>
+        <th class="c">President<br><span style="font-weight:400;font-size:9px;color:var(--text3)">Natalicchio</span></th>
+        <th class="c">VP Enrollment<br><span style="font-weight:400;font-size:9px;color:var(--text3)">L. Dwyer</span></th>
+        <th class="c">VP Mktg<br><span style="font-weight:400;font-size:9px;color:var(--text3)">E. Vazquez</span></th>
+        <th class="c">CMO<br><span style="font-weight:400;font-size:9px;color:var(--text3)">K. Ball</span></th>
+        <th class="c">VP Recruit.<br><span style="font-weight:400;font-size:9px;color:var(--text3)">J. Stovall</span></th>
+        <th class="c">Adm. Dir<br><span style="font-weight:400;font-size:9px;color:var(--text3)">A. Velazquez</span></th>
+        <th class="c">IT Director<br><span style="font-weight:400;font-size:9px;color:var(--text3)">M. Vega</span></th>
+        <th class="c">Fin. Svc<br><span style="font-weight:400;font-size:9px;color:var(--text3)">J. Molina</span></th>
+        <th class="c">Data Mgr<br><span style="font-weight:400;font-size:9px;color:var(--text3)">M. Fitting</span></th>
+        <th class="c">Sys Admin<br><span style="font-weight:400;font-size:9px;color:var(--text3)">A. Jarabo</span></th>
+      </tr></thead>
+      <tbody id="rbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════ PROCESSES ═══════════ -->
+<div class="panel" id="panel-processes">
+  <div class="page-title">Process Library</div>
+  <div class="page-sub">Step-by-step operational processes · click to expand</div>
+  <div class="abar">
+    <button class="btn btn-p" onclick="openModal('process')">+ New Process</button>
+    <button class="btn">⬡ Flow Diagram</button>
+  </div>
+  <div id="proc-list"></div>
+</div>
+
+<!-- ═══════════ DOCUMENTS ═══════════ -->
+<div class="panel" id="panel-docs">
+  <div class="page-title">Document Repository</div>
+  <div class="page-sub">Policies, guides, playbooks · linked to OneDrive &amp; SharePoint</div>
+  <div class="abar">
+    <button class="btn btn-p" onclick="openModal('doc')">+ Add Document</button>
+    <button class="btn">🔍 Search OneDrive</button>
+    <button class="btn">⟳ Recent Changes</button>
+  </div>
+  <div class="sec-label">Strategic &amp; Governance</div>
+  <div class="ga" style="margin-bottom:18px" id="docs-s"></div>
+  <div class="sec-label">Operations &amp; Systems</div>
+  <div class="ga" id="docs-o"></div>
+</div>
+
+<!-- ═══════════ INTEGRATIONS ═══════════ -->
+<div class="panel" id="panel-integrations">
+  <div class="page-title">Integration Map</div>
+  <div class="page-sub">Connected systems, status, and data flows</div>
+  <div class="abar">
+    <button class="btn btn-p">Configure</button>
+    <button class="btn">Check Status</button>
+  </div>
+  <div class="ga" id="i-grid"></div>
+  <div style="margin-top:16px;padding:14px 16px;background:var(--teal-light);border-radius:var(--r);font-size:12px;color:var(--teal-dark);line-height:1.7">
+    <strong>Architecture:</strong> Hub → SharePoint Lists (updated by Fabric Dataflows) → Salesforce + Element451. Outlook Calendar: native SP Calendar web part, no admin needed. Power BI: embed directly in SharePoint. Fabric OAuth fix: use named user credential in Dataflow Gen2, not API-only Salesforce user for interactive OAuth.
+  </div>
+</div>
+
+</main>
+</div><!-- end body-wrap -->
+</div><!-- end shell -->
+
+<!-- ═══════════ ADD MODAL ═══════════ -->
+<div class="modal-bg hidden" id="modal-bg" onclick="closeModalBg(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-title" id="modal-title">Add Item <span class="modal-close" onclick="closeModal()">×</span></div>
+    <div id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-p" onclick="saveModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════ DATA ═══════════
+const PROGRAMS=[
+  {degree:'MD',name:'Doctor of Medicine (LCME)',duration:'4 years',credits:'n/a',tuition:'$43,691/yr (resident) · $68,180/yr (non-resident)',apply:'AMCAS · deadline Dec 30',req:'Bachelor\'s · min GPA 2.7 · MCAT 494+',accred:'LCME accredited',campuses:['Ponce','St. Louis'],modality:'In-person'},
+  {degree:'MD',name:'Doctor of Medicine (ACCM — International)',duration:'4 years (166 weeks)',credits:'n/a',tuition:'Contact admissions',apply:'PHSU secondary application',req:'Bachelor\'s · MCAT · MSMS pathway guaranteed interview',accred:'ACCM accredited',campuses:['BVI'],modality:'In-person'},
+  {degree:'DMD',name:'Doctor of Dental Medicine',duration:'4 years',credits:'n/a',tuition:'Contact admissions',apply:'AADSAS · deadline Dec 30',req:'Bachelor\'s · DAT recommended',accred:'CODA accredited',campuses:['Ponce'],modality:'In-person'},
+  {degree:'PsyD',name:'Doctor of Psychology in Clinical Psychology',duration:'5 years',credits:'86 credits + 1,000 practicum hrs + 2,000 internship hrs',tuition:'Contact admissions',apply:'PHSU direct application',req:'Bachelor\'s · 15 credits in psychology · interview',accred:'APA accredited (Ponce/SJ) · APA pending (STL)',campuses:['Ponce','San Juan','St. Louis'],modality:'In-person'},
+  {degree:'PhD',name:'Doctor of Philosophy in Clinical Psychology',duration:'5+ years',credits:'n/a',tuition:'Contact admissions',apply:'PHSU direct application',req:'Bachelor\'s · psychology background',accred:'APA accredited',campuses:['Ponce'],modality:'In-person'},
+  {degree:'PhD',name:'Doctor of Philosophy in Biomedical Sciences',duration:'4–6 years',credits:'n/a',tuition:'Contact admissions',apply:'PHSU direct application',req:'Bachelor\'s in sciences',accred:'CHE-PR accredited',campuses:['Ponce'],modality:'In-person'},
+  {degree:'DrPH',name:'Doctor of Public Health in Epidemiology',duration:'3+ years',credits:'n/a',tuition:'Contact admissions',apply:'PHSU direct application',req:'Master\'s in public health or related',accred:'CEPH accredited',campuses:['Ponce'],modality:'In-person'},
+  {degree:'MPH',name:'Master of Public Health',duration:'2 years',credits:'n/a',tuition:'Contact admissions',apply:'PHSU direct application',req:'Bachelor\'s',accred:'CEPH accredited',campuses:['Ponce','San Juan'],modality:'In-person',tracks:'General · Epidemiology · Environmental Health'},
+  {degree:'MSMS',name:'Master of Science in Medical Sciences',duration:'10 months (in-person/remote) · 20 months (online)',credits:'n/a',tuition:'$34,875/yr (PR) · $37,683/yr (STL) · $8,000 scholarships available',apply:'PHSU direct · no MCAT required',req:'Bachelor\'s · min GPA 2.7',accred:'CHE-PR · SACSCOC',campuses:['Ponce','San Juan','St. Louis'],modality:'In-person · Remote · Online'},
+  {degree:'MSSP',name:'Master of Science in School Psychology',duration:'2–3 years',credits:'n/a',tuition:'Contact admissions',apply:'PHSU direct application',req:'Bachelor\'s · psychology background',accred:'NASP standards',campuses:['Ponce','San Juan'],modality:'In-person',tracks:'Neuropsychology specialty (Ponce & SJ)'},
+  {degree:'BSN',name:'Bachelor of Science in Nursing',duration:'2 years (RN to BSN)',credits:'n/a',tuition:'Scholarships up to 20% off for GPA 3.4+ with FAFSA need',apply:'PHSU direct application',req:'Active RN license · associate degree',accred:'ACEN accredited',campuses:['Ponce','St. Louis'],modality:'In-person',note:'STL: Enrolling Spring 2026'},
+  {degree:'Cert',name:'Professional Certificate in Family & Couples Therapy',duration:'1 year',credits:'n/a',tuition:'Contact admissions',apply:'PHSU direct application',req:'Graduate degree in psychology or related',accred:'CHE-PR',campuses:['Ponce'],modality:'In-person'},
+  {degree:'Cert',name:'Postgraduate Certificate in Neurosciences of Learning',duration:'1 year',credits:'n/a',tuition:'Contact admissions',apply:'PHSU direct application',req:'Graduate degree',accred:'CHE-PR',campuses:['Ponce'],modality:'In-person'},
+];
+
+const STAFF=[
+  {n:'Dr. Gino Natalicchio',e:'president@psm.edu',t:'President',c:'All Campuses',d:'Executive',av:'av-exec'},
+  {n:'Laura Dwyer',e:'ldwyer@psm.edu',t:'Vice President Enrollment',c:'Global',d:'Executive',av:'av-exec'},
+  {n:'Emsley Vazquez',e:'evazquez@psm.edu',t:'VP Strategic Marketing & Communications',c:'Global',d:'Executive',av:'av-exec'},
+  {n:'Karina Ball',e:'kball@psm.edu',t:'CMO',c:'Global',d:'Executive',av:'av-exec'},
+  {n:'Jennifer Leigh Stovall',e:'jstovall@psm.edu',t:'VP, Global Recruitment',c:'Global',d:'Recruitment',av:'av-dir'},
+  {n:'Astrid Velazquez',e:'avelazquez@psm.edu',t:'Admissions Director',c:'Global',d:'Admissions',av:'av-adm'},
+  {n:'Michael Vega',e:'mvega@psm.edu',t:'IT Director',c:'Global',d:'IT',av:'av-it'},
+  {n:'Jeniffer Molina',e:'jemolina@psm.edu',t:'Director of Student Financial Services',c:'Global',d:'Finance',av:'av-dir'},
+  {n:'Matt Kitchell',e:'mkitchell@psm.edu',t:'Director, Nursing Partnerships & Strategic Pathways',c:'St. Louis',d:'Academic',av:'av-dir'},
+  {n:'Kayleigh Hottel',e:'khottel@tiberhealth.com',t:'Digital Marketing Director',c:'Global',d:'Marketing',av:'av-mkt'},
+  {n:'Michael Fitting',e:'mfitting@psm.edu',t:'Data Strategy & Reporting Manager',c:'Global',d:'Data/Analytics',av:'av-it'},
+  {n:'Natalie Gutierrez Schmidt',e:'nschmidt@psm.edu',t:'Marketing & Communications Manager',c:'Global',d:'Marketing',av:'av-mkt'},
+  {n:'Crystal Guzman Davila',e:'cguzman@psm.edu',t:'Social Media & Digital Ads Manager',c:'Global',d:'Marketing',av:'av-mkt'},
+  {n:'Ginady Rivera',e:'girivera@psm.edu',t:'Marketing & Communications Coordinator',c:'Global',d:'Marketing',av:'av-mkt'},
+  {n:'John Reid',e:'jreid@psm.edu',t:'Multi-Channel Telecommunications Manager',c:'Global',d:'Telecom',av:'av-tel'},
+  {n:'Serenity Lowe',e:'slowe@psm.edu',t:'Admissions Manager',c:'St. Louis',d:'Admissions',av:'av-adm'},
+  {n:'Rafmary Pomales Jaimán',e:'rpomales@psm.edu',t:'PR Enrollment Coordinator',c:'Puerto Rico',d:'Admissions',av:'av-adm'},
+  {n:'Ana Jarabo',e:'ajarabo@psm.edu',t:'System Admin / Ops Consultant',c:'Global',d:'IT/Ops',av:'av-it'},
+  {n:'Robert Toombs',e:'rtoombs@psm.edu',t:'Web Developer',c:'Global',d:'IT',av:'av-it'},
+  {n:'Luis Denzell Matos',e:'lmatos@psm.edu',t:'Content Developer',c:'Global',d:'Marketing',av:'av-mkt'},
+  {n:'Victoria N Castilloveitia Mercado',e:'vcastilloveitia@psm.edu',t:'Admissions Officer',c:'BVI',d:'Admissions',av:'av-adm'},
+  {n:'Lyanibel Santiago Colon',e:'lsantiago@psm.edu',t:'Marketing & Communications Officer',c:'BVI',d:'Marketing',av:'av-mkt'},
+  {n:'Hilario Padilla Colón',e:'hpadilla@psm.edu',t:'Admission Officer',c:'BVI',d:'Admissions',av:'av-adm'},
+  {n:'Maria Colon',e:'mcolon@psm.edu',t:'Admissions Officer',c:'Puerto Rico',d:'Admissions',av:'av-adm'},
+  {n:'Yesenia Garcia',e:'yegarcia@psm.edu',t:'Admissions Assistant',c:'St. Louis',d:'Admissions',av:'av-adm'},
+  {n:'Solymar Perez Roman',e:'soperez@psm.edu',t:'Admissions Officer',c:'Puerto Rico',d:'Admissions',av:'av-adm'},
+  {n:'Isaura Monserrath Santiago Marchand',e:'imsantiago@psm.edu',t:'Admission Officer',c:'Puerto Rico',d:'Admissions',av:'av-adm'},
+  {n:'Ariana Gomez Gonzalez',e:'argomez@psm.edu',t:'Admissions Officer',c:'Puerto Rico',d:'Admissions',av:'av-adm'},
+  {n:'Crystal A Rodriguez',e:'cryrodriguez@psm.edu',t:'Administrative Assistant',c:'Puerto Rico',d:'Admin',av:'av-gen'},
+  {n:'Raven Fletcher',e:'rfletcher@psm.edu',t:'MD/MSMS Admissions Officer',c:'St. Louis',d:'Admissions',av:'av-adm'},
+  {n:'Stacey Tunnicliff',e:'stunnicliff@psm.edu',t:'BSN/MSMS Admissions Officer',c:'St. Louis',d:'Admissions',av:'av-adm'},
+  {n:'Andrew L Hudson',e:'ahudson@psm.edu',t:'Telecommunications Officer',c:'St. Louis',d:'Telecom',av:'av-tel'},
+  {n:'Ana Sofia Bigay Ortiz',e:'abigay@psm.edu',t:'Admissions & Telecommunications Officer',c:'Global',d:'Admissions',av:'av-adm'},
+  {n:'Julitza Cruz',e:'jcruz@psm.edu',t:'Telecommunications Officer',c:'Puerto Rico',d:'Telecom',av:'av-tel'},
+  {n:'Lizmarie Hernández Sánchez',e:'lizmhernandez@psm.edu',t:'Campus Host & Telecommunications',c:'Puerto Rico',d:'Telecom',av:'av-tel'},
+  {n:'Analaura Zayas',e:'azayas@psm.edu',t:'Telecommunicator & Admissions Officer',c:'Puerto Rico',d:'Telecom',av:'av-tel'},
+  {n:'Myrna E Lebron Lopez',e:'mylebron@psm.edu',t:'University Ambassador',c:'Puerto Rico',d:'Admissions',av:'av-gen'},
+  {n:'Jose A Mercado',e:'jomercado@psm.edu',t:'University Ambassador',c:'Puerto Rico',d:'Admissions',av:'av-gen'},
+  {n:'Agnes Judith Gonzalez',e:'agnesgonzalez@psm.edu',t:'University Ambassador',c:'Puerto Rico',d:'Admissions',av:'av-gen'},
+  {n:'Abi J Diaz Velazquez',e:'abdiaz@psm.edu',t:'University Ambassador',c:'Puerto Rico',d:'Admissions',av:'av-gen'},
+  {n:'Jose Daniel Perez',e:'jperez@psm.edu',t:'Dr.',c:'Global',d:'Academic',av:'av-exec'},
+];
+
+const PROJECTS=[
+  {n:'Element451 Integration',o:'Ana Jarabo',p:65,s:'active',due:'Jun 30 2025'},
+  {n:'SharePoint Intranet Rollout',o:'Ana Jarabo / M. Vega',p:40,s:'risk',due:'May 15 2025'},
+  {n:'Accreditation Docs Review',o:'Academic Affairs',p:80,s:'review',due:'Apr 30 2025'},
+  {n:'MS Fabric → Salesforce',o:'Ana Jarabo / M. Vega',p:25,s:'blocked',due:'TBD'},
+  {n:'Fall 2025 Admissions',o:'J. Stovall / L. Dwyer',p:90,s:'done',due:'Apr 15 2025'},
+  {n:'Org Intranet Hub v1',o:'Ana Jarabo',p:62,s:'active',due:'Jul 15 2025'},
+  {n:'Anthology LMS Upgrade',o:'M. Vega / Academic',p:35,s:'active',due:'Sep 30 2025'},
+];
+
+const GANTT=[
+  {n:'Element451 Integration',o:'Ana Jarabo',s:0,e:5,c:'gbt'},
+  {n:'SharePoint Intranet',o:'Ana / M. Vega',s:1,e:6,c:'gbo'},
+  {n:'Accreditation Docs',o:'Academic Affairs',s:0,e:3,c:'gbgr'},
+  {n:'MS Fabric → Salesforce',o:'Ana Jarabo',s:2,e:8,c:'gbg'},
+  {n:'Fall 2025 Admissions',o:'J. Stovall / L. Dwyer',s:0,e:3,c:'gbt'},
+  {n:'Org Intranet Hub v1',o:'Ana Jarabo',s:3,e:6,c:'gbo'},
+  {n:'Anthology LMS Upgrade',o:'M. Vega',s:4,e:8,c:'gbb'},
+  {n:'Budget FY2026',o:'Finance / J. Molina',s:5,e:8,c:'gbg'},
+  {n:'Salesforce Phase 2',o:'Ana Jarabo',s:6,e:11,c:'gbt'},
+];
+
+// cols: President, VP Enrollment, VP Mktg, CMO, VP Recruit, Adm Dir, IT Dir, Fin Svc, Data Mgr, Sys Admin
+const RACI=[
+  {p:'New Student Admissions',d:'Enrollment',c:['I','A','I','I','C','R','I','C','C','C']},
+  {p:'Element451 Config',d:'IT/Ops',c:['I','C','I','I','C','C','C','I','C','R']},
+  {p:'Marketing Campaigns',d:'Marketing',c:['I','I','A','R','C','I','I','I','C','I']},
+  {p:'Recruitment Strategy',d:'Recruitment',c:['A','C','C','C','R','C','I','I','I','I']},
+  {p:'Data Reporting',d:'Data',c:['I','C','C','I','C','I','C','I','R','R']},
+  {p:'Telecom Outreach',d:'Telecom',c:['I','C','I','I','C','C','I','I','I','I']},
+  {p:'Salesforce CRM',d:'IT/Ops',c:['I','I','I','I','I','I','C','I','C','R']},
+  {p:'SharePoint Intranet',d:'IT/Ops',c:['I','I','I','I','I','I','A','I','I','R']},
+  {p:'Accreditation',d:'Academic',c:['A','C','I','I','I','I','I','I','I','I']},
+  {p:'Financial Aid',d:'Finance',c:['I','A','I','I','I','C','I','R','I','I']},
+  {p:'Student Onboarding',d:'Enrollment',c:['I','A','I','I','C','R','C','I','I','C']},
+  {p:'Budget Planning',d:'Finance',c:['A','C','I','I','I','I','I','R','I','I']},
+];
+
+const PROCS=[
+  {n:'New Student Admissions',d:'Enrollment',ico:'🎓',o:'A. Velazquez / L. Dwyer',steps:['Application received in Element451','Document verification & checklist','Admissions committee review','Decision issued to applicant','Financial aid packet sent','Enrollment agreement signed','Orientation & onboarding']},
+  {n:'Element451 CRM Config',d:'IT/Ops',ico:'⚙️',o:'Ana Jarabo',steps:['Requirements gathering','User accounts setup','Program visibility & conditional rules','Email templates & touchpoints','Stripe payment gateway config','QA testing','Go-live & training']},
+  {n:'Salesforce Change Request',d:'IT/Ops',ico:'☁️',o:'Ana Jarabo',steps:['Change request submitted','Impact assessment','Build in dev sandbox','Unit testing','UAT sign-off by stakeholder','Deploy to production','Document & notify users']},
+  {n:'Marketing Campaign Launch',d:'Marketing',ico:'📣',o:'E. Vazquez / K. Ball / N. Schmidt',steps:['Strategy brief approved','Content created','Legal/compliance review','Schedule in Element451','Multi-channel launch (email/SMS/social)','Performance tracking','Post-campaign report']},
+  {n:'Telecom Outreach Cycle',d:'Telecom',ico:'📞',o:'J. Reid',steps:['Lead list pulled from Salesforce/Element451','Script preparation','Outreach calls & SMS','Disposition logged in CRM','Follow-up queue set','Weekly report to Admissions Dir.']},
+  {n:'Staff Onboarding',d:'HR / IT',ico:'👋',o:'Admin / M. Vega / Ana Jarabo',steps:['Offer letter accepted','HR paperwork completed','M365 account created','Element451 access granted','Salesforce profile configured','Training scheduled','Orientation complete']},
+  {n:'Financial Aid Processing',d:'Finance',ico:'💰',o:'J. Molina',steps:['FAFSA received & verified','Eligibility determined','Aid package created','Student notification sent','Award accepted by student','Disbursement processed','Ledger updated']},
+];
+
+const DOCS={
+  s:[
+    {i:'📘',n:'Strategic Plan 2024–2027',m:'Academic Affairs · Mar 2024',t:'PDF'},
+    {i:'📋',n:'Institutional Policies Manual',m:'HR / Legal · Jan 2025',t:'Word'},
+    {i:'🏫',n:'Accreditation Report 2024',m:'Academic Affairs · In Review',t:'Draft'},
+    {i:'📊',n:'Budget Plan FY2025',m:'Finance / J. Molina · Approved',t:'Excel'},
+    {i:'🌍',n:'Mission & Vision Statement',m:'Office of the President · Current',t:'PDF'},
+  ],
+  o:[
+    {i:'⚙️',n:'Salesforce Admin Guide',m:'Ana Jarabo · Apr 2025',t:'Live'},
+    {i:'🎓',n:'Admissions Playbook 2025',m:'J. Stovall / A. Velazquez · All Programs',t:'Word'},
+    {i:'🔒',n:'Data Privacy & FERPA Policy',m:'Compliance · Legal',t:'PDF'},
+    {i:'📡',n:'Element451 Configuration Guide',m:'Ana Jarabo · Apr 2025',t:'Live'},
+    {i:'📊',n:'MS Fabric Data Architecture',m:'Ana Jarabo / M. Fitting · In Progress',t:'Draft'},
+    {i:'🌐',n:'Web & Digital Strategy',m:'K. Ball / K. Hottel / C. Guzman',t:'Word'},
+    {i:'💰',n:'Financial Aid Manual 2025–2026',m:'J. Molina · Student Financial Services',t:'PDF'},
+    {i:'📞',n:'Telecom Outreach Playbook',m:'J. Reid · Telecom Team',t:'Word'},
+  ]
+};
+
+const INTEGRATIONS=[
+  {l:'SP',bg:'#E6F1FB',fg:'#0C447C',n:'SharePoint Online',t:'Microsoft 365',s:'is-l',sl:'Live',items:['Document library','Page hosting','Lists as data layer','Hub embed via iframe']},
+  {l:'OL',bg:'#E6F1FB',fg:'#0C447C',n:'Outlook Calendar',t:'Microsoft 365',s:'is-l',sl:'Live',items:['Event sync to hub','Meeting scheduling','Room booking','Email notifications']},
+  {l:'OD',bg:'#E6F1FB',fg:'#0C447C',n:'OneDrive for Business',t:'Microsoft 365',s:'is-l',sl:'Live',items:['File storage & versioning','Shared drives','Document co-authoring']},
+  {l:'SF',bg:'#E6F1FB',fg:'#185FA5',n:'Salesforce',t:'CRM',s:'is-l',sl:'Live',items:['Student records','Application pipeline','Admissions workflow','Reports & dashboards']},
+  {l:'E4',bg:'#E0F5F0',fg:'#085041',n:'Element451',t:'Enrollment CRM',s:'is-l',sl:'Live',items:['Application forms','Program visibility rules','Stripe payments','Email campaigns & touchpoints']},
+  {l:'Fb',bg:'#FAEEDA',fg:'#633806',n:'Microsoft Fabric',t:'Data Platform',s:'is-b',sl:'OAuth blocked',items:['Data warehouse (pending)','SF sync (pending)','Analytics pipelines','Power BI reports']},
+  {l:'An',bg:'#EAF3DE',fg:'#3B6D11',n:'Anthology (Banner)',t:'Student Info System',s:'is-p',sl:'Config pending',items:['Course enrollment','Student financials','Academic records','Grade sync']},
+  {l:'Az',bg:'#EEEDFE',fg:'#3C3489',n:'Azure AD / Entra ID',t:'Identity',s:'is-l',sl:'Live',items:['SSO for all M365 systems','User provisioning','Role-based access','MFA enforcement']},
+];
+
+// ═══════════ HELPERS ═══════════
+function ini(n){return n.replace(/^Dr\.\s*/,'').split(' ').filter((_,i,a)=>i===0||i===a.length-1).map(x=>x[0]||'').join('').toUpperCase()}
+function pill(s){const m={active:['p-a','Active'],risk:['p-r','At Risk'],blocked:['p-b','Blocked'],done:['p-d','Done'],review:['p-v','In Review'],planned:['p-g','Planned']};const[c,l]=m[s]||m.planned;return`<span class="pill ${c}">${l}</span>`}
+const campusTag={Ponce:'ct-ponce',STL:'St. Louis','St. Louis':'ct-stl','San Juan':'ct-sj',BVI:'ct-bvi',Online:'ct-online'};
+
+// ═══════════ RENDER PROGRAMS ═══════════
+let curPF='all';
+function setProgFilter(el,f){curPF=f;document.querySelectorAll('.fbtn[data-pf]').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderProgs()}
+function renderProgs(){
+  const f=curPF==='all'?PROGRAMS:PROGRAMS.filter(p=>p.campuses.some(c=>c.includes(curPF))||p.modality.includes(curPF));
+  const degColor={MD:'ct-ponce',DMD:'ct-ponce',PsyD:'ct-sj',PhD:'ct-sj',DrPH:'ct-bvi',MPH:'ct-bvi',MSMS:'ct-stl',MSSP:'ct-sj',BSN:'ct-ponce',Cert:'ct-online'};
+  document.getElementById('prog-grid').innerHTML=f.map(p=>{
+    const rows=[
+      ['Duration',p.duration],
+      ['Tuition',p.tuition],
+      ['Apply via',p.apply],
+      ['Requirements',p.req],
+      ['Accreditation',p.accred],
+      p.tracks?['Tracks',p.tracks]:null,
+      p.note?['Note',`<strong style="color:var(--teal)">${p.note}</strong>`]:null,
+    ].filter(Boolean);
+    return`<div class="prog-card">
+      <div class="prog-head">
+        <div class="prog-degree"><span class="campus-tag ${degColor[p.degree]||'ct-online'}" style="font-size:10px;padding:2px 8px">${p.degree}</span></div>
+        <div class="prog-name" style="margin-top:6px">${p.name}</div>
+      </div>
+      <div class="prog-body">
+        ${rows.map(r=>`<div class="prog-row"><span class="prog-key">${r[0]}</span><span class="prog-val">${r[1]}</span></div>`).join('')}
+        <div class="prog-campuses">${p.campuses.map(c=>`<span class="campus-tag ${campusTag[c]||'ct-online'}">${c}</span>`).join('')}${p.modality.includes('Online')?'<span class="campus-tag ct-online">Online</span>':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════ RENDER STAFF ═══════════
+let curSC='all';
+function filterStaff(){renderStaff()}
+function setCampus(el,c){curSC=c;document.querySelectorAll('.fbtn[data-sc]').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderStaff()}
+function renderStaff(){
+  const q=document.getElementById('sf-q').value.toLowerCase();
+  const f=STAFF.filter(s=>{
+    const mq=!q||[s.n,s.t,s.e,s.d,s.c].some(x=>x.toLowerCase().includes(q));
+    const mc=curSC==='all'||(curSC==='Global'?s.c==='Global':s.c.includes(curSC));
+    return mq&&mc;
+  });
+  document.getElementById('sf-count').textContent=`${f.length} of ${STAFF.length} staff`;
+  document.getElementById('sf-grid').innerHTML=f.map(s=>`
+    <div class="s-card" onclick="window.location='mailto:${s.e}'">
+      <div class="s-top"><div class="av ${s.av}">${ini(s.n)}</div>
+        <div><div class="s-name">${s.n}</div><div class="s-title">${s.t}</div></div>
+      </div>
+      <div class="s-email">${s.e}</div>
+      <div class="s-tags"><span class="s-tag">${s.c}</span><span class="s-tag s-tag-teal">${s.d}</span></div>
+    </div>`).join('');
+}
+
+// ═══════════ ORG CHART ═══════════
+function on(cls,name,title,email=''){return`<div class="o-node ${cls}"><div class="o-n">${name}</div><div class="o-t">${title}</div>${email?`<div class="o-e">${email}</div>`:''}</div>`}
+function renderOrg(){
+  document.getElementById('org-wrap').innerHTML=`<div class="org-tree">
+    <div class="o-level">${on('root','Dr. Gino Natalicchio','President','president@psm.edu')}</div>
+    <div class="o-conn"><div class="o-vline"></div></div>
+    <div class="o-level">
+      ${on('vp','Laura Dwyer','VP Enrollment','ldwyer@psm.edu')}
+      ${on('vp','Emsley Vazquez','VP Mktg & Comms','evazquez@psm.edu')}
+      ${on('vp','Karina Ball','CMO','kball@psm.edu')}
+      ${on('vp','Jennifer L. Stovall','VP Global Recruitment','jstovall@psm.edu')}
+      ${on('vp tbd','[VP Academic Affairs]','Provost · TBD')}
+      ${on('vp tbd','[VP Research / THI]','THI · TBD')}
+    </div>
+    <div class="o-conn"><div class="o-vline"></div></div>
+    <div class="o-level">
+      ${on('dir','Astrid Velazquez','Admissions Director','avelazquez@psm.edu')}
+      ${on('dir','Michael Vega','IT Director','mvega@psm.edu')}
+      ${on('dir','Jeniffer Molina','Dir. Student Financial Svc','jemolina@psm.edu')}
+      ${on('dir','Matt Kitchell','Dir. Nursing Partnerships · STL','mkitchell@psm.edu')}
+      ${on('dir','Kayleigh Hottel','Digital Marketing Dir · THI','khottel@tiberhealth.com')}
+      ${on('dir','Michael Fitting','Data Strategy & Reporting Mgr','mfitting@psm.edu')}
+      ${on('dir','Natalie G. Schmidt','Mktg & Comms Manager','nschmidt@psm.edu')}
+      ${on('dir','Serenity Lowe','Admissions Manager · STL','slowe@psm.edu')}
+      ${on('dir','John Reid','Telecom Manager','jreid@psm.edu')}
+      ${on('dir','Ana Jarabo','System Admin / Ops Consultant','ajarabo@psm.edu')}
+    </div>
+    <div class="o-conn"><div class="o-vline"></div></div>
+    <div class="o-level">
+      ${on('staff','ADM Puerto Rico','Solymar P · Ariana G · Isaura S · Maria C · Crystal R · Rafmary P · Myrna L · Jose M · Agnes G · Abi D')}
+      ${on('staff','ADM St. Louis','Raven F · Stacey T · Andrew H · Yesenia G')}
+      ${on('staff','ADM BVI','Victoria C · Hilario P · Lyanibel S')}
+      ${on('staff','Marketing / Content','Crystal G · Ginady R · Luis M · Robert T · Ana Sofia B')}
+      ${on('staff','Telecom Team PR','Julitza C · Lizmarie H · Analaura Z')}
+    </div>
+  </div>`;
+}
+
+// ═══════════ PROJECTS ═══════════
+function renderProjects(){
+  const fc={active:'var(--teal)',risk:'var(--orange)',blocked:'var(--red)',done:'var(--green)',review:'var(--teal)'};
+  document.getElementById('proj-list').innerHTML=PROJECTS.map(p=>`
+    <div class="p-row">
+      <div><div class="p-task">${p.n}</div><div class="p-own">${p.o}</div></div>
+      <div><div class="pbar"><div class="pfill" style="width:${p.p}%;background:${fc[p.s]||'var(--teal)'}"></div></div><div class="plbl">${p.p}% complete</div></div>
+      <div>${pill(p.s)}</div>
+      <div style="font-size:10px;color:var(--text2)">${p.due}</div>
+    </div>`).join('');
+  const mils=[
+    {d:'11',m:'APR',bg:'var(--teal-light)',tc:'var(--teal-dark)',t:'Stripe Go-Live'},
+    {d:'15',m:'APR',bg:'var(--orange-light)',tc:'var(--orange-d)',t:'Accreditation Deadline'},
+    {d:'22',m:'APR',bg:'#E6F1FB',tc:'#185FA5',t:'SharePoint Phase 1'},
+    {d:'30',m:'APR',bg:'#EAF3DE',tc:'#3B6D11',t:'Admissions Cycle Close'},
+  ];
+  document.getElementById('milestones').innerHTML=mils.map(m=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:${m.bg};border-radius:var(--r)">
+      <div style="text-align:center;min-width:28px"><div style="font-size:16px;font-weight:300;font-family:'Crimson Pro',serif;color:${m.tc}">${m.d}</div><div style="font-size:9px;font-weight:700;color:${m.tc}">${m.m}</div></div>
+      <div style="font-size:12px;font-weight:600;color:${m.tc}">${m.t}</div>
+    </div>`).join('');
+}
+
+// ═══════════ GANTT ═══════════
+function renderGantt(){
+  const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('gmonths').innerHTML=mo.map(m=>`<div class="gm">${m}</div>`).join('');
+  const today=(3+(10/30))/12;
+  document.getElementById('grows').innerHTML=GANTT.map(p=>{
+    const l=(p.s/12*100).toFixed(1),w=((p.e-p.s)/12*100).toFixed(1);
+    return`<div class="g-row">
+      <div class="g-lbl"><div class="g-task">${p.n}</div><div class="g-own">${p.o}</div></div>
+      <div class="g-track">
+        <div class="g-today" style="left:${(today*100).toFixed(1)}%"><span class="g-tlbl">Today</span></div>
+        <div class="g-bar ${p.c}" style="left:${l}%;width:${w}%">${parseFloat(w)>7?mo[p.s]+' – '+mo[p.e-1]:''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════ RACI ═══════════
+function renderRaci(){
+  const m={R:'rb-R',A:'rb-A',C:'rb-C',I:'rb-I'};
+  document.getElementById('rbody').innerHTML=RACI.map(r=>`
+    <tr>
+      <td style="font-weight:700">${r.p}</td>
+      <td style="font-size:10px;color:var(--text2)">${r.d}</td>
+      ${r.c.map(v=>`<td style="text-align:center"><span class="rb ${m[v]||''}">${v}</span></td>`).join('')}
+    </tr>`).join('');
+}
+
+// ═══════════ PROCESSES ═══════════
+function renderProcs(){
+  document.getElementById('proc-list').innerHTML=PROCS.map((p,i)=>`
+    <div class="proc-row">
+      <div class="proc-hdr" onclick="toggleProc(${i})">
+        <div class="proc-ico" style="background:var(--teal-light)">${p.ico}</div>
+        <div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--text)">${p.n}</div><div style="font-size:11px;color:var(--text2)">${p.d} · ${p.o}</div></div>
+        <div style="font-size:11px;color:var(--text2);margin-right:8px">${p.steps.length} steps</div>
+        <div style="font-size:20px;color:var(--text3);transition:transform .2s;line-height:1" id="pa-${i}">›</div>
+      </div>
+      <div class="proc-body" id="pb-${i}">
+        <div class="proc-steps">${p.steps.map((s,j)=>`<span class="proc-step">${j+1}. ${s}</span>${j<p.steps.length-1?'<span class="proc-arr">→</span>':''}`).join('')}</div>
+      </div>
+    </div>`).join('');
+}
+function toggleProc(i){const b=document.getElementById('pb-'+i),a=document.getElementById('pa-'+i);b.classList.toggle('open');a.style.transform=b.classList.contains('open')?'rotate(90deg)':''}
+
+// ═══════════ DOCS ═══════════
+const tc={PDF:'p-v',Word:'p-d',Excel:'p-d',Live:'p-a',Draft:'p-r'};
+function renderDocs(){
+  ['s','o'].forEach(k=>{document.getElementById('docs-'+k).innerHTML=DOCS[k].map(d=>`
+    <div class="d-card"><div class="d-ico">${d.i}</div><div class="d-name">${d.n}</div><div class="d-meta">${d.m}</div><span class="pill ${tc[d.t]||'p-g'}" style="margin-top:7px">${d.t}</span></div>`).join('')});
+}
+
+// ═══════════ INTEGRATIONS ═══════════
+function renderInt(){
+  document.getElementById('i-grid').innerHTML=INTEGRATIONS.map(i=>`
+    <div class="i-card">
+      <div class="i-hdr"><div class="i-logo" style="background:${i.bg};color:${i.fg}">${i.l}</div>
+        <div><div class="i-name">${i.n}</div><div class="i-type">${i.t}</div></div>
+      </div>
+      <ul class="i-list">${i.items.map(x=>`<li>${x}</li>`).join('')}</ul>
+      <div class="i-status ${i.s}">${i.sl}</div>
+    </div>`).join('');
+}
+
+// ═══════════ DASHBOARD FEEDS ═══════════
+function renderDash(){
+  const fc={active:'var(--teal)',risk:'var(--orange)',blocked:'var(--red)',done:'var(--green)',review:'var(--teal)'};
+  document.getElementById('dash-projs').innerHTML=PROJECTS.map(p=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)">
+      <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--text)">${p.n}</div><div style="font-size:10px;color:var(--text2)">${p.o}</div></div>
+      <div style="width:65px"><div class="pbar"><div class="pfill" style="width:${p.p}%;background:${fc[p.s]||'var(--teal)'}"></div></div></div>
+      ${pill(p.s)}
+    </div>`).join('');
+  const mils=[{d:'11',m:'APR',bg:'var(--teal-light)',tc:'var(--teal-dark)',t:'Stripe Go-Live','s':'All campuses'},{d:'15',m:'APR',bg:'var(--orange-light)',tc:'var(--orange-d)',t:'Accreditation','s':'Academic Affairs'},{d:'22',m:'APR',bg:'#E6F1FB',tc:'#185FA5',t:'SP Phase 1','s':'IT / Ops'},{d:'30',m:'APR',bg:'#EAF3DE',tc:'#3B6D11',t:'Admissions Close','s':'J. Stovall'}];
+  document.getElementById('dash-milestones').innerHTML=mils.map(m=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border)">
+      <div style="min-width:38px;text-align:center;background:${m.bg};border-radius:6px;padding:4px 2px">
+        <div style="font-size:17px;font-weight:300;font-family:'Crimson Pro',serif;color:${m.tc};line-height:1">${m.d}</div>
+        <div style="font-size:9px;font-weight:700;color:${m.tc};margin-top:1px">${m.m}</div>
+      </div>
+      <div><div style="font-size:12px;font-weight:700;color:var(--text)">${m.t}</div><div style="font-size:10px;color:var(--text2)">${m.s}</div></div>
+    </div>`).join('');
+}
+
+// ═══════════ MODAL ═══════════
+const MODAL_FORMS={
+  project:`<div class="form-row"><label class="form-label">Project Name</label><input class="form-input" placeholder="e.g. Salesforce Phase 2 Rollout"></div>
+    <div class="form-row-2"><div class="form-row" style="margin:0"><label class="form-label">Owner</label><input class="form-input" placeholder="Name / team"></div>
+    <div class="form-row" style="margin:0"><label class="form-label">Due Date</label><input class="form-input" type="date"></div></div>
+    <div class="form-row"><label class="form-label">Status</label><select class="form-select"><option>Active</option><option>At Risk</option><option>Blocked</option><option>Planning</option></select></div>
+    <div class="form-row"><label class="form-label">Description</label><textarea class="form-textarea" placeholder="Brief description of scope and goals..."></textarea></div>`,
+  raci:`<div class="form-row"><label class="form-label">Process Name</label><input class="form-input" placeholder="e.g. New Faculty Hiring"></div>
+    <div class="form-row-2"><div class="form-row" style="margin:0"><label class="form-label">Department</label><input class="form-input" placeholder="e.g. HR / Academic"></div>
+    <div class="form-row" style="margin:0"><label class="form-label">Primary Owner</label><input class="form-input" placeholder="Name"></div></div>
+    <div class="form-row"><label class="form-label">Notes</label><textarea class="form-textarea" placeholder="Scope, triggers, frequency..."></textarea></div>`,
+  process:`<div class="form-row"><label class="form-label">Process Name</label><input class="form-input" placeholder="e.g. Student Leave of Absence"></div>
+    <div class="form-row-2"><div class="form-row" style="margin:0"><label class="form-label">Department</label><input class="form-input" placeholder="Dept"></div>
+    <div class="form-row" style="margin:0"><label class="form-label">Owner</label><input class="form-input" placeholder="Name"></div></div>
+    <div class="form-row"><label class="form-label">Steps (one per line)</label><textarea class="form-textarea" style="min-height:120px" placeholder="Step 1&#10;Step 2&#10;Step 3..."></textarea></div>`,
+  doc:`<div class="form-row"><label class="form-label">Document Name</label><input class="form-input" placeholder="e.g. Student Handbook 2025"></div>
+    <div class="form-row-2"><div class="form-row" style="margin:0"><label class="form-label">Category</label><select class="form-select"><option>Strategic</option><option>Operations</option><option>Academic</option><option>Compliance</option></select></div>
+    <div class="form-row" style="margin:0"><label class="form-label">Type</label><select class="form-select"><option>PDF</option><option>Word</option><option>Excel</option><option>Live Doc</option><option>Draft</option></select></div></div>
+    <div class="form-row"><label class="form-label">Owner / Department</label><input class="form-input" placeholder="e.g. Ana Jarabo · IT/Ops"></div>
+    <div class="form-row"><label class="form-label">OneDrive / SharePoint Link</label><input class="form-input" type="url" placeholder="https://..."></div>`,
+  staff:`<div class="form-row-2"><div class="form-row" style="margin:0"><label class="form-label">Full Name</label><input class="form-input" placeholder="First Last"></div>
+    <div class="form-row" style="margin:0"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="name@psm.edu"></div></div>
+    <div class="form-row"><label class="form-label">Title</label><input class="form-input" placeholder="e.g. Admissions Officer"></div>
+    <div class="form-row-2"><div class="form-row" style="margin:0"><label class="form-label">Department</label><input class="form-input" placeholder="e.g. Admissions"></div>
+    <div class="form-row" style="margin:0"><label class="form-label">Campus</label><select class="form-select"><option>Puerto Rico</option><option>St. Louis</option><option>BVI</option><option>Global</option></select></div></div>`,
+};
+const MODAL_TITLES={project:'Add New Project',raci:'Add RACI Process Row',process:'Add New Process',doc:'Add Document',staff:'Add Staff Member'};
+let currentModal='';
+function openModal(type){
+  currentModal=type;
+  document.getElementById('modal-title').innerHTML=MODAL_TITLES[type]+' <span class="modal-close" onclick="closeModal()">×</span>';
+  document.getElementById('modal-body').innerHTML=MODAL_FORMS[type]||'';
+  document.getElementById('modal-bg').classList.remove('hidden');
+}
+function closeModal(){document.getElementById('modal-bg').classList.add('hidden')}
+function closeModalBg(e){if(e.target===document.getElementById('modal-bg'))closeModal()}
+function saveModal(){
+  alert('Saved! In the full deployed version this writes to your SharePoint List, which syncs to the hub automatically.');
+  closeModal();
+}
+
+// ═══════════ SIDEBAR NAV ═══════════
+function switchTab(name){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.toggle('active',i.dataset.tab===name));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+name));
+  document.querySelector('.main').scrollTo(0,0);
+}
+document.querySelectorAll('.sb-item[data-tab]').forEach(i=>i.addEventListener('click',()=>switchTab(i.dataset.tab)));
+
+// ═══════════ INIT ═══════════
+renderProgs();renderStaff();renderOrg();renderProjects();renderGantt();renderRaci();renderProcs();renderDocs();renderInt();renderDash();
+</script>
+</body>
+</html>
