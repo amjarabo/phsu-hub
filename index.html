@@ -41,6 +41,9 @@ button,input,select,textarea{font-family:inherit}
 .tb-pill:hover{background:rgba(255,255,255,.12);color:#fff}
 .tb-pill.connected::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--teal-mid)}
 .tb-pill.blocked::before{content:'';width:5px;height:5px;border-radius:50%;background:#E24B4A}
+.lang-toggle{display:flex;align-items:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:2px;gap:2px;flex-shrink:0;margin-left:8px}
+.lang-btn{padding:3px 10px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;color:rgba(255,255,255,.55);transition:all .15s;letter-spacing:.3px}
+.lang-btn.active{background:var(--teal);color:#fff;box-shadow:0 1px 4px rgba(0,153,154,.4)}
 
 /* ── SIDEBAR + MAIN ── */
 .body-wrap{display:flex;flex:1;overflow:hidden}
@@ -274,6 +277,10 @@ button,input,select,textarea{font-family:inherit}
     <div class="tb-pill connected">Element451</div>
     <div class="tb-pill blocked">Fabric (OAuth)</div>
     <div class="tb-pill">Anthology</div>
+  </div>
+  <div class="lang-toggle">
+    <div class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</div>
+    <div class="lang-btn" id="btn-es" onclick="setLang('es')">ES</div>
   </div>
 </header>
 
@@ -514,8 +521,8 @@ button,input,select,textarea{font-family:inherit}
     <div class="modal-title" id="modal-title">Add Item <span class="modal-close" onclick="closeModal()">×</span></div>
     <div id="modal-body"></div>
     <div class="modal-footer">
-      <button class="btn" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-p" onclick="saveModal()">Save</button>
+      <button class="btn" onclick="closeModal()" id="modal-cancel-btn">Cancel</button>
+      <button class="btn btn-p" onclick="saveModal()" id="modal-save-btn">Save</button>
     </div>
   </div>
 </div>
@@ -663,24 +670,27 @@ const INTEGRATIONS=[
 
 // ═══════════ HELPERS ═══════════
 function ini(n){return n.replace(/^Dr\.\s*/,'').split(' ').filter((_,i,a)=>i===0||i===a.length-1).map(x=>x[0]||'').join('').toUpperCase()}
-function pill(s){const m={active:['p-a','Active'],risk:['p-r','At Risk'],blocked:['p-b','Blocked'],done:['p-d','Done'],review:['p-v','In Review'],planned:['p-g','Planned']};const[c,l]=m[s]||m.planned;return`<span class="pill ${c}">${l}</span>`}
+function pill(s){const m={active:['p-a',t('sActive')],risk:['p-r',t('sRisk')],blocked:['p-b',t('sBlocked')],done:['p-d',t('sDone')],review:['p-v',t('sReview')],planned:['p-g',t('sPlanned')]};const[c,l]=m[s]||m.planned;return`<span class="pill ${c}">${l}</span>`}
 const campusTag={Ponce:'ct-ponce',STL:'St. Louis','St. Louis':'ct-stl','San Juan':'ct-sj',BVI:'ct-bvi',Online:'ct-online'};
 
 // ═══════════ RENDER PROGRAMS ═══════════
 let curPF='all';
 function setProgFilter(el,f){curPF=f;document.querySelectorAll('.fbtn[data-pf]').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderProgs()}
 function renderProgs(){
+  // update filter button labels
+  const pfLabels={all:'progAll',Ponce:'progFilterPonce','St. Louis':'progFilterSTL','San Juan':'progFilterSJ',BVI:'progFilterBVI',Online:'progFilterOnline'};
+  document.querySelectorAll('.fbtn[data-pf]').forEach(b=>{const k=pfLabels[b.dataset.pf];if(k)b.textContent=t(k)});
   const f=curPF==='all'?PROGRAMS:PROGRAMS.filter(p=>p.campuses.some(c=>c.includes(curPF))||p.modality.includes(curPF));
   const degColor={MD:'ct-ponce',DMD:'ct-ponce',PsyD:'ct-sj',PhD:'ct-sj',DrPH:'ct-bvi',MPH:'ct-bvi',MSMS:'ct-stl',MSSP:'ct-sj',BSN:'ct-ponce',Cert:'ct-online'};
   document.getElementById('prog-grid').innerHTML=f.map(p=>{
     const rows=[
-      ['Duration',p.duration],
-      ['Tuition',p.tuition],
-      ['Apply via',p.apply],
-      ['Requirements',p.req],
-      ['Accreditation',p.accred],
-      p.tracks?['Tracks',p.tracks]:null,
-      p.note?['Note',`<strong style="color:var(--teal)">${p.note}</strong>`]:null,
+      [t('progDuration'),p.duration],
+      [t('progTuition'),p.tuition],
+      [t('progApply'),p.apply],
+      [t('progReq'),p.req],
+      [t('progAccred'),p.accred],
+      p.tracks?[t('progTracks'),p.tracks]:null,
+      p.note?[t('progNote'),`<strong style="color:var(--teal)">${p.note}</strong>`]:null,
     ].filter(Boolean);
     return`<div class="prog-card">
       <div class="prog-head">
@@ -689,7 +699,7 @@ function renderProgs(){
       </div>
       <div class="prog-body">
         ${rows.map(r=>`<div class="prog-row"><span class="prog-key">${r[0]}</span><span class="prog-val">${r[1]}</span></div>`).join('')}
-        <div class="prog-campuses">${p.campuses.map(c=>`<span class="campus-tag ${campusTag[c]||'ct-online'}">${c}</span>`).join('')}${p.modality.includes('Online')?'<span class="campus-tag ct-online">Online</span>':''}</div>
+        <div class="prog-campuses">${p.campuses.map(c=>`<span class="campus-tag ${campusTag[c]||'ct-online'}">${c}</span>`).join('')}${p.modality.includes('Online')?`<span class="campus-tag ct-online">${t('progFilterOnline')}</span>`:''}</div>
       </div>
     </div>`;
   }).join('');
@@ -700,13 +710,18 @@ let curSC='all';
 function filterStaff(){renderStaff()}
 function setCampus(el,c){curSC=c;document.querySelectorAll('.fbtn[data-sc]').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderStaff()}
 function renderStaff(){
-  const q=document.getElementById('sf-q').value.toLowerCase();
+  // update filter labels
+  document.querySelectorAll('.fbtn[data-sc]').forEach(b=>{if(b.dataset.sc==='all')b.textContent=t('staffAll')});
+  const q=document.getElementById('sf-q');
+  if(q)q.placeholder=t('staffSearch');
   const f=STAFF.filter(s=>{
-    const mq=!q||[s.n,s.t,s.e,s.d,s.c].some(x=>x.toLowerCase().includes(q));
+    const sq=document.getElementById('sf-q')?document.getElementById('sf-q').value.toLowerCase():'';
+    const mq=!sq||[s.n,s.t,s.e,s.d,s.c].some(x=>x.toLowerCase().includes(sq));
     const mc=curSC==='all'||(curSC==='Global'?s.c==='Global':s.c.includes(curSC));
     return mq&&mc;
   });
-  document.getElementById('sf-count').textContent=`${f.length} of ${STAFF.length} staff`;
+  const cnt=document.getElementById('sf-count');
+  if(cnt)cnt.textContent=`${f.length} ${t('staffCount')} ${STAFF.length} ${t('staffStaff')}`;
   document.getElementById('sf-grid').innerHTML=f.map(s=>`
     <div class="s-card" onclick="window.location='mailto:${s.e}'">
       <div class="s-top"><div class="av ${s.av}">${ini(s.n)}</div>
@@ -720,6 +735,10 @@ function renderStaff(){
 // ═══════════ ORG CHART ═══════════
 function on(cls,name,title,email=''){return`<div class="o-node ${cls}"><div class="o-n">${name}</div><div class="o-t">${title}</div>${email?`<div class="o-e">${email}</div>`:''}</div>`}
 function renderOrg(){
+  // update legend
+  const legs=document.querySelectorAll('#panel-org .o-leg-i');
+  const lk=['orgPresident','orgVP','orgDir','orgStaff'];
+  legs.forEach((el,i)=>{const bar=el.querySelector('.o-leg-bar');el.textContent=t(lk[i]);if(bar)el.prepend(bar)});
   document.getElementById('org-wrap').innerHTML=`<div class="org-tree">
     <div class="o-level">${on('root','Dr. Gino Natalicchio','President','president@psm.edu')}</div>
     <div class="o-conn"><div class="o-vline"></div></div>
@@ -761,26 +780,26 @@ function renderProjects(){
   document.getElementById('proj-list').innerHTML=PROJECTS.map(p=>`
     <div class="p-row">
       <div><div class="p-task">${p.n}</div><div class="p-own">${p.o}</div></div>
-      <div><div class="pbar"><div class="pfill" style="width:${p.p}%;background:${fc[p.s]||'var(--teal)'}"></div></div><div class="plbl">${p.p}% complete</div></div>
+      <div><div class="pbar"><div class="pfill" style="width:${p.p}%;background:${fc[p.s]||'var(--teal)'}"></div></div><div class="plbl">${p.p}${t('projComplete')}</div></div>
       <div>${pill(p.s)}</div>
       <div style="font-size:10px;color:var(--text2)">${p.due}</div>
     </div>`).join('');
   const mils=[
-    {d:'11',m:'APR',bg:'var(--teal-light)',tc:'var(--teal-dark)',t:'Stripe Go-Live'},
-    {d:'15',m:'APR',bg:'var(--orange-light)',tc:'var(--orange-d)',t:'Accreditation Deadline'},
-    {d:'22',m:'APR',bg:'#E6F1FB',tc:'#185FA5',t:'SharePoint Phase 1'},
-    {d:'30',m:'APR',bg:'#EAF3DE',tc:'#3B6D11',t:'Admissions Cycle Close'},
+    {d:'11',m:LANG==='es'?'ABR':'APR',bg:'var(--teal-light)',tc:'var(--teal-dark)',tx:t('mil1')},
+    {d:'15',m:LANG==='es'?'ABR':'APR',bg:'var(--orange-light)',tc:'var(--orange-d)',tx:t('mil2')},
+    {d:'22',m:LANG==='es'?'ABR':'APR',bg:'#E6F1FB',tc:'#185FA5',tx:t('mil3')},
+    {d:'30',m:LANG==='es'?'ABR':'APR',bg:'#EAF3DE',tc:'#3B6D11',tx:t('mil4')},
   ];
   document.getElementById('milestones').innerHTML=mils.map(m=>`
     <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:${m.bg};border-radius:var(--r)">
       <div style="text-align:center;min-width:28px"><div style="font-size:16px;font-weight:300;font-family:'Crimson Pro',serif;color:${m.tc}">${m.d}</div><div style="font-size:9px;font-weight:700;color:${m.tc}">${m.m}</div></div>
-      <div style="font-size:12px;font-weight:600;color:${m.tc}">${m.t}</div>
+      <div style="font-size:12px;font-weight:600;color:${m.tc}">${m.tx||m.t}</div>
     </div>`).join('');
 }
 
 // ═══════════ GANTT ═══════════
 function renderGantt(){
-  const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mo=t('months');
   document.getElementById('gmonths').innerHTML=mo.map(m=>`<div class="gm">${m}</div>`).join('');
   const today=(3+(10/30))/12;
   document.getElementById('grows').innerHTML=GANTT.map(p=>{
@@ -801,7 +820,7 @@ function renderRaci(){
   document.getElementById('rbody').innerHTML=RACI.map(r=>`
     <tr>
       <td style="font-weight:700">${r.p}</td>
-      <td style="font-size:10px;color:var(--text2)">${r.d}</td>
+      <td style="font-size:10px;color:var(--text2)">${t('raciDept')==='Depto.'?r.d:r.d}</td>
       ${r.c.map(v=>`<td style="text-align:center"><span class="rb ${m[v]||''}">${v}</span></td>`).join('')}
     </tr>`).join('');
 }
@@ -813,7 +832,7 @@ function renderProcs(){
       <div class="proc-hdr" onclick="toggleProc(${i})">
         <div class="proc-ico" style="background:var(--teal-light)">${p.ico}</div>
         <div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--text)">${p.n}</div><div style="font-size:11px;color:var(--text2)">${p.d} · ${p.o}</div></div>
-        <div style="font-size:11px;color:var(--text2);margin-right:8px">${p.steps.length} steps</div>
+        <div style="font-size:11px;color:var(--text2);margin-right:8px">${p.steps.length} ${t('procSteps')}</div>
         <div style="font-size:20px;color:var(--text3);transition:transform .2s;line-height:1" id="pa-${i}">›</div>
       </div>
       <div class="proc-body" id="pb-${i}">
@@ -826,6 +845,8 @@ function toggleProc(i){const b=document.getElementById('pb-'+i),a=document.getEl
 // ═══════════ DOCS ═══════════
 const tc={PDF:'p-v',Word:'p-d',Excel:'p-d',Live:'p-a',Draft:'p-r'};
 function renderDocs(){
+  document.querySelector('#panel-docs .sec-label:first-of-type').textContent=t('docsStrategic');
+  document.querySelector('#panel-docs .sec-label:last-of-type').textContent=t('docsOps');
   ['s','o'].forEach(k=>{document.getElementById('docs-'+k).innerHTML=DOCS[k].map(d=>`
     <div class="d-card"><div class="d-ico">${d.i}</div><div class="d-name">${d.n}</div><div class="d-meta">${d.m}</div><span class="pill ${tc[d.t]||'p-g'}" style="margin-top:7px">${d.t}</span></div>`).join('')});
 }
@@ -845,20 +866,52 @@ function renderInt(){
 // ═══════════ DASHBOARD FEEDS ═══════════
 function renderDash(){
   const fc={active:'var(--teal)',risk:'var(--orange)',blocked:'var(--red)',done:'var(--green)',review:'var(--teal)'};
+  // dashboard title/sub
+  const dt=document.querySelector('#panel-dashboard .page-title');
+  const ds=document.querySelector('#panel-dashboard .page-sub');
+  if(dt)dt.textContent=t('dashTitle');
+  if(ds)ds.textContent=t('dashSub');
+  // stat labels
+  const stats=document.querySelectorAll('#panel-dashboard .stat');
+  const sk=[['statPrograms','statProgramsSub'],['statStaff','statStaffSub'],['statProjects','statProjectsSub'],['statGrads','statGradsSub']];
+  stats.forEach((s,i)=>{const l=s.querySelector('.stat-l'),ss=s.querySelector('.stat-s');if(l&&sk[i])l.textContent=t(sk[i][0]);if(ss&&sk[i])ss.textContent=t(sk[i][1])});
+  // section labels on dashboard
+  const secEls=document.querySelectorAll('#panel-dashboard .sec-label');
+  const secKeys=['secProjectStatus','secUpcoming','secQuickNav','secCampuses'];
+  secEls.forEach((el,i)=>{if(secKeys[i])el.textContent=t(secKeys[i])});
+  // quick cards
+  const qcards=document.querySelectorAll('#panel-dashboard .card-sm[onclick]');
+  const qk=[['qPrograms','qProgramsSub'],['qStaff','qStaffSub'],['qOrg','qOrgSub'],['qRaci','qRaciSub']];
+  qcards.forEach((c,i)=>{
+    if(!qk[i])return;
+    const name=c.querySelectorAll('div')[1],sub=c.querySelectorAll('div')[2];
+    if(name)name.textContent=t(qk[i][0]);if(sub)sub.textContent=t(qk[i][1]);
+  });
+  // campus cards
+  const cc=document.querySelectorAll('#panel-dashboard .card-sm:not([onclick])');
+  const ck=[['campusPonce','campusPoncePrograms'],['campusSTL','campusSTLPrograms'],['campusSJ','campusSJPrograms'],['campusBVI','campusBVIPrograms']];
+  cc.forEach((c,i)=>{if(!ck[i])return;const label=c.querySelector('div:first-child'),progs=c.querySelector('div:last-child');if(label)label.textContent=t(ck[i][0]);if(progs)progs.textContent=t(ck[i][1])});
+  // project rows
   document.getElementById('dash-projs').innerHTML=PROJECTS.map(p=>`
     <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border)">
       <div style="flex:1"><div style="font-size:12px;font-weight:700;color:var(--text)">${p.n}</div><div style="font-size:10px;color:var(--text2)">${p.o}</div></div>
       <div style="width:65px"><div class="pbar"><div class="pfill" style="width:${p.p}%;background:${fc[p.s]||'var(--teal)'}"></div></div></div>
       ${pill(p.s)}
     </div>`).join('');
-  const mils=[{d:'11',m:'APR',bg:'var(--teal-light)',tc:'var(--teal-dark)',t:'Stripe Go-Live','s':'All campuses'},{d:'15',m:'APR',bg:'var(--orange-light)',tc:'var(--orange-d)',t:'Accreditation','s':'Academic Affairs'},{d:'22',m:'APR',bg:'#E6F1FB',tc:'#185FA5',t:'SP Phase 1','s':'IT / Ops'},{d:'30',m:'APR',bg:'#EAF3DE',tc:'#3B6D11',t:'Admissions Close','s':'J. Stovall'}];
+  const aprLabel=LANG==='es'?'ABR':'APR';
+  const mils=[
+    {d:'11',m:aprLabel,bg:'var(--teal-light)',tc:'var(--teal-dark)',tx:t('mil1'),s:t('mil1s')},
+    {d:'15',m:aprLabel,bg:'var(--orange-light)',tc:'var(--orange-d)',tx:t('mil2'),s:t('mil2s')},
+    {d:'22',m:aprLabel,bg:'#E6F1FB',tc:'#185FA5',tx:t('mil3'),s:t('mil3s')},
+    {d:'30',m:aprLabel,bg:'#EAF3DE',tc:'#3B6D11',tx:t('mil4'),s:t('mil4s')},
+  ];
   document.getElementById('dash-milestones').innerHTML=mils.map(m=>`
     <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border)">
       <div style="min-width:38px;text-align:center;background:${m.bg};border-radius:6px;padding:4px 2px">
         <div style="font-size:17px;font-weight:300;font-family:'Crimson Pro',serif;color:${m.tc};line-height:1">${m.d}</div>
         <div style="font-size:9px;font-weight:700;color:${m.tc};margin-top:1px">${m.m}</div>
       </div>
-      <div><div style="font-size:12px;font-weight:700;color:var(--text)">${m.t}</div><div style="font-size:10px;color:var(--text2)">${m.s}</div></div>
+      <div><div style="font-size:12px;font-weight:700;color:var(--text)">${m.tx}</div><div style="font-size:10px;color:var(--text2)">${m.s}</div></div>
     </div>`).join('');
 }
 
@@ -892,14 +945,14 @@ const MODAL_TITLES={project:'Add New Project',raci:'Add RACI Process Row',proces
 let currentModal='';
 function openModal(type){
   currentModal=type;
-  document.getElementById('modal-title').innerHTML=MODAL_TITLES[type]+' <span class="modal-close" onclick="closeModal()">×</span>';
+  document.getElementById('modal-title').innerHTML=(typeof MODAL_TITLES[type]==='function'?MODAL_TITLES[type]():MODAL_TITLES[type])+' <span class="modal-close" onclick="closeModal()">×</span>';
   document.getElementById('modal-body').innerHTML=MODAL_FORMS[type]||'';
   document.getElementById('modal-bg').classList.remove('hidden');
 }
 function closeModal(){document.getElementById('modal-bg').classList.add('hidden')}
 function closeModalBg(e){if(e.target===document.getElementById('modal-bg'))closeModal()}
 function saveModal(){
-  alert('Saved! In the full deployed version this writes to your SharePoint List, which syncs to the hub automatically.');
+  alert(LANG==='es'?'¡Guardado! En la versión desplegada esto escribe en tu Lista de SharePoint, que sincroniza con el hub automáticamente.':'Saved! In the full deployed version this writes to your SharePoint List, which syncs to the hub automatically.');
   closeModal();
 }
 
@@ -910,6 +963,208 @@ function switchTab(name){
   document.querySelector('.main').scrollTo(0,0);
 }
 document.querySelectorAll('.sb-item[data-tab]').forEach(i=>i.addEventListener('click',()=>switchTab(i.dataset.tab)));
+
+// ═══════════ TRANSLATIONS ═══════════
+let LANG='en';
+const T={
+  en:{
+    hubName:'PHSU Ops Hub',
+    hubSub:'Ponce Health Sciences University · psm.edu',
+    // Sidebar
+    sbOverview:'Overview',sbPeople:'People',sbProjects:'Projects',sbResources:'Resources',
+    sbDashboard:'Dashboard',sbPrograms:'Programs',sbStaff:'Staff Directory',sbOrg:'Org Chart',
+    sbRaci:'RACI Matrix',sbProjectsItem:'Projects',sbGantt:'Gantt Timeline',sbProcesses:'Processes',
+    sbDocs:'Documents',sbIntegrations:'Integrations',
+    // Dashboard
+    dashTitle:'Good morning — PHSU Operations Hub',
+    dashSub:'Ponce Health Sciences University · Ponce PR · San Juan PR · St. Louis MO · Tortola BVI',
+    statPrograms:'Academic Programs',statProgramsSub:'4 campuses · online options',
+    statStaff:'Staff in Directory',statStaffSub:'from Element451',
+    statProjects:'Active Projects',statProjectsSub:'1 blocked · 1 at risk',
+    statGrads:'Graduates Annually',statGradsSub:'90%+ underrepresented minorities',
+    secProjectStatus:'Project Status',secUpcoming:'Upcoming Milestones',secQuickNav:'Quick Navigation',secCampuses:'Campuses',
+    qPrograms:'Programs',qProgramsSub:'13 programs · 4 campuses',
+    qStaff:'Staff Directory',qStaffSub:'41 staff · searchable',
+    qOrg:'Org Chart',qOrgSub:'Full hierarchy',
+    qRaci:'RACI Matrix',qRaciSub:'Accountability map',
+    campusPonce:'Ponce, PR — Main',campusPoncePrograms:'MD · DMD · PsyD · PhD · BSN · MPH · DrPH · MSMS · MSSP',
+    campusSTL:'St. Louis, MO',campusSTLPrograms:'MD · PsyD · MSMS · BSN (Spring 2026)',
+    campusSJ:'San Juan, PR',campusSJPrograms:'PsyD · MSMS · MSSP · MPH',
+    campusBVI:'Tortola, BVI',campusBVIPrograms:'MD (International) · MSMS pathway',
+    // Programs
+    progTitle:'Academic Programs',progSub:'All programs, campuses, durations, tuition, and admissions info',
+    progAll:'All Programs',progFilterPonce:'Ponce PR',progFilterSTL:'St. Louis',progFilterSJ:'San Juan',progFilterBVI:'BVI',progFilterOnline:'Online',
+    progDuration:'Duration',progTuition:'Tuition',progApply:'Apply via',progReq:'Requirements',progAccred:'Accreditation',progTracks:'Tracks',progNote:'Note',progCampusLabel:'Campuses',
+    // Staff
+    staffTitle:'Staff Directory',staffSub:'41 staff from Element451 · psm.edu · Click any card to email',
+    staffSearch:'Search name, title, department, email...',staffAll:'All',staffCount:'of',staffStaff:'staff',
+    // Org
+    orgTitle:'Org Chart',orgSub:'Organizational hierarchy — add missing VP/Dean names as you get them',
+    orgPresident:'President',orgVP:'C-Suite / VP',orgDir:'Director / Manager',orgStaff:'Staff',
+    // Projects
+    projTitle:'Projects',projSub:'Active, at-risk, and blocked initiatives',
+    projNew:'+ New Project',projExport:'↑ Export Excel',projSync:'⟳ Sync Planner',
+    projMilestones:'April 2025 Milestones',projComplete:'% complete',
+    // Gantt
+    ganttTitle:'Gantt Timeline · 2025',ganttSub:'Full project timeline across all active initiatives',
+    ganttAdd:'+ Add Project',ganttExport:'↑ Export',ganttSync:'⟳ Sync MS Project',
+    ganttInProgress:'In progress',ganttRisk:'At risk',ganttBlocked:'Blocked',ganttDone:'Complete',
+    // RACI
+    raciTitle:'RACI Matrix',raciSub:'Responsibility assignment across all key processes and stakeholders',
+    raciAdd:'+ Add Process',raciExport:'↑ Export Excel',
+    raciR:'Responsible — does the work',raciA:'Accountable — owns the outcome',
+    raciC:'Consulted — provides input',raciI:'Informed — kept in the loop',
+    raciProcess:'Process',raciDept:'Dept',
+    // Processes
+    procTitle:'Process Library',procSub:'Step-by-step operational processes · click to expand',
+    procNew:'+ New Process',procDiagram:'⬡ Flow Diagram',procSteps:'steps',
+    // Docs
+    docsTitle:'Document Repository',docsSub:'Policies, guides, playbooks · linked to OneDrive & SharePoint',
+    docsAdd:'+ Add Document',docsSearch:'🔍 Search OneDrive',docsRecent:'⟳ Recent Changes',
+    docsStrategic:'Strategic & Governance',docsOps:'Operations & Systems',
+    // Integrations
+    intTitle:'Integration Map',intSub:'Connected systems, status, and data flows',
+    intConfig:'Configure',intStatus:'Check Status',intNote:'<strong>Architecture:</strong> Hub → SharePoint Lists (updated by Fabric Dataflows) → Salesforce + Element451. Outlook Calendar: native SP Calendar web part, no admin needed. Power BI: embed directly in SharePoint. Fabric OAuth fix: use named user credential in Dataflow Gen2.',
+    // Modal
+    modalSave:'Save',modalCancel:'Cancel',
+    modalTitleProject:'Add New Project',modalTitleRaci:'Add RACI Process Row',
+    modalTitleProcess:'Add New Process',modalTitleDoc:'Add Document',modalTitleStaff:'Add Staff Member',
+    // Status pills
+    sActive:'Active',sRisk:'At Risk',sBlocked:'Blocked',sDone:'Done',sReview:'In Review',sPlanned:'Planned',
+    // Months
+    months:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    // Milestones
+    mil1:'Stripe Go-Live',mil1s:'All campuses',mil2:'Accreditation',mil2s:'Academic Affairs',mil3:'SP Phase 1',mil3s:'IT / Ops',mil4:'Admissions Close',mil4s:'J. Stovall',
+  },
+  es:{
+    hubName:'Hub Ops PHSU',
+    hubSub:'Universidad de Ciencias de la Salud de Ponce · psm.edu',
+    // Sidebar
+    sbOverview:'General',sbPeople:'Personal',sbProjects:'Proyectos',sbResources:'Recursos',
+    sbDashboard:'Panel Principal',sbPrograms:'Programas',sbStaff:'Directorio de Personal',sbOrg:'Organigrama',
+    sbRaci:'Matriz RACI',sbProjectsItem:'Proyectos',sbGantt:'Cronograma Gantt',sbProcesses:'Procesos',
+    sbDocs:'Documentos',sbIntegrations:'Integraciones',
+    // Dashboard
+    dashTitle:'Buenos días — Hub Operacional PHSU',
+    dashSub:'Universidad de Ciencias de la Salud de Ponce · Ponce PR · San Juan PR · St. Louis MO · Tortola BVI',
+    statPrograms:'Programas Académicos',statProgramsSub:'4 recintos · opciones en línea',
+    statStaff:'Personal en Directorio',statStaffSub:'desde Element451',
+    statProjects:'Proyectos Activos',statProjectsSub:'1 bloqueado · 1 en riesgo',
+    statGrads:'Graduados Anualmente',statGradsSub:'90%+ minorías subrepresentadas',
+    secProjectStatus:'Estado de Proyectos',secUpcoming:'Próximos Hitos',secQuickNav:'Navegación Rápida',secCampuses:'Recintos',
+    qPrograms:'Programas',qProgramsSub:'13 programas · 4 recintos',
+    qStaff:'Directorio de Personal',qStaffSub:'41 empleados · búsqueda',
+    qOrg:'Organigrama',qOrgSub:'Jerarquía completa',
+    qRaci:'Matriz RACI',qRaciSub:'Mapa de responsabilidades',
+    campusPonce:'Ponce, PR — Principal',campusPoncePrograms:'MD · DMD · PsyD · PhD · BSN · MPH · DrPH · MSMS · MSSP',
+    campusSTL:'St. Louis, MO',campusSTLPrograms:'MD · PsyD · MSMS · BSN (Primavera 2026)',
+    campusSJ:'San Juan, PR',campusSJPrograms:'PsyD · MSMS · MSSP · MPH',
+    campusBVI:'Tortola, BVI',campusBVIPrograms:'MD (Internacional) · ruta MSMS',
+    // Programs
+    progTitle:'Programas Académicos',progSub:'Todos los programas, recintos, duraciones, costos e información de admisiones',
+    progAll:'Todos',progFilterPonce:'Ponce PR',progFilterSTL:'St. Louis',progFilterSJ:'San Juan',progFilterBVI:'BVI',progFilterOnline:'En Línea',
+    progDuration:'Duración',progTuition:'Matrícula',progApply:'Solicitar por',progReq:'Requisitos',progAccred:'Acreditación',progTracks:'Concentraciones',progNote:'Nota',progCampusLabel:'Recintos',
+    // Staff
+    staffTitle:'Directorio de Personal',staffSub:'41 empleados de Element451 · psm.edu · Clic en tarjeta para enviar correo',
+    staffSearch:'Buscar nombre, título, departamento, correo...',staffAll:'Todos',staffCount:'de',staffStaff:'empleados',
+    // Org
+    orgTitle:'Organigrama',orgSub:'Jerarquía organizacional — agrega nombres de VP/Decanos según los obtengas',
+    orgPresident:'Presidente',orgVP:'C-Suite / VP',orgDir:'Director / Gerente',orgStaff:'Personal',
+    // Projects
+    projTitle:'Proyectos',projSub:'Iniciativas activas, en riesgo y bloqueadas',
+    projNew:'+ Nuevo Proyecto',projExport:'↑ Exportar Excel',projSync:'⟳ Sincronizar Planner',
+    projMilestones:'Hitos · Abril 2025',projComplete:'% completado',
+    // Gantt
+    ganttTitle:'Cronograma Gantt · 2025',ganttSub:'Cronograma completo de todos los proyectos activos',
+    ganttAdd:'+ Agregar Proyecto',ganttExport:'↑ Exportar',ganttSync:'⟳ Sincronizar MS Project',
+    ganttInProgress:'En progreso',ganttRisk:'En riesgo',ganttBlocked:'Bloqueado',ganttDone:'Completado',
+    // RACI
+    raciTitle:'Matriz RACI',raciSub:'Asignación de responsabilidades en todos los procesos clave',
+    raciAdd:'+ Agregar Proceso',raciExport:'↑ Exportar Excel',
+    raciR:'Responsable — realiza el trabajo',raciA:'Accountable — dueño del resultado',
+    raciC:'Consultado — provee información',raciI:'Informado — se mantiene al tanto',
+    raciProcess:'Proceso',raciDept:'Depto.',
+    // Processes
+    procTitle:'Biblioteca de Procesos',procSub:'Procesos operacionales paso a paso · clic para expandir',
+    procNew:'+ Nuevo Proceso',procDiagram:'⬡ Diagrama de Flujo',procSteps:'pasos',
+    // Docs
+    docsTitle:'Repositorio de Documentos',docsSub:'Políticas, guías y manuales · vinculados a OneDrive y SharePoint',
+    docsAdd:'+ Agregar Documento',docsSearch:'🔍 Buscar en OneDrive',docsRecent:'⟳ Cambios Recientes',
+    docsStrategic:'Estratégico y Gobernanza',docsOps:'Operaciones y Sistemas',
+    // Integrations
+    intTitle:'Mapa de Integraciones',intSub:'Sistemas conectados, estado y flujos de datos',
+    intConfig:'Configurar',intStatus:'Verificar Estado',intNote:'<strong>Arquitectura:</strong> Hub → Listas de SharePoint (actualizadas por Fabric Dataflows) → Salesforce + Element451. Calendario Outlook: web part nativo de SP, sin necesidad de admin. Power BI: incrustar directamente en SharePoint. Corrección OAuth de Fabric: usar credencial de usuario nombrado en Dataflow Gen2.',
+    // Modal
+    modalSave:'Guardar',modalCancel:'Cancelar',
+    modalTitleProject:'Agregar Nuevo Proyecto',modalTitleRaci:'Agregar Fila a RACI',
+    modalTitleProcess:'Agregar Nuevo Proceso',modalTitleDoc:'Agregar Documento',modalTitleStaff:'Agregar Empleado',
+    // Status pills
+    sActive:'Activo',sRisk:'En Riesgo',sBlocked:'Bloqueado',sDone:'Completado',sReview:'En Revisión',sPlanned:'Planificado',
+    // Months
+    months:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+    // Milestones
+    mil1:'Stripe en Vivo',mil1s:'Todos los recintos',mil2:'Acreditación',mil2s:'Asuntos Académicos',mil3:'SharePoint Fase 1',mil3s:'TI / Ops',mil4:'Cierre Admisiones',mil4s:'J. Stovall',
+  }
+};
+
+function t(key){return(T[LANG]&&T[LANG][key]!==undefined)?T[LANG][key]:T.en[key]||key}
+
+function setLang(lang){
+  LANG=lang;
+  document.getElementById('btn-en').classList.toggle('active',lang==='en');
+  document.getElementById('btn-es').classList.toggle('active',lang==='es');
+  document.documentElement.lang=lang;
+  // Topbar
+  document.querySelector('.tb-name').textContent=t('hubName');
+  document.querySelector('.tb-sub').textContent=t('hubSub');
+  // Sidebar labels
+  const sbLabels=document.querySelectorAll('.sb-label');
+  const lblKeys=['sbOverview','sbPeople','sbProjects','sbResources'];
+  sbLabels.forEach((el,i)=>{if(lblKeys[i])el.textContent=t(lblKeys[i])});
+  // Sidebar items — find by data-tab
+  const sbMap={dashboard:'sbDashboard',programs:'sbPrograms',staff:'sbStaff',org:'sbOrg',raci:'sbRaci',projects:'sbProjectsItem',gantt:'sbGantt',processes:'sbProcesses',docs:'sbDocs',integrations:'sbIntegrations'};
+  document.querySelectorAll('.sb-item[data-tab]').forEach(el=>{
+    const key=sbMap[el.dataset.tab];
+    if(key){
+      // preserve icon and badge
+      const icon=el.querySelector('.sb-icon');
+      const badge=el.querySelector('.sb-badge');
+      el.textContent=t(key);
+      if(icon)el.prepend(icon);
+      if(badge)el.appendChild(badge);
+    }
+  });
+  // Update modal buttons
+  const mcb=document.getElementById('modal-cancel-btn');const msb=document.getElementById('modal-save-btn');
+  if(mcb)mcb.textContent=t('modalCancel');if(msb)msb.textContent=t('modalSave');
+  // Re-render all panels
+  renderDash();renderProgs();renderStaff();renderOrg();renderProjects();renderGantt();renderRaci();renderProcs();renderDocs();renderInt();
+  // Panel titles/subs
+  applyStaticText();
+}
+
+function applyStaticText(){
+  // Page titles & subtitles
+  const pages=[
+    ['panel-programs','progTitle','progSub'],
+    ['panel-staff','staffTitle','staffSub'],
+    ['panel-org','orgTitle','orgSub'],
+    ['panel-projects','projTitle','projSub'],
+    ['panel-gantt','ganttTitle','ganttSub'],
+    ['panel-raci','raciTitle','raciSub'],
+    ['panel-processes','procTitle','procSub'],
+    ['panel-docs','docsTitle','docsSub'],
+    ['panel-integrations','intTitle','intSub'],
+  ];
+  pages.forEach(([id,tk,sk])=>{
+    const panel=document.getElementById(id);
+    if(!panel)return;
+    const title=panel.querySelector('.page-title');
+    const sub=panel.querySelector('.page-sub');
+    if(title)title.textContent=t(tk);
+    if(sub)sub.textContent=t(sk);
+  });
+}
 
 // ═══════════ INIT ═══════════
 renderProgs();renderStaff();renderOrg();renderProjects();renderGantt();renderRaci();renderProcs();renderDocs();renderInt();renderDash();
