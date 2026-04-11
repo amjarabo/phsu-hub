@@ -534,9 +534,71 @@ button,input,select,textarea{font-family:inherit}
 
 /* REPORTS CHART AREA */
 .report-charts{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px}
+
+/* DRAG AND DROP KANBAN */
+.kb-card.dragging{opacity:.4;transform:scale(.97)}
+.kb-col.drag-over{background:rgba(0,153,154,.06);border-radius:var(--r)}
+.kb-col-body{min-height:80px;transition:background .15s}
+
+/* SEARCH RESULTS */
+.search-results{position:absolute;top:100%;left:0;right:0;background:var(--w);border:1px solid var(--bdr);border-radius:var(--rl);box-shadow:var(--shlg);z-index:500;max-height:360px;overflow-y:auto;margin-top:4px}
+.search-result-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .15s;border-bottom:1px solid var(--bdr)}
+.search-result-item:hover{background:var(--bg)}
+.search-result-item:last-child{border-bottom:none}
+.sr-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.sr-name{font-size:12px;font-weight:600;color:var(--tx)}
+.sr-type{font-size:10px;color:var(--tx3)}
+.sr-section{padding:6px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--tx3);background:var(--bg);border-bottom:1px solid var(--bdr)}
+.tb-search{position:relative}
+
+/* MOBILE OVERLAY */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199}
+.sb-overlay.show{display:block}
+
+/* SKELETON */
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.skeleton{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px}
+
+/* TOAST NOTIFICATIONS */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:600;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--td);color:#fff;padding:12px 16px;border-radius:var(--r);font-size:12px;font-weight:500;box-shadow:var(--shlg);display:flex;align-items:center;gap:10px;pointer-events:all;transform:translateX(120%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-width:300px}
+.toast.show{transform:translateX(0)}
+.toast.success{background:var(--gn)}
+.toast.warning{background:var(--am)}
+.toast.error{background:var(--rd)}
+.toast-ico{font-size:16px;flex-shrink:0}
+
+/* PRINT */
+@media print{
+  .topbar,.sidebar,.drw-bg,.mbg,.toast-wrap,.abar,.ph-actions,.pf-bar,.sf-bar,.tb-search{display:none!important}
+  .shell{display:block}
+  .main{padding:0}
+  .panel{display:block!important}
+  .panel:not(.active){display:none!important}
+  .card,.chart-card,.tbl-wrap,.pjrow{box-shadow:none;border:1px solid #ccc}
+  body{font-size:11px}
+}
+
+/* IMPROVED MOBILE */
+@media(max-width:800px){
+  .cal-grid{grid-template-columns:1fr}
+  .settings-layout{grid-template-columns:1fr}
+  .messages-layout{grid-template-columns:1fr;height:auto}
+  .msg-sidebar{height:200px;border-right:none;border-bottom:1px solid var(--bdr)}
+  .analytics-grid{grid-template-columns:1fr 1fr}
+  .report-charts{grid-template-columns:1fr}
+  .g2{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .analytics-grid{grid-template-columns:1fr}
+  .topbar{padding:0 12px 0 0}
+  .tb-search{display:none}
+}
 </style>
 </head>
 <body>
+<div class="toast-wrap" id="toast-wrap"></div>
+<div class="sb-overlay" id="sb-overlay" onclick="closeMobileNav()"></div>
 <header class="topbar">
   <div class="tb-toggle" id="sb-tog" onclick="toggleSidebar()">&#9776;</div>
   <div class="tb-brand">
@@ -1925,6 +1987,246 @@ setTimeout(()=>{
     tb.prepend(b);
   }
 },300);
+
+
+// ======== TOAST SYSTEM ========
+function toast(msg, type="success", duration=3000){
+  const wrap=document.getElementById("toast-wrap");
+  const t=document.createElement("div");
+  t.className=`toast ${type}`;
+  const icons={success:"✅",warning:"⚠️",error:"❌",info:"ℹ️"};
+  t.innerHTML=`<span class="toast-ico">${icons[type]||"ℹ️"}</span><span>${msg}</span>`;
+  wrap.appendChild(t);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add("show")));
+  setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),350)},duration);
+}
+
+// ======== LOCALSTORAGE PERSISTENCE ========
+function saveToStorage(key,data){try{localStorage.setItem("phsu_"+key,JSON.stringify(data));}catch(e){}}
+function loadFromStorage(key,fallback){try{const d=localStorage.getItem("phsu_"+key);return d?JSON.parse(d):fallback;}catch(e){return fallback;}}
+
+// Load persisted data on startup
+(function loadPersistedData(){
+  const savedProjects=loadFromStorage("projects",null);
+  if(savedProjects&&savedProjects.length>0){PROJECTS.splice(0,PROJECTS.length,...savedProjects);}
+  const savedStaff=loadFromStorage("staff",null);
+  if(savedStaff&&savedStaff.length>0){STAFF.splice(0,STAFF.length,...savedStaff);}
+  const savedDocs=loadFromStorage("docs",null);
+  if(savedDocs){Object.assign(DOCS,savedDocs);}
+})();
+
+// Override saveMod to actually save data
+const _origSaveMod=saveMod;
+function saveMod(){
+  const type=document.getElementById("m-title").textContent;
+  const inputs=document.querySelectorAll("#m-body .finp, #m-body .fsel, #m-body .ftxt");
+  const vals=[...inputs].map(i=>i.value);
+
+  if(type.includes("Project")){
+    if(vals[0]&&vals[0].trim()){
+      const newProj={n:vals[0],o:vals[1]||"Unassigned",p:0,s:(vals[3]||"active").toLowerCase().replace(" ",""),due:vals[2]||"TBD",desc:vals[4]||"",tags:[],sprint:vals[3]||""};
+      PROJECTS.unshift(newProj);
+      saveToStorage("projects",PROJECTS);
+      renderProjs();renderDash();
+      if(document.getElementById("panel-kanban").classList.contains("active"))renderKanban();
+      toast("Project added successfully!","success");
+    }
+  }
+  else if(type.includes("Staff")){
+    if(vals[0]&&vals[1]){
+      const ini2=vals[0].split(" ").filter((_,i,a)=>i===0||i===a.length-1).map(x=>x[0]||"").join("").toUpperCase();
+      const newStaff={n:vals[0],e:vals[1],t:vals[2]||"",c:vals[4]||"Global",d:vals[3]||"General",av:"av-gen",bio:`${vals[2]||""} at PHSU.`};
+      STAFF.push(newStaff);
+      saveToStorage("staff",STAFF);
+      renderStaff();
+      toast("Staff member added!","success");
+    }
+  }
+  else if(type.includes("Process")){
+    if(vals[0]){
+      const steps=(vals[2]||"").split("\n").filter(s=>s.trim());
+      PROCS.push({n:vals[0],d:vals[1]||"General",ico:"⬡",o:vals[1]||"",steps});
+      renderProcs();
+      toast("Process added!","success");
+    }
+  }
+  else if(type.includes("Document")){
+    if(vals[0]){
+      const newDoc={i:"📄",n:vals[0],m:vals[3]||"",t:vals[2]||"PDF",url:vals[4]||"#"};
+      DOCS[vals[1]==="Operations"?"o":"s"].unshift(newDoc);
+      saveToStorage("docs",DOCS);
+      renderDocs();
+      toast("Document added!","success");
+    }
+  }
+  else if(type.includes("Event")){
+    if(vals[0]&&vals[1]){
+      CAL_EVENTS.push({date:vals[1],title:vals[0],time:vals[2]||"TBD",campus:vals[3]||"Virtual",color:"#00999A",type:vals[4]||"meeting"});
+      CAL_EVENTS.sort((a,b)=>a.date.localeCompare(b.date));
+      renderCal();
+      toast("Event added to calendar!","success");
+    }
+  }
+  else if(type.includes("RACI")){
+    if(vals[0]){
+      RACI.push({p:vals[0],d:vals[1]||"General",c:Array(RCOLS.length).fill("I")});
+      renderRaci();
+      toast("Process added to RACI!","success");
+    }
+  }
+
+  closeMod();
+}
+
+// ======== ENHANCED GLOBAL SEARCH ========
+function globalSearch(q){
+  const existing=document.querySelector(".search-results");
+  if(existing)existing.remove();
+  if(!q||q.length<2)return;
+  const ql=q.toLowerCase();
+  const results=[];
+
+  STAFF.filter(s=>[s.n,s.t,s.e,s.d].some(x=>x.toLowerCase().includes(ql))).slice(0,4).forEach((s,i)=>{
+    results.push({section:"Staff",ico:`<div class="av ${s.av}" style="width:30px;height:30px;font-size:10px">${ini(s.n)}</div>`,name:s.n,sub:s.t,action:()=>{goTab("staff");setTimeout(()=>{document.getElementById("sf-q").value=q;filterStaff();},100);}});
+  });
+  PROJECTS.filter(p=>p.n.toLowerCase().includes(ql)||p.o.toLowerCase().includes(ql)).slice(0,3).forEach((p,i)=>{
+    const ri=PROJECTS.indexOf(p);
+    results.push({section:"Projects",ico:`<div class="sr-ico" style="background:var(--tl)">📌</div>`,name:p.n,sub:p.o,action:()=>openDrw("project",ri)});
+  });
+  PROGRAMS.filter(p=>p.name.toLowerCase().includes(ql)||p.degree.toLowerCase().includes(ql)).slice(0,3).forEach((p,i)=>{
+    const ri=PROGRAMS.indexOf(p);
+    results.push({section:"Programs",ico:`<div class="sr-ico" style="background:var(--tl)">${p.icon||"🎓"}</div>`,name:p.name,sub:p.degree,action:()=>{goTab("programs");setTimeout(()=>openDrw("program",ri),200);}});
+  });
+  PROCS.filter(p=>p.n.toLowerCase().includes(ql)).slice(0,2).forEach((p,i)=>{
+    const ri=PROCS.indexOf(p);
+    results.push({section:"Processes",ico:`<div class="sr-ico" style="background:var(--tl)">${p.ico}</div>`,name:p.n,sub:p.d,action:()=>{goTab("processes");setTimeout(()=>openDrw("process",ri),200);}});
+  });
+
+  if(!results.length){
+    const div=document.createElement("div");
+    div.className="search-results";
+    div.innerHTML=`<div style="padding:14px 16px;font-size:12px;color:var(--tx2);text-align:center">No results for "${q}"</div>`;
+    document.querySelector(".tb-search").appendChild(div);
+    return;
+  }
+
+  const div=document.createElement("div");div.className="search-results";
+  let lastSection="";
+  div.innerHTML=results.map(r=>{
+    let html="";
+    if(r.section!==lastSection){html+=`<div class="sr-section">${r.section}</div>`;lastSection=r.section;}
+    html+=`<div class="search-result-item" onclick="this.closest('.search-results').remove();(${r.action.toString()})()">
+      ${r.ico}<div><div class="sr-name">${r.name}</div><div class="sr-type">${r.sub}</div></div>
+    </div>`;
+    return html;
+  }).join("");
+  document.querySelector(".tb-search").appendChild(div);
+}
+document.addEventListener("click",e=>{if(!e.target.closest(".tb-search"))document.querySelectorAll(".search-results").forEach(r=>r.remove());});
+
+// ======== KANBAN DRAG AND DROP ========
+let dragCard=null,dragFromCol=null;
+function initKanbanDrag(){
+  document.querySelectorAll(".kb-card").forEach((card,i)=>{
+    card.draggable=true;
+    card.addEventListener("dragstart",e=>{
+      dragCard=card;
+      dragFromCol=card.closest(".kb-col-body")?.dataset.col;
+      setTimeout(()=>card.classList.add("dragging"),0);
+      e.dataTransfer.effectAllowed="move";
+    });
+    card.addEventListener("dragend",()=>{
+      card.classList.remove("dragging");
+      document.querySelectorAll(".kb-col-body").forEach(c=>c.classList.remove("drag-over"));
+    });
+  });
+  document.querySelectorAll(".kb-col-body").forEach(col=>{
+    col.addEventListener("dragover",e=>{e.preventDefault();col.classList.add("drag-over");});
+    col.addEventListener("dragleave",()=>col.classList.remove("drag-over"));
+    col.addEventListener("drop",e=>{
+      e.preventDefault();
+      col.classList.remove("drag-over");
+      if(dragCard&&col!==dragCard.closest(".kb-col-body")){
+        const toCol=col.dataset.col;
+        col.insertBefore(dragCard,col.querySelector(".kb-add")||null);
+        // update status
+        const colStatusMap={planning:"planned",inprogress:"active",review:"review",done:"done",blocked:"blocked"};
+        const cardTitle=dragCard.querySelector(".kb-name")?.textContent;
+        const proj=PROJECTS.find(p=>p.n.includes((cardTitle||"").split(" ")[0]));
+        if(proj){proj.s=colStatusMap[toCol]||proj.s;saveToStorage("projects",PROJECTS);renderProjs();renderDash();}
+        // update count badges
+        document.querySelectorAll(".kb-head").forEach(h=>{
+          const cnt=h.closest(".kb-col")?.querySelector(".kb-col-body")?.querySelectorAll(".kb-card").length||0;
+          const badge=h.querySelector(".kb-cnt");if(badge)badge.textContent=cnt;
+        });
+        toast(`Moved to ${toCol.replace("inprogress","In Progress")}!`,"success",1500);
+      }
+    });
+  });
+}
+
+// Patch renderKanban to add drag support and col-body wrappers
+const _origRenderKanban=renderKanban;
+function renderKanban(){
+  const kb=document.getElementById("kanban-board");
+  if(!kb)return;
+  kb.innerHTML=KANBAN_COLS.map(col=>`
+    <div class="kb-col">
+      <div class="kb-head">
+        <div style="display:flex;align-items:center;gap:7px">
+          <div style="width:8px;height:8px;border-radius:50%;background:${col.color}"></div>
+          <div class="kb-title">${col.title}</div>
+        </div>
+        <div class="kb-cnt">${col.items.length}</div>
+      </div>
+      <div class="kb-col-body" data-col="${col.id}">
+        ${col.items.map((card,ci)=>`
+          <div class="kb-card" draggable="true" onclick="openDrw('project',${Math.max(0,PROJECTS.findIndex(p=>p.n.toLowerCase().includes(card.title.split(' ')[0].toLowerCase())))})">
+            <span class="kb-tag" style="background:${card.tagC};color:${card.tagTC}">${card.tag}</span>
+            <div class="kb-name">${card.title}</div>
+            <div class="kb-pbar"><div class="kb-pfill" style="width:${card.p}%"></div></div>
+            <div class="kb-meta">
+              <div class="kb-avatars">${card.avs.map((av,ai)=>`<div class="kb-av" style="background:${ai===0?"var(--teal)":"var(--or)"};width:22px;height:22px;font-size:8px">${av}</div>`).join("")}</div>
+              <div class="kb-due">${card.due}</div>
+            </div>
+          </div>`).join("")}
+        <button class="kb-add" onclick="openModal('project')">+ Add Card</button>
+      </div>
+    </div>`).join("");
+  setTimeout(initKanbanDrag,100);
+}
+
+// ======== MOBILE NAV ========
+function closeMobileNav(){
+  document.getElementById("sidebar").classList.remove("mob-open");
+  document.getElementById("sb-overlay").classList.remove("show");
+}
+const _origToggleSidebar=toggleSidebar;
+function toggleSidebar(){
+  if(window.innerWidth<=800){
+    const sb=document.getElementById("sidebar");
+    const ov=document.getElementById("sb-overlay");
+    const isOpen=sb.classList.toggle("mob-open");
+    ov.classList.toggle("show",isOpen);
+  } else {
+    sbCollapsed=!sbCollapsed;
+    document.getElementById("sidebar").classList.toggle("collapsed",sbCollapsed);
+  }
+}
+
+// ======== PRINT ========
+function printPanel(){
+  window.print();
+}
+
+// Show toast on first load
+setTimeout(()=>{
+  const welcomed=sessionStorage.getItem("phsu-welcomed");
+  if(!welcomed){toast("Welcome to PHSU Ops Hub v4!","success",4000);sessionStorage.setItem("phsu-welcomed","1");}
+},800);
+
+// Re-render kanban on tab switch to get drag working
+document.querySelectorAll(".sb-it[data-tab='kanban']").forEach(i=>i.addEventListener("click",()=>setTimeout(initKanbanDrag,200)));
 
 </script>
 </body>
