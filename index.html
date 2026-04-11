@@ -594,6 +594,99 @@ button,input,select,textarea{font-family:inherit}
   .topbar{padding:0 12px 0 0}
   .tb-search{display:none}
 }
+
+/* ====== TICKETING ====== */
+.ticket-layout{display:grid;grid-template-columns:1fr 340px;gap:18px;align-items:start}
+.ticket-board{display:flex;flex-direction:column;gap:8px}
+.ticket-row{background:var(--w);border:1px solid var(--bdr);border-radius:var(--r);padding:13px 16px;cursor:pointer;transition:all .2s;display:grid;grid-template-columns:auto 1fr auto auto auto;gap:12px;align-items:center}
+.ticket-row:hover{border-color:var(--teal);box-shadow:var(--sh);transform:translateX(2px)}
+.ticket-id{font-size:10px;font-weight:700;color:var(--tx3);font-family:'Crimson Pro',serif;white-space:nowrap}
+.ticket-title{font-size:13px;font-weight:600;color:var(--tx)}
+.ticket-sub{font-size:11px;color:var(--tx2);margin-top:2px}
+.ticket-pri{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pri-high{background:var(--rd)}.pri-med{background:var(--am)}.pri-low{background:var(--gn)}
+.ticket-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.ticket-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.tstat{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rl);padding:13px 15px;text-align:center;cursor:pointer;transition:all .2s}
+.tstat:hover{border-color:var(--teal);box-shadow:var(--sh)}
+.tstat-v{font-size:24px;font-weight:300;color:var(--td);font-family:'Crimson Pro',serif}
+.tstat-l{font-size:10px;font-weight:600;color:var(--tx2);margin-top:3px}
+.tstat-dot{width:8px;height:8px;border-radius:50%;margin:0 auto 6px}
+.ticket-sidebar{display:flex;flex-direction:column;gap:14px}
+.kb-section{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden}
+.kb-sec-head{padding:12px 16px;border-bottom:1px solid var(--bdr);font-size:12px;font-weight:700;color:var(--tx);display:flex;align-items:center;justify-content:space-between}
+.kb-issue{padding:10px 14px;border-bottom:1px solid var(--bdr);cursor:pointer;transition:background .15s}
+.kb-issue:hover{background:var(--bg)}
+.kb-issue:last-child{border-bottom:none}
+.kb-issue-title{font-size:12px;font-weight:600;color:var(--tx)}
+.kb-issue-cnt{font-size:10px;color:var(--tx3);margin-top:2px}
+.kb-tag-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+
+/* ====== KNOWLEDGE BASE ====== */
+.kb-layout{display:grid;grid-template-columns:240px 1fr;gap:18px;align-items:start}
+.kb-nav{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;position:sticky;top:74px}
+.kb-nav-item{display:flex;align-items:center;gap:9px;padding:10px 14px;cursor:pointer;font-size:12px;font-weight:500;color:var(--tx2);border-left:3px solid transparent;transition:all .15s}
+.kb-nav-item:hover{background:var(--bg);color:var(--tx)}
+.kb-nav-item.on{background:var(--tl);color:var(--td);border-left-color:var(--teal);font-weight:700}
+.kb-nav-section{padding:8px 14px 4px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx3)}
+.kb-content{display:flex;flex-direction:column;gap:12px}
+.kb-article{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;cursor:pointer;transition:all .2s}
+.kb-article:hover{border-color:var(--teal);box-shadow:var(--sh)}
+.kb-article-head{padding:14px 16px;display:flex;align-items:flex-start;gap:12px}
+.kb-article-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.kb-article-title{font-size:13px;font-weight:700;color:var(--tx)}
+.kb-article-sub{font-size:11px;color:var(--tx2);margin-top:3px;line-height:1.5}
+.kb-article-meta{display:flex;align-items:center;gap:8px;padding:0 16px 12px;flex-wrap:wrap}
+.kb-article-body{padding:0 16px 14px;display:none;border-top:1px solid var(--bdr)}
+.kb-article-body.open{display:block}
+.kb-step{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bg2)}
+.kb-step:last-child{border-bottom:none}
+.kb-step-n{width:22px;height:22px;border-radius:50%;background:var(--teal);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.kb-step-text{font-size:12px;color:var(--tx);line-height:1.6}
+.kb-step-text code{background:var(--bg2);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:11px;color:var(--teal)}
+.kb-views{font-size:10px;color:var(--tx3)}
+.kb-helpful{font-size:11px;color:var(--tx2);display:flex;gap:8px;align-items:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--bdr)}
+.kb-helpful-btn{padding:4px 12px;border-radius:20px;border:1px solid var(--bdr);background:var(--w);cursor:pointer;font-size:11px;font-weight:600;transition:all .15s}
+.kb-helpful-btn:hover{border-color:var(--teal);color:var(--teal)}
+.kb-search-bar{background:linear-gradient(135deg,var(--td),var(--teal));border-radius:var(--rl);padding:24px;margin-bottom:16px;text-align:center}
+.kb-search-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:4px;font-family:'Crimson Pro',serif}
+.kb-search-sub{font-size:12px;color:rgba(255,255,255,.7);margin-bottom:14px}
+.kb-search-inp{width:100%;max-width:440px;padding:10px 16px;border-radius:24px;border:none;font-size:13px;outline:none;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+
+/* ====== TRAINING ====== */
+.training-hero{background:linear-gradient(135deg,var(--td) 0%,#006B6C 50%,var(--teal) 100%);border-radius:var(--rl);padding:28px 32px;margin-bottom:20px;display:flex;align-items:center;gap:24px}
+.training-hero-text h2{font-size:22px;font-weight:700;color:#fff;font-family:'Crimson Pro',serif;margin-bottom:4px}
+.training-hero-text p{font-size:13px;color:rgba(255,255,255,.75)}
+.training-hero-stats{display:flex;gap:20px;margin-top:14px;flex-wrap:wrap}
+.th-stat{text-align:center}
+.th-stat-v{font-size:22px;font-weight:300;color:#fff;font-family:'Crimson Pro',serif}
+.th-stat-l{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px}
+.training-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+.course-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;cursor:pointer;transition:all .2s}
+.course-card:hover{border-color:var(--teal);box-shadow:var(--shh);transform:translateY(-2px)}
+.course-thumb{height:100px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative}
+.course-badge{position:absolute;top:10px;right:10px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.course-body{padding:14px}
+.course-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:5px}
+.course-desc{font-size:11px;color:var(--tx2);line-height:1.5;margin-bottom:10px}
+.course-meta{display:flex;align-items:center;gap:10px;font-size:10px;color:var(--tx3)}
+.course-progress{margin-top:10px}
+.course-prog-bar{height:4px;background:var(--bg2);border-radius:2px}
+.course-prog-fill{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--teal),var(--tm))}
+.course-prog-label{font-size:10px;color:var(--tx2);margin-top:4px}
+.cert-card{background:linear-gradient(135deg,#FFF9E6,#FEF3CC);border:1px solid #F5D576;border-radius:var(--rl);padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s}
+.cert-card:hover{box-shadow:var(--sh);transform:translateY(-1px)}
+.cert-badge{font-size:28px;flex-shrink:0}
+.cert-name{font-size:13px;font-weight:700;color:#633806}
+.cert-sub{font-size:11px;color:#854F0B;margin-top:2px}
+.cert-status{margin-left:auto;font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px}
+.learning-path{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rl);padding:18px;margin-bottom:14px}
+.lp-step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg2);align-items:center}
+.lp-step:last-child{border-bottom:none}
+.lp-step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.lp-step-name{font-size:12px;font-weight:600;color:var(--tx)}
+.lp-step-sub{font-size:10px;color:var(--tx2);margin-top:2px}
+.lp-step-status{margin-left:auto;font-size:10px;font-weight:700;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1089,6 +1182,80 @@ button,input,select,textarea{font-family:inherit}
       </div>
     </div>
   </div>
+</div>
+
+
+<!-- SUPPORT / TICKETING -->
+<div class="panel" id="panel-support">
+  <div class="breadcrumb">&#8962; Home <span class="bc-sep">/</span> <span>Support &amp; Tickets</span></div>
+  <div class="ph">
+    <div class="ph-left"><div class="ph-title">Support Tickets</div><div class="ph-sub">Track issues, requests, and resolutions across all PHSU systems</div></div>
+    <div class="ph-actions">
+      <button class="btn btn-sm" onclick="goTab('kb')">&#128218; Knowledge Base</button>
+      <button class="btn btn-p btn-sm" onclick="openModal('ticket')">+ New Ticket</button>
+    </div>
+  </div>
+  <div class="ticket-stats" id="ticket-stats"></div>
+  <div class="ticket-layout">
+    <div>
+      <div class="ticket-filters" id="ticket-filters"></div>
+      <div class="ticket-board" id="ticket-board"></div>
+    </div>
+    <div class="ticket-sidebar">
+      <div class="kb-section">
+        <div class="kb-sec-head">
+          <span>&#128293; Common Issues</span>
+          <span style="font-size:10px;font-weight:400;color:var(--tx3)">click to view fix</span>
+        </div>
+        <div id="common-issues"></div>
+      </div>
+      <div class="kb-section">
+        <div class="kb-sec-head">&#9881; System Status</div>
+        <div id="sys-status"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KNOWLEDGE BASE -->
+<div class="panel" id="panel-kb">
+  <div class="breadcrumb">&#8962; Home <span class="bc-sep">/</span> <span>Knowledge Base</span></div>
+  <div class="kb-search-bar">
+    <div class="kb-search-title">How can we help you?</div>
+    <div class="kb-search-sub">Search guides, tutorials, and troubleshooting articles</div>
+    <input class="kb-search-inp" type="text" placeholder="e.g. How to reset Salesforce password, Element451 setup..." oninput="searchKB(this.value)">
+  </div>
+  <div class="kb-layout">
+    <div class="kb-nav" id="kb-nav"></div>
+    <div class="kb-content" id="kb-content"></div>
+  </div>
+</div>
+
+<!-- TRAINING -->
+<div class="panel" id="panel-training">
+  <div class="breadcrumb">&#8962; Home <span class="bc-sep">/</span> <span>Training Center</span></div>
+  <div class="training-hero">
+    <div style="font-size:48px">🎓</div>
+    <div class="training-hero-text">
+      <h2>PHSU Learning &amp; Training Center</h2>
+      <p>Onboarding guides, system tutorials, and professional development for all staff</p>
+      <div class="training-hero-stats">
+        <div class="th-stat"><div class="th-stat-v">12</div><div class="th-stat-l">Courses</div></div>
+        <div class="th-stat"><div class="th-stat-v">4</div><div class="th-stat-l">Certifications</div></div>
+        <div class="th-stat"><div class="th-stat-v">41</div><div class="th-stat-l">Staff Enrolled</div></div>
+        <div class="th-stat"><div class="th-stat-v">6h</div><div class="th-stat-l">Avg. Completion</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="slbl" style="margin-bottom:12px">My Progress</div>
+  <div class="learning-path" id="learning-path"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <div class="slbl" style="margin:0">All Courses</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap" id="training-filters"></div>
+  </div>
+  <div class="training-grid" id="training-grid"></div>
+  <div class="slbl" style="margin-bottom:10px">Certifications &amp; Achievements</div>
+  <div style="display:flex;flex-direction:column;gap:8px" id="certs-list"></div>
 </div>
 
 <!-- DRAWER -->
@@ -1954,6 +2121,13 @@ function exportData(){
 document.getElementById("deploy-date").textContent="Last pushed: April 2025 · v4.0";
 
 // ======== EVENT MODAL FORM ========
+MFORMS.ticket=`<div class="frow"><label class="flbl">Issue Title</label><input class="finp" placeholder="e.g. Element451 login not working for new user"></div>
+  <div class="fr2"><div class="frow" style="margin:0"><label class="flbl">System</label><select class="fsel"><option>Element451</option><option>Salesforce</option><option>SharePoint</option><option>Outlook</option><option>Microsoft Fabric</option><option>Anthology</option><option>OneDrive</option><option>Other</option></select></div>
+  <div class="frow" style="margin:0"><label class="flbl">Priority</label><select class="fsel"><option>Medium</option><option>High</option><option>Low</option><option>Critical</option></select></div></div>
+  <div class="fr2"><div class="frow" style="margin:0"><label class="flbl">Reported By</label><input class="finp" placeholder="Name or email"></div>
+  <div class="frow" style="margin:0"><label class="flbl">Campus</label><select class="fsel"><option>Puerto Rico</option><option>St. Louis</option><option>BVI</option><option>San Juan</option><option>All</option></select></div></div>
+  <div class="frow"><label class="flbl">Description</label><textarea class="ftxt" placeholder="Describe the issue in detail. Include steps to reproduce, error messages, and screenshots if possible..."></textarea></div>`;
+MTITLES.ticket="Open Support Ticket";
 MFORMS.event=`<div class="frow"><label class="flbl">Event Title</label><input class="finp" placeholder="e.g. Admissions Review Meeting"></div>
   <div class="fr2"><div class="frow" style="margin:0"><label class="flbl">Date</label><input class="finp" type="date"></div>
   <div class="frow" style="margin:0"><label class="flbl">Time</label><input class="finp" type="time" value="09:00"></div></div>
@@ -2227,6 +2401,536 @@ setTimeout(()=>{
 
 // Re-render kanban on tab switch to get drag working
 document.querySelectorAll(".sb-it[data-tab='kanban']").forEach(i=>i.addEventListener("click",()=>setTimeout(initKanbanDrag,200)));
+
+
+// ============================================================
+// TICKETING SYSTEM
+// ============================================================
+const TICKETS = loadFromStorage("tickets", [
+  {id:"TKT-001",title:"Element451 — new user cannot log in after invite",sys:"Element451",pri:"high",status:"open",by:"Serenity Lowe",campus:"St. Louis",created:"Apr 10, 2025",desc:"New admissions assistant Yesenia Garcia received the Element451 invite email but clicking the link gives a 404 error. Tried resending invite twice — same result.",comments:[{author:"Ana Jarabo",time:"Apr 10 2:14 PM",text:"Checking Element451 admin — looks like the user email domain is psm.edu but the tenant is configured for a different domain. I'll fix the domain mapping."}]},
+  {id:"TKT-002",title:"Salesforce — Flow error on GL_Auto_Create_Program_Tasks",sys:"Salesforce",pri:"high",status:"in-progress",by:"Ana Jarabo",campus:"Global",created:"Apr 9, 2025",desc:"Flow failing with tmpVar1 error on automated program task creation. Affects all new admissions records created after Apr 8.",comments:[{author:"Ana Jarabo",time:"Apr 9 11:00 AM",text:"Found the issue — tmpVar1 variable is null when the contact record doesn't have a program field populated. Adding null check to the flow."}]},
+  {id:"TKT-003",title:"Microsoft Fabric OAuth blocked — cannot connect to Salesforce",sys:"Microsoft Fabric",pri:"high",status:"open",by:"Michael Fitting",campus:"Global",created:"Apr 8, 2025",desc:"Getting OAUTH_APPROVAL_ERROR_GENERIC when trying to connect Fabric Dataflow to Salesforce. API-only user license doesn't support interactive OAuth.",comments:[{author:"Ana Jarabo",time:"Apr 8 3:00 PM",text:"Confirmed — need Azure App Registration from IT to resolve. Also need to switch to named user credential in Dataflow Gen2."},{author:"Michael Vega",time:"Apr 9 9:00 AM",text:"Working on the App Registration. Should have Client ID and Tenant ID by tomorrow."}]},
+  {id:"TKT-004",title:"Outlook Calendar — meeting invites not syncing to SharePoint",sys:"Outlook",pri:"medium",status:"resolved",by:"Crystal A Rodriguez",campus:"Puerto Rico",created:"Apr 7, 2025",desc:"Calendar events created in Outlook are not appearing in the SharePoint Events web part.",comments:[{author:"Ana Jarabo",time:"Apr 7 4:30 PM",text:"Fixed — the SharePoint Calendar web part was pointing to the wrong calendar list. Corrected the source URL."}],resolved:"Apr 8, 2025"},
+  {id:"TKT-005",title:"Element451 — Stripe payment page not loading for BSN applicants",sys:"Element451",pri:"critical",status:"open",by:"Astrid Velazquez",campus:"Ponce PR",created:"Apr 11, 2025",desc:"BSN applicants at Ponce campus are getting a blank page when clicking the Stripe payment link in the application portal. Affects Spring 2026 applications.",comments:[]},
+  {id:"TKT-006",title:"SharePoint — Embed web part blocked by tenant policy",sys:"SharePoint",pri:"medium",status:"open",by:"Ana Jarabo",campus:"Global",created:"Apr 11, 2025",desc:"SharePoint Embed web part is not loading external iframe content. Need IT to enable DenyAddAndCustomizePages setting or whitelist github.io domain.",comments:[{author:"Michael Vega",time:"Apr 11 10:00 AM",text:"I'll add amjarabo.github.io to the iframe whitelist in SharePoint admin. Give me a couple hours."}]},
+  {id:"TKT-007",title:"Anthology — student enrollment data not syncing",sys:"Anthology",pri:"low",status:"open",by:"Laura Dwyer",campus:"Global",created:"Apr 6, 2025",desc:"Student enrollment counts in Anthology are 3 weeks out of date. The scheduled sync job appears to have stopped running.",comments:[]},
+  {id:"TKT-008",title:"Salesforce — email recipients on scheduled Flow incorrect",sys:"Salesforce",pri:"medium",status:"resolved",by:"Jennifer Stovall",campus:"Global",created:"Apr 3, 2025",desc:"Scheduled Flow sending admissions report to old distribution list instead of new one.",comments:[{author:"Ana Jarabo",time:"Apr 3 2:00 PM",text:"Updated the email list in the Flow. Tested — now sending to correct recipients."}],resolved:"Apr 4, 2025"},
+]);
+
+const COMMON_ISSUES = [
+  {ico:"🔐",title:"Element451 login / invite issues",count:"12 tickets",tag:"Element451",fix:"Check domain mapping in E451 admin. Resend invite from Users > Pending. If 404, verify tenant URL in user settings."},
+  {ico:"⚡",title:"Salesforce Flow failures (tmpVar/null errors)",count:"8 tickets",tag:"Salesforce",fix:"Add null check before variable assignment. Check Flow debug log for exact line. Common cause: required lookup field empty on triggering record."},
+  {ico:"🔒",title:"Microsoft Fabric OAuth blocked",count:"5 tickets",tag:"Fabric",fix:"Use named user credential in Dataflow Gen2. Requires Azure App Registration. Contact IT for Client ID + Tenant ID. Do NOT use API-only Salesforce user."},
+  {ico:"📅",title:"Outlook calendar not syncing to SharePoint",count:"4 tickets",tag:"Outlook",fix:"Verify SharePoint Calendar web part source URL. Check that the calendar is shared with 'Everyone' in Outlook. Re-save the web part connection."},
+  {ico:"💳",title:"Stripe payment page blank / not loading",count:"3 tickets",tag:"Element451",fix:"Check Element451 payment gateway config. Verify Stripe API keys (test vs live). Ensure program is set to 'requires payment' and amount > $0."},
+  {ico:"🌐",title:"SharePoint iframe / embed blocked",count:"3 tickets",tag:"SharePoint",fix:"IT must whitelist the domain in SharePoint admin (DenyAddAndCustomizePages). Add domain to iframe allowlist at tenant level."},
+];
+
+const SYS_STATUS_DATA = [
+  {n:"Element451",s:"degraded",note:"Login issues reported"},
+  {n:"Salesforce",s:"operational",note:"All systems normal"},
+  {n:"SharePoint",s:"operational",note:"All systems normal"},
+  {n:"Outlook / M365",s:"operational",note:"All systems normal"},
+  {n:"Microsoft Fabric",s:"outage",note:"OAuth blocked"},
+  {n:"Anthology",s:"degraded",note:"Sync job failed"},
+  {n:"OneDrive",s:"operational",note:"All systems normal"},
+];
+
+let ticketFilter = "all";
+
+function renderTickets() {
+  // Stats
+  const open = TICKETS.filter(t=>t.status==="open").length;
+  const inprog = TICKETS.filter(t=>t.status==="in-progress").length;
+  const resolved = TICKETS.filter(t=>t.status==="resolved").length;
+  const critical = TICKETS.filter(t=>t.pri==="critical").length;
+  const ts = document.getElementById("ticket-stats");
+  if(ts) ts.innerHTML = `
+    <div class="tstat" onclick="setTicketFilter('open')"><div class="tstat-dot" style="background:var(--rd)"></div><div class="tstat-v">${open}</div><div class="tstat-l">Open</div></div>
+    <div class="tstat" onclick="setTicketFilter('in-progress')"><div class="tstat-dot" style="background:var(--am)"></div><div class="tstat-v">${inprog}</div><div class="tstat-l">In Progress</div></div>
+    <div class="tstat" onclick="setTicketFilter('resolved')"><div class="tstat-dot" style="background:var(--gn)"></div><div class="tstat-v">${resolved}</div><div class="tstat-l">Resolved</div></div>
+    <div class="tstat" onclick="setTicketFilter('critical')"><div class="tstat-dot" style="background:var(--rd)"></div><div class="tstat-v">${critical}</div><div class="tstat-l">Critical</div></div>`;
+
+  // Filter bar
+  const tf = document.getElementById("ticket-filters");
+  if(tf) tf.innerHTML = `
+    <input class="sf-inp" style="flex:1;max-width:260px" type="text" placeholder="Search tickets..." oninput="searchTickets(this.value)">
+    ${["all","open","in-progress","resolved"].map(f=>`<button class="fbtn${ticketFilter===f?" on":""}" onclick="setTicketFilter('${f}')">${f==="all"?"All":f==="in-progress"?"In Progress":f.charAt(0).toUpperCase()+f.slice(1)}</button>`).join("")}
+    <select class="fsel" style="padding:5px 10px;font-size:11px;max-width:140px" onchange="filterTicketBySys(this.value)">
+      <option value="">All Systems</option>
+      ${["Element451","Salesforce","SharePoint","Outlook","Microsoft Fabric","Anthology"].map(s=>`<option>${s}</option>`).join("")}
+    </select>`;
+
+  renderTicketBoard(TICKETS);
+
+  // Common issues
+  const ci = document.getElementById("common-issues");
+  if(ci) ci.innerHTML = COMMON_ISSUES.map((i,idx)=>`
+    <div class="kb-issue" onclick="openDrw('issue',${idx})">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">${i.ico}</span>
+        <div><div class="kb-issue-title">${i.title}</div><div class="kb-issue-cnt">${i.count} this month</div></div>
+      </div>
+      <div class="kb-tag-row"><span class="ctag ct-o">${i.tag}</span></div>
+    </div>`).join("");
+
+  // System status
+  const ss = document.getElementById("sys-status");
+  if(ss) ss.innerHTML = SYS_STATUS_DATA.map(s=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--bdr)">
+      <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:${s.s==="operational"?"var(--gn)":s.s==="degraded"?"var(--am)":"var(--rd)"}"></div>
+      <div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--tx)">${s.n}</div><div style="font-size:10px;color:var(--tx2)">${s.note}</div></div>
+      <span class="pill" style="font-size:9px;background:${s.s==="operational"?"var(--tl)":s.s==="degraded"?"var(--ol)":"#FDEAEA"};color:${s.s==="operational"?"#065E4A":s.s==="degraded"?"#8A4A10":"#8B2424"}">${s.s}</span>
+    </div>`).join("");
+
+  // Update badge
+  const badge = document.getElementById("open-ticket-cnt");
+  if(badge) badge.textContent = open;
+}
+
+function renderTicketBoard(tickets) {
+  const filtered = ticketFilter==="critical" ? tickets.filter(t=>t.pri==="critical") : ticketFilter==="all" ? tickets : tickets.filter(t=>t.status===ticketFilter);
+  const priOrder = {critical:0,high:1,medium:2,low:3};
+  filtered.sort((a,b)=>(priOrder[a.pri]||2)-(priOrder[b.pri]||2));
+  const tb = document.getElementById("ticket-board");
+  if(!tb) return;
+  if(!filtered.length){tb.innerHTML=`<div style="padding:32px;text-align:center;color:var(--tx2);font-size:13px">No tickets found ✓</div>`;return;}
+  tb.innerHTML = filtered.map((t,i)=>{
+    const ri = TICKETS.indexOf(t);
+    const statusColor = {open:"var(--rd)",resolved:"var(--gn)","in-progress":"var(--am)"}[t.status]||"var(--tx3)";
+    const priColor = {critical:"var(--rd)",high:"var(--rd)",medium:"var(--am)",low:"var(--gn)"}[t.pri];
+    return `<div class="ticket-row" onclick="openDrw('ticket',${ri})">
+      <div class="ticket-pri" style="background:${priColor}"></div>
+      <div><div class="ticket-title">${t.title}</div><div class="ticket-sub">${t.sys} · ${t.campus} · ${t.by}</div></div>
+      <span class="pill" style="background:${statusColor}22;color:${statusColor};font-size:9px;white-space:nowrap">${t.status}</span>
+      <span class="pill pg" style="font-size:9px;white-space:nowrap">${t.pri}</span>
+      <div class="ticket-id">${t.id}</div>
+    </div>`;
+  }).join("");
+}
+
+function setTicketFilter(f){ticketFilter=f;renderTickets();}
+function searchTickets(q){
+  if(!q){renderTicketBoard(TICKETS);return;}
+  const ql=q.toLowerCase();
+  renderTicketBoard(TICKETS.filter(t=>[t.title,t.sys,t.by,t.desc,t.id].some(x=>x.toLowerCase().includes(ql))));
+}
+function filterTicketBySys(sys){
+  if(!sys){renderTicketBoard(TICKETS);return;}
+  renderTicketBoard(TICKETS.filter(t=>t.sys===sys));
+}
+
+// ============================================================
+// KNOWLEDGE BASE
+// ============================================================
+const KB_ARTICLES = [
+  {cat:"Element451",ico:"⚙️",bg:"#E0F5F5",title:"How to add a new user to Element451",sub:"Step-by-step guide for adding staff with correct permissions",views:47,steps:[
+    {text:"Go to <code>Element451 Admin → Users → Invite User</code>"},
+    {text:"Enter the user's <code>@psm.edu</code> email address exactly as it appears in M365"},
+    {text:"Select their Primary Team (e.g. ADM-Puerto Rico, ADM-St. Louis, ADM-BVI, All Users)"},
+    {text:"Set their Role — Admissions Officer, Manager, or System Admin"},
+    {text:"Click <strong>Send Invitation</strong>. The user will receive an email with a setup link"},
+    {text:"If the invite fails with a 404, check that the user's email domain matches the tenant domain in <code>Admin → Settings → Domains</code>"},
+    {text:"For persistent issues, open a support ticket referencing TKT-001 for known fixes"},
+  ]},
+  {cat:"Element451",ico:"💳",bg:"#E0F5F5",title:"Configuring Stripe payment gateway in Element451",sub:"Connect Stripe to application forms for payment collection",views:31,steps:[
+    {text:"Log in to <code>element451.com</code> → Admin → Integrations → Payment Providers"},
+    {text:"Click <strong>Add Stripe</strong>. You'll need your Stripe API keys (get from <code>dashboard.stripe.com → Developers → API Keys</code>)"},
+    {text:"Enter the <strong>Publishable Key</strong> and <strong>Secret Key</strong>. Use Live keys for production, Test keys for sandbox testing"},
+    {text:"Go to your Program settings → Application Form → Payment Step"},
+    {text:"Enable <strong>Require Payment</strong>, set the amount, and select your Stripe account"},
+    {text:"Test with a Stripe test card: <code>4242 4242 4242 4242</code> · any future date · any CVC"},
+    {text:"If payment page is blank, verify the program is published and the Stripe keys are in the correct environment (test vs live)"},
+  ]},
+  {cat:"Element451",ico:"📋",bg:"#E0F5F5",title:"Setting up program visibility rules",sub:"Control which programs appear to which applicants",views:28,steps:[
+    {text:"Go to <code>Element451 Admin → Programs → [Program Name] → Visibility</code>"},
+    {text:"Set <strong>Audience</strong>: All Applicants, Specific Campus, or Specific Funnel"},
+    {text:"Use <strong>Conditional Rules</strong> to show/hide based on applicant answers (e.g. show MD program only if MCAT score entered)"},
+    {text:"Set <strong>Term Availability</strong> — which semesters this program accepts applications"},
+    {text:"Enable <strong>Campus Filter</strong> to ensure STL applicants see STL programs and PR applicants see PR programs"},
+    {text:"Test by creating a test applicant profile and verifying the correct programs appear"},
+    {text:"Contact Ana Jarabo (ajarabo@psm.edu) for complex rule configurations"},
+  ]},
+  {cat:"Salesforce",ico:"☁️",bg:"#E6F1FB",title:"Fixing Salesforce Flow errors (null variable / tmpVar)",sub:"Most common Flow failure — null check on lookup fields",views:62,steps:[
+    {text:"Go to <code>Salesforce Setup → Flows → [Flow Name] → Debug</code>"},
+    {text:"Run in Debug mode and look for the error message — it will show which element and variable failed"},
+    {text:"The most common cause: a <strong>Get Records</strong> element returns no records, making the variable null"},
+    {text:"Add a <strong>Decision</strong> element after every Get Records to check: <code>Is Null = False</code> before using the variable"},
+    {text:"For <code>tmpVar1</code> errors specifically: check that the triggering record has all required lookup fields populated"},
+    {text:"After fixing, click <strong>Save</strong> then <strong>Activate</strong>. Test with a new record in sandbox first"},
+    {text:"If the issue persists, open a ticket. Include the Flow API name and the full error message"},
+  ]},
+  {cat:"Salesforce",ico:"📧",bg:"#E6F1FB",title:"Updating email recipients on scheduled Flows",sub:"How to change who receives automated Salesforce emails",views:19,steps:[
+    {text:"Go to <code>Setup → Flows → [Flow Name]</code> → click <strong>Edit</strong>"},
+    {text:"Find the <strong>Send Email</strong> action in the flow canvas"},
+    {text:"Click the action → update the <strong>To Address</strong> field with the new recipients"},
+    {text:"For a distribution list: enter the group email (e.g. admissions-pr@psm.edu)"},
+    {text:"For individual users: use a formula referencing the user record or hardcode the email"},
+    {text:"Click <strong>Done</strong> → <strong>Save</strong> → <strong>Activate</strong>"},
+    {text:"Test by running the Flow in Debug mode or triggering the condition manually"},
+  ]},
+  {cat:"SharePoint",ico:"🏢",bg:"#EEEDFE",title:"Embedding external content in SharePoint (iframe setup)",sub:"How to embed the PHSU Hub or any external tool in SharePoint",views:38,steps:[
+    {text:"Go to your SharePoint page → click the <strong>Edit</strong> pencil icon (top right)"},
+    {text:"Click <strong>+</strong> to add a web part → search for <strong>Embed</strong>"},
+    {text:"Paste your iframe code: <code>&lt;iframe src='https://amjarabo.github.io/phsu-hub' width='100%' height='920' frameborder='0'&gt;&lt;/iframe&gt;</code>"},
+    {text:"If the content doesn't load: IT must whitelist the domain. Have IT add <code>amjarabo.github.io</code> to the iframe allowlist in SharePoint Admin Center → Settings → Pages"},
+    {text:"IT also needs to disable <code>DenyAddAndCustomizePages</code> for the site via PowerShell: <code>Set-SPOSite -Identity [URL] -DenyAddAndCustomizePages Disabled</code>"},
+    {text:"After IT makes changes, clear browser cache and reload the SharePoint page"},
+    {text:"Publish the page when done — changes are only visible to others after publishing"},
+  ]},
+  {cat:"Microsoft Fabric",ico:"📊",bg:"#FAEEDA",title:"Fixing Microsoft Fabric OAuth with Salesforce",sub:"Resolving OAUTH_APPROVAL_ERROR_GENERIC — the complete fix",views:44,steps:[
+    {text:"<strong>Root cause:</strong> You're using an API-only Salesforce user license for interactive OAuth — this is not supported"},
+    {text:"<strong>Step 1 — IT:</strong> Create an Azure AD App Registration at <code>portal.azure.com → App registrations → New registration</code>"},
+    {text:"Set Redirect URI to Single-page Application (SPA): <code>https://app.fabric.microsoft.com</code>"},
+    {text:"<strong>Step 2 — IT:</strong> Add API permissions: <code>Calendars.ReadWrite</code>, <code>Tasks.ReadWrite</code>, <code>User.Read</code> (Microsoft Graph, Delegated)"},
+    {text:"<strong>Step 3:</strong> In Microsoft Fabric → Dataflows Gen2 → New Dataflow → Get Data → Salesforce"},
+    {text:"Use <strong>Organizational account</strong> (not service account) for authentication. Sign in with your own @psm.edu credentials"},
+    {text:"<strong>Step 4:</strong> Create the transformation, then set the output destination to a Fabric Lakehouse or SharePoint List"},
+    {text:"Reference ticket TKT-003 for current status. Contact ajarabo@psm.edu or mvega@psm.edu for help"},
+  ]},
+  {cat:"Onboarding",ico:"👋",bg:"#EAF3DE",title:"New staff onboarding — complete IT checklist",sub:"Everything a new PHSU staff member needs to get set up",views:83,steps:[
+    {text:"<strong>Day 1 — IT will provide:</strong> M365 account (@psm.edu email), temporary password, MFA setup instructions"},
+    {text:"Set up <strong>Microsoft Authenticator</strong> app on your phone for MFA — required for all systems"},
+    {text:"<strong>Element451:</strong> You'll receive an invite email. Click the link and create your password. If the link doesn't work, contact ajarabo@psm.edu"},
+    {text:"<strong>Outlook:</strong> Sign in at <code>outlook.office.com</code> with your @psm.edu credentials. Set up on your phone via the Outlook app"},
+    {text:"<strong>SharePoint:</strong> Access at your PHSU SharePoint URL. You'll automatically have access once your M365 account is set up"},
+    {text:"<strong>Salesforce:</strong> If you need Salesforce access, your manager must submit a request to Ana Jarabo. Include your role and required permissions"},
+    {text:"<strong>Teams:</strong> Download Microsoft Teams. Sign in with @psm.edu. Join your campus channel and department team"},
+    {text:"<strong>Help:</strong> For any access issues, open a ticket at the Support tab or email ajarabo@psm.edu"},
+  ]},
+  {cat:"Onboarding",ico:"🔐",bg:"#EAF3DE",title:"Password reset guide — all PHSU systems",sub:"How to reset your password for M365, Salesforce, and Element451",views:56,steps:[
+    {text:"<strong>M365 / Outlook / SharePoint:</strong> Go to <code>aka.ms/sspr</code> → Self-service password reset. Use your registered MFA method to verify"},
+    {text:"If locked out of M365: contact IT (mvega@psm.edu) — they can reset via Azure AD"},
+    {text:"<strong>Salesforce:</strong> Click <strong>Forgot Password</strong> on the login page. An email will be sent to your @psm.edu address"},
+    {text:"<strong>Element451:</strong> Go to <code>app.element451.com</code> → click <strong>Forgot password</strong> → check your @psm.edu email"},
+    {text:"<strong>Best practice:</strong> Use a password manager. All PHSU systems require 12+ character passwords with complexity requirements"},
+    {text:"Passwords expire every 90 days for Salesforce. M365 passwords do not expire (MFA is required instead)"},
+  ]},
+];
+
+const KB_CATEGORIES = ["All","Element451","Salesforce","SharePoint","Microsoft Fabric","Onboarding"];
+let curKBCat = "All";
+
+function renderKB() {
+  // Nav
+  const nav = document.getElementById("kb-nav");
+  if(nav) nav.innerHTML = KB_CATEGORIES.map((c,i)=>{
+    const ico = ["🔍","⚙️","☁️","🏢","📊","👋"][i];
+    const cnt = c==="All" ? KB_ARTICLES.length : KB_ARTICLES.filter(a=>a.cat===c).length;
+    return `<div class="kb-nav-item${curKBCat===c?" on":""}" onclick="setKBCat('${c}')">${ico} ${c} <span style="margin-left:auto;font-size:10px;opacity:.6">${cnt}</span></div>`;
+  }).join("");
+
+  const f = curKBCat==="All" ? KB_ARTICLES : KB_ARTICLES.filter(a=>a.cat===curKBCat);
+  const kbc = document.getElementById("kb-content");
+  if(!kbc) return;
+  kbc.innerHTML = f.map((a,fi)=>{
+    const ri = KB_ARTICLES.indexOf(a);
+    return `<div class="kb-article">
+      <div class="kb-article-head" onclick="toggleKBArticle(${ri})">
+        <div class="kb-article-ico" style="background:${a.bg}">${a.ico}</div>
+        <div style="flex:1">
+          <div class="kb-article-title">${a.title}</div>
+          <div class="kb-article-sub">${a.sub}</div>
+        </div>
+        <div style="font-size:20px;color:var(--tx3);transition:transform .2s;line-height:1" id="kb-arr-${ri}">›</div>
+      </div>
+      <div class="kb-article-meta">
+        <span class="ctag ct-o">${a.cat}</span>
+        <span class="kb-views">&#128065; ${a.views} views</span>
+        <span class="kb-views">${a.steps.length} steps</span>
+      </div>
+      <div class="kb-article-body" id="kb-body-${ri}">
+        <div class="drw-steps" style="margin-top:12px">
+          ${a.steps.map((s,i)=>`<div class="kb-step"><div class="kb-step-n">${i+1}</div><div class="kb-step-text">${s.text}</div></div>`).join("")}
+        </div>
+        <div class="kb-helpful">
+          <span>Was this helpful?</span>
+          <button class="kb-helpful-btn" onclick="kbHelpful(${ri},true)">&#128077; Yes</button>
+          <button class="kb-helpful-btn" onclick="kbHelpful(${ri},false)">&#128078; No</button>
+          <button class="btn btn-sm btn-ghost" style="margin-left:auto" onclick="openModal('ticket')">Still need help? Open ticket</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function toggleKBArticle(i){
+  const b=document.getElementById("kb-body-"+i);
+  const a=document.getElementById("kb-arr-"+i);
+  b.classList.toggle("open");
+  a.style.transform=b.classList.contains("open")?"rotate(90deg)":"";
+  KB_ARTICLES[i].views++;
+}
+function setKBCat(c){curKBCat=c;renderKB();}
+function kbHelpful(i,yes){toast(yes?"Thanks for the feedback! 👍":"Sorry it wasn't helpful. Consider opening a ticket for personalized help.","success",3000);}
+function searchKB(q){
+  if(!q||q.length<2){renderKB();return;}
+  const ql=q.toLowerCase();
+  const f=KB_ARTICLES.filter(a=>a.title.toLowerCase().includes(ql)||a.sub.toLowerCase().includes(ql)||a.cat.toLowerCase().includes(ql)||a.steps.some(s=>s.text.toLowerCase().includes(ql)));
+  curKBCat="All";
+  const kbc=document.getElementById("kb-content");
+  if(!kbc)return;
+  if(!f.length){kbc.innerHTML=`<div style="padding:32px;text-align:center;color:var(--tx2)">No articles found for "${q}" — <button class="btn btn-sm btn-p" onclick="openModal('ticket')">Open a ticket</button></div>`;return;}
+  const nav=document.getElementById("kb-nav");
+  if(nav)nav.querySelectorAll(".kb-nav-item").forEach(n=>n.classList.remove("on"));
+  kbc.innerHTML=`<div style="font-size:12px;color:var(--tx2);margin-bottom:10px">Found ${f.length} article${f.length!==1?"s":""} for "${q}"</div>`+f.map((a)=>{
+    const ri=KB_ARTICLES.indexOf(a);
+    return`<div class="kb-article">
+      <div class="kb-article-head" onclick="toggleKBArticle(${ri})">
+        <div class="kb-article-ico" style="background:${a.bg}">${a.ico}</div>
+        <div style="flex:1"><div class="kb-article-title">${a.title}</div><div class="kb-article-sub">${a.sub}</div></div>
+        <div style="font-size:20px;color:var(--tx3);transition:transform .2s" id="kb-arr-${ri}">›</div>
+      </div>
+      <div class="kb-article-meta"><span class="ctag ct-o">${a.cat}</span><span class="kb-views">&#128065; ${a.views} views</span></div>
+      <div class="kb-article-body" id="kb-body-${ri}">
+        <div class="drw-steps" style="margin-top:12px">${a.steps.map((s,i)=>`<div class="kb-step"><div class="kb-step-n">${i+1}</div><div class="kb-step-text">${s.text}</div></div>`).join("")}</div>
+        <div class="kb-helpful"><span>Was this helpful?</span><button class="kb-helpful-btn" onclick="kbHelpful(${ri},true)">&#128077; Yes</button><button class="kb-helpful-btn" onclick="kbHelpful(${ri},false)">&#128078; No</button></div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ============================================================
+// TRAINING CENTER
+// ============================================================
+const COURSES = [
+  {id:"onb-1",title:"New Employee Orientation",desc:"Everything you need to know about PHSU — culture, systems, processes, and your first 30 days.",cat:"Onboarding",ico:"👋",bg:"#E0F5F5",duration:"2h",lessons:8,progress:100,badge:"🏆"},
+  {id:"e451-1",title:"Element451 Essentials",desc:"Complete guide to using Element451 for admissions. Covers applications, communications, and pipeline management.",cat:"Element451",ico:"⚙️",bg:"#E6F1FB",duration:"3h",lessons:12,progress:75,badge:""},
+  {id:"sf-1",title:"Salesforce for Admissions Staff",desc:"How to use Salesforce CRM to manage leads, track applications, and run reports. No admin access required.",cat:"Salesforce",ico:"☁️",bg:"#E6F1FB",duration:"2.5h",lessons:10,progress:50,badge:""},
+  {id:"sp-1",title:"SharePoint & OneDrive Basics",desc:"Navigate SharePoint, create documents, share files, and collaborate using Microsoft 365 tools.",cat:"Microsoft 365",ico:"🏢",bg:"#EEEDFE",duration:"1.5h",lessons:6,progress:100,badge:"🏆"},
+  {id:"m365-1",title:"Outlook & Teams Productivity",desc:"Master email management, calendar scheduling, Teams meetings, and Microsoft 365 collaboration tools.",cat:"Microsoft 365",ico:"📧",bg:"#EEEDFE",duration:"1h",lessons:5,progress:80,badge:""},
+  {id:"data-1",title:"Data & Reporting Fundamentals",desc:"How to pull reports from Salesforce, Element451, and SharePoint. Basic data hygiene and entry standards for PHSU.",cat:"Data",ico:"📊",bg:"#FEF3E8",duration:"2h",lessons:8,progress:0,badge:""},
+  {id:"adm-1",title:"Admissions Process Deep Dive",desc:"Complete walkthrough of the PHSU admissions lifecycle — from first contact to enrolled student across all campuses.",cat:"Admissions",ico:"🎓",bg:"#EAF3DE",duration:"3h",lessons:14,progress:0,badge:""},
+  {id:"comp-1",title:"FERPA & Data Privacy for PHSU Staff",desc:"Legal requirements for handling student data. Mandatory for all staff with access to student records.",cat:"Compliance",ico:"🔒",bg:"#FDEAEA",duration:"1h",lessons:4,progress:100,badge:"🏆",required:true},
+  {id:"sf-admin-1",title:"Salesforce Admin Essentials",desc:"For admin users — flows, users, permissions, reports & dashboards. Intermediate level.",cat:"Salesforce",ico:"⚡",bg:"#E6F1FB",duration:"4h",lessons:16,progress:30,badge:""},
+  {id:"e451-adv",title:"Element451 Advanced — Automation & Workflows",desc:"Build automated touchpoint sequences, set up conditional rules, and configure advanced program settings.",cat:"Element451",ico:"🤖",bg:"#E6F1FB",duration:"2.5h",lessons:10,progress:0,badge:""},
+  {id:"tele-1",title:"Telecom & Outreach Best Practices",desc:"Scripts, disposition codes, CRM logging, and compliance for the telecommunications team.",cat:"Telecom",ico:"📞",bg:"#E0F5F5",duration:"1.5h",lessons:6,progress:0,badge:""},
+  {id:"lead-1",title:"Leadership & Strategic Planning at PHSU",desc:"For directors and above — strategic planning, OKRs, budget cycles, and institutional priorities.",cat:"Leadership",ico:"🏛",bg:"#FAEEDA",duration:"3h",lessons:10,progress:0,badge:""},
+];
+
+const LEARNING_PATH = [
+  {n:"New Employee Orientation",dur:"2h",status:"done",id:"onb-1"},
+  {n:"FERPA & Data Privacy (Required)",dur:"1h",status:"done",id:"comp-1"},
+  {n:"SharePoint & OneDrive Basics",dur:"1.5h",status:"done",id:"sp-1"},
+  {n:"Outlook & Teams Productivity",dur:"1h",status:"in-progress",id:"m365-1"},
+  {n:"Element451 Essentials",dur:"3h",status:"in-progress",id:"e451-1"},
+  {n:"Salesforce for Admissions Staff",dur:"2.5h",status:"locked",id:"sf-1"},
+  {n:"Data & Reporting Fundamentals",dur:"2h",status:"locked",id:"data-1"},
+];
+
+const CERTS = [
+  {ico:"🏆",name:"PHSU New Employee",sub:"Completed orientation + FERPA training",status:"earned",date:"Mar 2025"},
+  {ico:"🏢",name:"Microsoft 365 Certified",sub:"SharePoint, Teams, and Outlook proficiency",status:"earned",date:"Mar 2025"},
+  {ico:"⚙️",name:"Element451 Practitioner",sub:"Complete Element451 Essentials + Advanced",status:"in-progress",pct:75},
+  {ico:"☁️",name:"Salesforce CRM Associate",sub:"Complete all Salesforce courses",status:"locked",pct:0},
+];
+
+let trainingCatFilter = "All";
+
+function renderTraining() {
+  // Learning path
+  const lp = document.getElementById("learning-path");
+  if(lp) lp.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--tx);margin-bottom:12px">My Learning Path — Admin Onboarding Track</div>` + LEARNING_PATH.map((s,i)=>{
+    const statusColor={done:"var(--gn)",locked:"var(--tx3)","in-progress":"var(--teal)"}[s.status];
+    const statusBg={done:"var(--tl)",locked:"var(--bg2)","in-progress":"var(--tl)"}[s.status];
+    const statusLabel={done:"✓ Completed",locked:"🔒 Locked","in-progress":"▶ In Progress"}[s.status];
+    return`<div class="lp-step">
+      <div class="lp-step-num" style="background:${statusBg};color:${statusColor}">${i+1}</div>
+      <div style="flex:1"><div class="lp-step-name">${s.n}</div><div class="lp-step-sub">${s.dur}</div></div>
+      <div class="lp-step-status" style="color:${statusColor}">${statusLabel}</div>
+      ${s.status!=="locked"?`<button class="btn btn-sm" style="margin-left:8px" onclick="openCourse('${s.id}')">${s.status==="done"?"Review":"Continue"}</button>`:""}
+    </div>`;
+  }).join("");
+
+  // Filter bar
+  const tf = document.getElementById("training-filters");
+  const cats = ["All",...[...new Set(COURSES.map(c=>c.cat))]];
+  if(tf) tf.innerHTML = cats.map(c=>`<button class="fbtn${trainingCatFilter===c?" on":""}" onclick="setTrainingCat('${c}')">${c}</button>`).join("");
+
+  // Courses
+  const f = trainingCatFilter==="All" ? COURSES : COURSES.filter(c=>c.cat===trainingCatFilter);
+  const tg = document.getElementById("training-grid");
+  if(tg) tg.innerHTML = f.map(c=>`
+    <div class="course-card" onclick="openCourse('${c.id}')">
+      <div class="course-thumb" style="background:${c.bg}">
+        <span>${c.ico}</span>
+        ${c.required?`<span class="course-badge" style="background:var(--rd);color:#fff">Required</span>`:""}
+        ${c.badge?`<span class="course-badge" style="background:var(--am);color:#fff">${c.badge} Earned</span>`:""}
+      </div>
+      <div class="course-body">
+        <div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">${c.cat}</div>
+        <div class="course-title">${c.title}</div>
+        <div class="course-desc">${c.desc}</div>
+        <div class="course-meta">
+          <span>&#128337; ${c.duration}</span>
+          <span>&#128218; ${c.lessons} lessons</span>
+        </div>
+        <div class="course-progress">
+          <div class="course-prog-bar"><div class="course-prog-fill" style="width:${c.progress}%"></div></div>
+          <div class="course-prog-label">${c.progress===0?"Not started":c.progress===100?"✓ Completed":c.progress+"% complete"}</div>
+        </div>
+      </div>
+    </div>`).join("");
+
+  // Certs
+  const cl = document.getElementById("certs-list");
+  if(cl) cl.innerHTML = CERTS.map(c=>`
+    <div class="cert-card">
+      <div class="cert-badge">${c.ico}</div>
+      <div><div class="cert-name">${c.name}</div><div class="cert-sub">${c.sub}</div>
+        ${c.status==="in-progress"?`<div style="margin-top:6px"><div class="course-prog-bar" style="height:3px;width:160px"><div class="course-prog-fill" style="width:${c.pct}%"></div></div><div style="font-size:10px;color:#854F0B;margin-top:3px">${c.pct}% complete</div></div>`:""}
+      </div>
+      <div class="cert-status" style="background:${c.status==="earned"?"#EAF3DE":c.status==="in-progress"?"var(--tl)":"var(--bg2)"};color:${c.status==="earned"?"#3B6D11":c.status==="in-progress"?"var(--td)":"var(--tx3)"}">${c.status==="earned"?"✓ Earned":c.status==="in-progress"?"In Progress":"Locked"}</div>
+    </div>`).join("");
+}
+
+function setTrainingCat(c){trainingCatFilter=c;renderTraining();}
+function openCourse(id){
+  const c=COURSES.find(x=>x.id===id);
+  if(!c)return;
+  document.getElementById("drw-ico").innerHTML=`<div style="font-size:26px;background:${c.bg};width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">${c.ico}</div>`;
+  document.getElementById("drw-title").textContent=c.title;
+  document.getElementById("drw-sub").textContent=c.cat+" · "+c.duration+" · "+c.lessons+" lessons";
+  document.getElementById("drw-body").innerHTML=`
+    <div class="drw-section">
+      <p style="font-size:12px;color:var(--tx2);line-height:1.7;margin-bottom:12px">${c.desc}</p>
+      <div class="pbar-lg"><div class="pfill-lg" style="width:${c.progress}%"></div></div>
+      <div style="font-size:11px;color:var(--tx2);margin-top:5px">${c.progress===100?"✓ Completed":c.progress===0?"Not started yet":c.progress+"% complete"}</div>
+    </div>
+    <div class="drw-section">
+      <div class="drw-sec-title">Course Content</div>
+      ${Array.from({length:Math.min(c.lessons,8)},(_,i)=>`<div class="drw-row">
+        <div class="drw-key" style="min-width:80px">Lesson ${i+1}</div>
+        <div class="drw-val" style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;color:var(--tx)">Module ${i+1}: ${["Introduction","Core Concepts","Hands-on Practice","Real Scenarios","Tips & Tricks","Advanced Features","Assessment","Certification"][i]||"Content"}</span>
+          ${i<Math.round(c.progress/100*c.lessons)?`<span style="color:var(--gn);font-size:12px">✓</span>`:""}
+        </div>
+      </div>`).join("")}
+    </div>`;
+  document.getElementById("drw-acts").innerHTML=`<button class="btn btn-p" onclick="startCourse('${c.id}')">▶ ${c.progress===0?"Start Course":c.progress===100?"Review":"Continue"}</button><button class="btn btn-ghost" onclick="closeDrw()">Later</button>`;
+  document.getElementById("drw-bg").classList.add("open");
+}
+
+function startCourse(id){
+  const c=COURSES.find(x=>x.id===id);
+  if(!c||c.progress===100)return;
+  c.progress=Math.min(100,c.progress+25);
+  if(c.progress===100){toast("🏆 Course completed! "+c.title,"success",4000);}
+  else{toast("Progress saved — "+c.progress+"% complete","success",2000);}
+  closeDrw();
+  renderTraining();
+}
+
+// Extend openDrw to handle ticket and issue types
+const _origOpenDrw=openDrw;
+function openDrw(type,data){
+  if(type==="ticket"){
+    const t=TICKETS[data];
+    if(!t)return;
+    document.getElementById("drw-ico").innerHTML=`<div style="font-size:26px;background:#FDEAEA;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">&#127381;</div>`;
+    document.getElementById("drw-title").textContent=t.title;
+    document.getElementById("drw-sub").textContent=t.id+" · "+t.sys+" · "+t.created;
+    const priColor={critical:"var(--rd)",high:"var(--rd)",medium:"var(--am)",low:"var(--gn)"}[t.pri];
+    const statusColor={open:"var(--rd)",resolved:"var(--gn)","in-progress":"var(--am)"}[t.status];
+    document.getElementById("drw-body").innerHTML=`
+      <div class="drw-section">
+        <div class="drw-row"><div class="drw-key">Status</div><div class="drw-val"><span class="pill" style="background:${statusColor}22;color:${statusColor}">${t.status}</span></div></div>
+        <div class="drw-row"><div class="drw-key">Priority</div><div class="drw-val"><span class="pill" style="background:${priColor}22;color:${priColor}">${t.pri}</span></div></div>
+        <div class="drw-row"><div class="drw-key">System</div><div class="drw-val">${t.sys}</div></div>
+        <div class="drw-row"><div class="drw-key">Reported by</div><div class="drw-val">${t.by}</div></div>
+        <div class="drw-row"><div class="drw-key">Campus</div><div class="drw-val">${t.campus}</div></div>
+        ${t.resolved?`<div class="drw-row"><div class="drw-key">Resolved</div><div class="drw-val" style="color:var(--gn)">${t.resolved}</div></div>`:""}
+      </div>
+      <div class="drw-section"><div class="drw-sec-title">Description</div><p style="font-size:12px;color:var(--tx2);line-height:1.7">${t.desc}</p></div>
+      ${t.comments.length?`<div class="drw-section"><div class="drw-sec-title">Comments (${t.comments.length})</div>
+        ${t.comments.map(c=>`<div style="padding:10px;background:var(--bg);border-radius:var(--r);margin-bottom:8px">
+          <div style="font-size:11px;font-weight:700;color:var(--tx)">${c.author} <span style="font-weight:400;color:var(--tx3)">${c.time}</span></div>
+          <div style="font-size:12px;color:var(--tx2);margin-top:4px;line-height:1.6">${c.text}</div>
+        </div>`).join("")}
+      </div>`:""}
+      <div class="drw-section"><div class="drw-sec-title">Add Comment</div>
+        <textarea class="ftxt" id="ticket-comment-${data}" placeholder="Add a comment or update..." style="margin-top:8px;min-height:70px"></textarea>
+      </div>`;
+    document.getElementById("drw-acts").innerHTML=`
+      <button class="btn btn-p" onclick="addTicketComment(${data})">Post Comment</button>
+      <button class="btn btn-ghost" onclick="resolveTicket(${data})">${t.status==="resolved"?"Reopen":"Mark Resolved"}</button>
+      <button class="btn" onclick="goTab('kb');closeDrw()">&#128218; Find Fix</button>`;
+    document.getElementById("drw-bg").classList.add("open");
+    return;
+  }
+  if(type==="issue"){
+    const i=COMMON_ISSUES[data];
+    document.getElementById("drw-ico").innerHTML=`<div style="font-size:26px;background:#FDEAEA;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">${i.ico}</div>`;
+    document.getElementById("drw-title").textContent=i.title;
+    document.getElementById("drw-sub").textContent=i.count+" this month";
+    document.getElementById("drw-body").innerHTML=`
+      <div class="drw-section"><div class="drw-sec-title">Quick Fix</div>
+        <p style="font-size:12px;color:var(--tx2);line-height:1.8">${i.fix}</p>
+      </div>
+      <div class="drw-section"><div class="drw-sec-title">Related Articles</div>
+        ${KB_ARTICLES.filter(a=>a.cat===i.tag).map((a,ri)=>`<div class="kb-issue" onclick="closeDrw();goTab('kb');setTimeout(()=>{setKBCat('${a.cat}');setTimeout(()=>toggleKBArticle(${KB_ARTICLES.indexOf(a)}),200)},200)">
+          <div class="kb-issue-title">${a.ico} ${a.title}</div><div class="kb-issue-cnt">&#128065; ${a.views} views</div>
+        </div>`).join("")}
+      </div>`;
+    document.getElementById("drw-acts").innerHTML=`<button class="btn btn-p" onclick="openModal('ticket')">Open Ticket If Persists</button><button class="btn btn-ghost" onclick="goTab('kb');closeDrw()">Full KB Article</button>`;
+    document.getElementById("drw-bg").classList.add("open");
+    return;
+  }
+  _origOpenDrw(type,data);
+}
+
+function addTicketComment(i){
+  const ta=document.getElementById("ticket-comment-"+i);
+  if(!ta||!ta.value.trim())return;
+  TICKETS[i].comments.push({author:"Ana Jarabo",time:"Just now",text:ta.value});
+  saveToStorage("tickets",TICKETS);
+  toast("Comment added","success",2000);
+  openDrw("ticket",i);
+}
+
+function resolveTicket(i){
+  TICKETS[i].status=TICKETS[i].status==="resolved"?"open":"resolved";
+  if(TICKETS[i].status==="resolved")TICKETS[i].resolved=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+  saveToStorage("tickets",TICKETS);
+  toast(TICKETS[i].status==="resolved"?"Ticket resolved! ✓":"Ticket reopened",TICKETS[i].status==="resolved"?"success":"warning",2500);
+  closeDrw();
+  renderTickets();
+}
+
+// Extend saveMod to handle tickets
+const _origSaveMod2=saveMod;
+function saveMod(){
+  const type=document.getElementById("m-title").textContent;
+  if(type.includes("Ticket")){
+    const inputs=document.querySelectorAll("#m-body .finp, #m-body .fsel, #m-body .ftxt");
+    const vals=[...inputs].map(i=>i.value);
+    if(vals[0]&&vals[0].trim()){
+      const newTicket={
+        id:"TKT-"+(String(TICKETS.length+1).padStart(3,"0")),
+        title:vals[0],sys:vals[1]||"Other",pri:(vals[2]||"medium").toLowerCase(),
+        status:"open",by:vals[3]||"Unknown",campus:vals[4]||"Global",
+        created:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
+        desc:vals[5]||"",comments:[]
+      };
+      TICKETS.unshift(newTicket);
+      saveToStorage("tickets",TICKETS);
+      renderTickets();
+      toast("Ticket "+newTicket.id+" created!","success");
+      closeMod();
+      return;
+    }
+  }
+  _origSaveMod2();
+}
+
+// Extend goTab
+const _origGoTab2=goTab;
+function goTab(name){
+  _origGoTab2(name);
+  if(name==="support")renderTickets();
+  if(name==="kb")renderKB();
+  if(name==="training")renderTraining();
+}
 
 </script>
 </body>
