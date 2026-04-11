@@ -442,6 +442,98 @@ button,input,select,textarea{font-family:inherit}
 @media(max-width:800px){.sidebar{position:fixed;left:0;top:56px;height:calc(100vh - 56px);transform:translateX(-100%);z-index:250}.sidebar.mob-open{transform:translateX(0)}.drw{width:100%;max-width:100%}.g2,.qgrid,.camp-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.main{padding:14px}}
 @media(max-width:480px){.stats,.qstat-bar{grid-template-columns:1fr}}
 
+
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.cal-month{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rl);padding:18px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-nav{display:flex;gap:6px}
+.cal-nav-btn{width:30px;height:30px;border-radius:6px;border:1px solid var(--bdr);background:var(--w);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--tx2);transition:all .15s}
+.cal-nav-btn:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
+.cal-month-name{font-size:16px;font-weight:700;color:var(--td);font-family:'Crimson Pro',serif}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
+.cal-dow-cell{text-align:center;font-size:10px;font-weight:700;color:var(--tx3);padding:4px 0}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day{min-height:52px;border-radius:6px;padding:4px;cursor:pointer;transition:background .15s;position:relative}
+.cal-day:hover{background:var(--bg)}
+.cal-day.other-month{opacity:.35}
+.cal-day.today{background:var(--tl);border:1px solid var(--teal)}
+.cal-day.has-event::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--teal)}
+.cal-day-num{font-size:11px;font-weight:600;color:var(--tx2)}
+.cal-day.today .cal-day-num{color:var(--td);font-weight:700}
+.cal-event-dot{width:14px;height:4px;border-radius:2px;margin-top:2px}
+.cal-sidebar{display:flex;flex-direction:column;gap:14px}
+.cal-event-list{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rl);padding:16px}
+.cal-ev-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr);cursor:pointer;transition:background .15s}
+.cal-ev-item:hover{background:rgba(0,153,154,.04)}
+.cal-ev-item:last-child{border-bottom:none}
+.cal-ev-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.cal-ev-title{font-size:12px;font-weight:600;color:var(--tx)}
+.cal-ev-time{font-size:10px;color:var(--tx2);margin-top:2px}
+.cal-ev-campus{font-size:10px;padding:1px 7px;border-radius:10px;background:var(--bg2);color:var(--tx2);display:inline-block;margin-top:3px}
+
+/* ANALYTICS / REPORTS */
+.analytics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.metric-card{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rl);padding:16px 18px;cursor:pointer;transition:all .2s}
+.metric-card:hover{box-shadow:var(--sh);transform:translateY(-2px)}
+.metric-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.metric-ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.metric-change{font-size:11px;font-weight:700;display:flex;align-items:center;gap:3px}
+.metric-v{font-size:26px;font-weight:300;color:var(--td);font-family:'Crimson Pro',serif;line-height:1}
+.metric-l{font-size:11px;font-weight:600;color:var(--tx2);margin-top:4px}
+.metric-bar{height:4px;background:var(--bg2);border-radius:2px;margin-top:10px}
+.metric-fill{height:4px;border-radius:2px}
+
+/* SETTINGS */
+.settings-layout{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:start}
+.settings-nav{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden}
+.settings-nav-item{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;font-size:12px;font-weight:500;color:var(--tx2);border-left:3px solid transparent;transition:all .15s}
+.settings-nav-item:hover{background:var(--bg);color:var(--tx)}
+.settings-nav-item.on{background:var(--tl);color:var(--td);border-left-color:var(--teal);font-weight:700}
+.settings-panel{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rl);padding:22px;display:none}
+.settings-panel.on{display:block}
+.settings-section{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--bdr)}
+.settings-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.settings-section-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:14px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--bg2);gap:16px}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:12px;font-weight:600;color:var(--tx)}
+.setting-sub{font-size:11px;color:var(--tx2);margin-top:2px}
+.toggle-wrap{width:40px;height:22px;border-radius:11px;background:var(--bg2);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle-wrap.on{background:var(--teal)}
+.toggle-knob{position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle-wrap.on .toggle-knob{left:21px}
+.profile-card{display:flex;align-items:center;gap:16px;padding:16px;background:var(--bg);border-radius:var(--r);margin-bottom:20px}
+.profile-av{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--td),var(--teal));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff}
+.profile-name{font-size:15px;font-weight:700;color:var(--tx)}
+.profile-role{font-size:12px;color:var(--tx2);margin-top:2px}
+
+/* MESSAGES */
+.messages-layout{display:grid;grid-template-columns:280px 1fr;gap:0;border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;background:var(--w);height:calc(100vh - 180px)}
+.msg-sidebar{border-right:1px solid var(--bdr);display:flex;flex-direction:column}
+.msg-search{padding:12px;border-bottom:1px solid var(--bdr)}
+.msg-list{overflow-y:auto;flex:1}
+.msg-item{display:flex;gap:10px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--bdr);transition:background .15s}
+.msg-item:hover{background:var(--bg)}
+.msg-item.on{background:var(--tl);border-left:3px solid var(--teal)}
+.msg-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.msg-name{font-size:12px;font-weight:700;color:var(--tx)}
+.msg-preview{font-size:11px;color:var(--tx2);margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:170px}
+.msg-time{font-size:10px;color:var(--tx3);margin-left:auto;white-space:nowrap}
+.msg-unread{width:8px;height:8px;border-radius:50%;background:var(--teal);margin-top:4px;flex-shrink:0}
+.msg-main{display:flex;flex-direction:column}
+.msg-header{padding:14px 18px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:12px}
+.msg-body{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.msg-bubble{max-width:70%;padding:10px 13px;border-radius:12px;font-size:12px;line-height:1.5}
+.msg-bubble.me{background:var(--teal);color:#fff;border-radius:12px 12px 3px 12px;align-self:flex-end}
+.msg-bubble.them{background:var(--bg);color:var(--tx);border-radius:12px 12px 12px 3px;align-self:flex-start}
+.msg-bubble-time{font-size:9px;opacity:.65;margin-top:4px;text-align:right}
+.msg-input-bar{padding:12px 16px;border-top:1px solid var(--bdr);display:flex;gap:8px;align-items:center}
+.msg-inp{flex:1;padding:9px 14px;border-radius:20px;border:1px solid var(--bdr);background:var(--bg);font-size:12px;color:var(--tx);outline:none;transition:border .15s}
+.msg-inp:focus{border-color:var(--teal)}
+
+/* REPORTS CHART AREA */
+.report-charts{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px}
 </style>
 </head>
 <body>
@@ -517,6 +609,8 @@ button,input,select,textarea{font-family:inherit}
     <div class="sb-it" data-tab="docs"><div class="sb-ico">&#128193;</div><span>Documents</span></div>
     <div class="sb-it" data-tab="integrations"><div class="sb-ico">&#9889;</div><span>Integrations</span></div>
   </div>
+    <div class="sb-sec"><div class="sb-label">Account</div><div class="sb-it" data-tab="settings"><div class="sb-ico">&#9881;</div><span>Settings</span></div></div>
+  <div class="sb-div"></div>
   <div class="sb-bottom">
     <div class="sb-user">
       <div class="sb-uav">AJ</div>
@@ -759,6 +853,180 @@ button,input,select,textarea{font-family:inherit}
   <div style="margin-top:14px;padding:14px 16px;background:var(--tl);border-radius:var(--r);font-size:12px;color:var(--td);line-height:1.7"><strong>Architecture:</strong> Hub reads from SharePoint Lists updated by Fabric Dataflows from Salesforce + Element451. Outlook Calendar: native SP Calendar web part. Power BI: embed in SharePoint. Fabric OAuth fix: use named user credential in Dataflow Gen2.</div>
 </div>
 </main>
+</div>
+
+
+<!-- CALENDAR -->
+<div class="panel" id="panel-calendar">
+  <div class="breadcrumb">&#8962; Home <span class="bc-sep">/</span> <span>Calendar</span></div>
+  <div class="ph">
+    <div class="ph-left"><div class="ph-title">Calendar &amp; Agenda</div><div class="ph-sub">PHSU events, deadlines, and meetings across all campuses</div></div>
+    <div class="ph-actions">
+      <button class="btn btn-sm" onclick="calNav(-1)">&#8592; Prev</button>
+      <button class="btn btn-sm" onclick="calNav(1)">Next &#8594;</button>
+      <button class="btn btn-p btn-sm" onclick="openModal('event')">+ New Event</button>
+    </div>
+  </div>
+  <div class="cal-grid">
+    <div class="cal-month">
+      <div class="cal-header">
+        <div class="cal-month-name" id="cal-month-name">April 2025</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="fbtn on" onclick="setCalView(this,'month')">Month</button>
+          <button class="fbtn" onclick="setCalView(this,'week')">Week</button>
+          <button class="fbtn" onclick="setCalView(this,'agenda')">Agenda</button>
+        </div>
+      </div>
+      <div class="cal-dow" id="cal-dow"></div>
+      <div class="cal-days" id="cal-days"></div>
+    </div>
+    <div class="cal-sidebar">
+      <div class="cal-event-list">
+        <div style="font-size:12px;font-weight:700;color:var(--tx);margin-bottom:12px" id="cal-ev-title">Upcoming Events</div>
+        <div id="cal-ev-list"></div>
+      </div>
+      <div class="card" style="padding:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--tx);margin-bottom:10px">Recurring Meetings</div>
+        <div id="cal-recurring"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYTICS / REPORTS -->
+<div class="panel" id="panel-reports">
+  <div class="breadcrumb">&#8962; Home <span class="bc-sep">/</span> <span>Reports &amp; Analytics</span></div>
+  <div class="ph"><div class="ph-left"><div class="ph-title">Reports &amp; Analytics</div><div class="ph-sub">Enrollment trends, admissions pipeline, staff metrics, and integration health</div></div>
+    <div class="ph-actions">
+      <button class="btn btn-sm">&#8593; Export PDF</button>
+      <button class="btn btn-sm">&#8595; Download Data</button>
+    </div>
+  </div>
+  <div class="analytics-grid" id="analytics-metrics"></div>
+  <div class="report-charts">
+    <div class="chart-card">
+      <div class="cc-head"><div><div class="cc-title">Admissions Pipeline by Campus</div><div class="cc-sub">Applications, accepted, enrolled — current cycle</div></div>
+        <div class="cc-actions">
+          <button class="cc-tab on">2025</button>
+          <button class="cc-tab">2024</button>
+        </div>
+      </div>
+      <canvas id="admissions-chart" height="180"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="cc-head"><div><div class="cc-title">Staff by Campus</div><div class="cc-sub">Distribution across locations</div></div></div>
+      <canvas id="campus-chart" height="180"></canvas>
+    </div>
+  </div>
+  <div class="g2" style="gap:14px">
+    <div class="chart-card">
+      <div class="cc-head"><div><div class="cc-title">Program Enrollment Trend</div><div class="cc-sub">All programs · last 6 months</div></div></div>
+      <canvas id="trend-chart" height="150"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="cc-head"><div><div class="cc-title">Integration Health</div><div class="cc-sub">System uptime &amp; sync status</div></div></div>
+      <div id="int-health-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGES -->
+<div class="panel" id="panel-messages">
+  <div class="breadcrumb">&#8962; Home <span class="bc-sep">/</span> <span>Messages</span></div>
+  <div class="ph"><div class="ph-left"><div class="ph-title">Messages</div><div class="ph-sub">Internal team communication</div></div></div>
+  <div class="messages-layout">
+    <div class="msg-sidebar">
+      <div class="msg-search"><input class="sf-inp" style="width:100%;max-width:100%" placeholder="Search messages..." type="text"></div>
+      <div class="msg-list" id="msg-list"></div>
+    </div>
+    <div class="msg-main" id="msg-main"></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="panel" id="panel-settings">
+  <div class="breadcrumb">&#8962; Home <span class="bc-sep">/</span> <span>Settings</span></div>
+  <div class="ph"><div class="ph-left"><div class="ph-title">Settings</div><div class="ph-sub">Hub preferences, integrations, and account configuration</div></div></div>
+  <div class="settings-layout">
+    <div class="settings-nav" id="settings-nav">
+      <div class="settings-nav-item on" data-s="profile" onclick="setSettings(this,'profile')">&#128100; Profile</div>
+      <div class="settings-nav-item" data-s="appearance" onclick="setSettings(this,'appearance')">&#127912; Appearance</div>
+      <div class="settings-nav-item" data-s="notifications" onclick="setSettings(this,'notifications')">&#128276; Notifications</div>
+      <div class="settings-nav-item" data-s="integrations" onclick="setSettings(this,'integrations')">&#9889; Integrations</div>
+      <div class="settings-nav-item" data-s="data" onclick="setSettings(this,'data')">&#128202; Data &amp; Export</div>
+      <div class="settings-nav-item" data-s="security" onclick="setSettings(this,'security')">&#128274; Security</div>
+    </div>
+    <div>
+      <div class="settings-panel on" id="settings-profile">
+        <div class="profile-card">
+          <div class="profile-av">AJ</div>
+          <div><div class="profile-name">Ana Jarabo</div><div class="profile-role">System Admin / Ops Consultant &mdash; PHSU</div><div style="margin-top:6px"><a href="mailto:ajarabo@psm.edu" style="font-size:11px">ajarabo@psm.edu</a></div></div>
+          <button class="btn btn-sm btn-ghost" style="margin-left:auto">Edit Photo</button>
+        </div>
+        <div class="settings-section">
+          <div class="settings-section-title">Personal Information</div>
+          <div class="frow"><label class="flbl">Full Name</label><input class="finp" value="Ana Jarabo"></div>
+          <div class="fr2"><div class="frow" style="margin:0"><label class="flbl">Email</label><input class="finp" value="ajarabo@psm.edu"></div>
+          <div class="frow" style="margin:0"><label class="flbl">Campus</label><select class="fsel"><option>Global / All</option><option>Ponce PR</option><option>St. Louis</option></select></div></div>
+          <div class="frow"><label class="flbl">Title</label><input class="finp" value="System Admin / Ops Consultant"></div>
+          <div class="frow"><label class="flbl">Bio</label><textarea class="ftxt">Salesforce Administrator, Business Analyst, App Builder, and Developer. Certified Salesforce Admin and AI Associate.</textarea></div>
+          <button class="btn btn-p">Save Changes</button>
+        </div>
+      </div>
+      <div class="settings-panel" id="settings-appearance">
+        <div class="settings-section">
+          <div class="settings-section-title">Theme &amp; Display</div>
+          <div class="setting-row"><div><div class="setting-label">Dark Mode</div><div class="setting-sub">Switch to dark theme</div></div><div class="toggle-wrap" id="dark-toggle" onclick="toggleDarkSetting()"><div class="toggle-knob"></div></div></div>
+          <div class="setting-row"><div><div class="setting-label">Compact Sidebar</div><div class="setting-sub">Collapse sidebar to icon-only mode</div></div><div class="toggle-wrap" id="compact-toggle" onclick="toggleCompact()"><div class="toggle-knob"></div></div></div>
+          <div class="setting-row"><div><div class="setting-label">Default Language</div><div class="setting-sub">Hub display language</div></div><div style="display:flex;gap:6px"><button class="fbtn on" onclick="setLang('en')">EN</button><button class="fbtn" onclick="setLang('es')">ES</button></div></div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-section-title">Dashboard Layout</div>
+          <div class="setting-row"><div><div class="setting-label">Show Charts on Dashboard</div><div class="setting-sub">Project progress and department charts</div></div><div class="toggle-wrap on" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div></div>
+          <div class="setting-row"><div><div class="setting-label">Show Activity Feed</div><div class="setting-sub">Recent activity timeline on dashboard</div></div><div class="toggle-wrap on" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div></div>
+          <div class="setting-row"><div><div class="setting-label">Show Sparklines</div><div class="setting-sub">Mini trend charts on KPI cards</div></div><div class="toggle-wrap on" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div></div>
+        </div>
+      </div>
+      <div class="settings-panel" id="settings-notifications">
+        <div class="settings-section">
+          <div class="settings-section-title">Notification Preferences</div>
+          <div class="setting-row"><div><div class="setting-label">Project Status Changes</div><div class="setting-sub">When a project changes to at-risk or blocked</div></div><div class="toggle-wrap on" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div></div>
+          <div class="setting-row"><div><div class="setting-label">Milestone Reminders</div><div class="setting-sub">2 days before upcoming milestones</div></div><div class="toggle-wrap on" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div></div>
+          <div class="setting-row"><div><div class="setting-label">Staff Updates</div><div class="setting-sub">New staff members added to directory</div></div><div class="toggle-wrap" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div></div>
+          <div class="setting-row"><div><div class="setting-label">Integration Alerts</div><div class="setting-sub">When integrations go down or need attention</div></div><div class="toggle-wrap on" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div></div>
+          <div class="setting-row"><div><div class="setting-label">Weekly Summary Email</div><div class="setting-sub">Hub digest every Monday morning</div></div><div class="toggle-wrap" onclick="this.classList.toggle('on')"><div class="toggle-knob"></div></div></div>
+        </div>
+      </div>
+      <div class="settings-panel" id="settings-integrations">
+        <div class="settings-section">
+          <div class="settings-section-title">Connected Systems</div>
+          <div id="settings-int-list"></div>
+        </div>
+      </div>
+      <div class="settings-panel" id="settings-data">
+        <div class="settings-section">
+          <div class="settings-section-title">Export Data</div>
+          <div class="setting-row"><div><div class="setting-label">Staff Directory</div><div class="setting-sub">Export all 41 staff as CSV or Excel</div></div><div style="display:flex;gap:6px"><button class="btn btn-sm">CSV</button><button class="btn btn-sm btn-ghost">Excel</button></div></div>
+          <div class="setting-row"><div><div class="setting-label">Projects List</div><div class="setting-sub">All projects with status and owners</div></div><div><button class="btn btn-sm">CSV</button></div></div>
+          <div class="setting-row"><div><div class="setting-label">RACI Matrix</div><div class="setting-sub">Full responsibility matrix as Excel</div></div><div><button class="btn btn-sm btn-ghost">Excel</button></div></div>
+          <div class="setting-row"><div><div class="setting-label">Full Hub Backup</div><div class="setting-sub">All hub data as JSON</div></div><div><button class="btn btn-sm" onclick="exportData()">Download JSON</button></div></div>
+        </div>
+        <div class="settings-section">
+          <div class="settings-section-title">Import Data</div>
+          <div class="setting-row"><div><div class="setting-label">Import Staff from CSV</div><div class="setting-sub">Upload a CSV from Element451 or Salesforce</div></div><div><input type="file" accept=".csv" style="display:none" id="csv-upload"><button class="btn btn-sm btn-ghost" onclick="document.getElementById('csv-upload').click()">Upload CSV</button></div></div>
+        </div>
+      </div>
+      <div class="settings-panel" id="settings-security">
+        <div class="settings-section">
+          <div class="settings-section-title">Access &amp; Security</div>
+          <div class="setting-row"><div><div class="setting-label">GitHub Repository</div><div class="setting-sub">github.com/amjarabo/phsu-hub</div></div><a href="https://github.com/amjarabo/phsu-hub" target="_blank" class="btn btn-sm">Open</a></div>
+          <div class="setting-row"><div><div class="setting-label">GitHub Pages URL</div><div class="setting-sub">amjarabo.github.io/phsu-hub</div></div><a href="https://amjarabo.github.io/phsu-hub" target="_blank" class="btn btn-sm btn-ghost">Open</a></div>
+          <div class="setting-row"><div><div class="setting-label">SharePoint Embed Code</div><div class="setting-sub">Copy iframe for SharePoint Embed web part</div></div><button class="btn btn-sm" onclick="copyEmbed()">Copy</button></div>
+          <div class="setting-row"><div><div class="setting-label">Last Deployed</div><div class="setting-sub" id="deploy-date">Loading...</div></div><button class="btn btn-sm btn-ghost" onclick="location.reload()">Refresh</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- DRAWER -->
@@ -1430,6 +1698,234 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDrw();closeMod
 // ======== INIT ========
 renderProgs();renderStaff();renderOrg();renderProjs();renderGantt();renderRaci();renderProcs();renderDocs();renderInts();renderKanban();renderDash();
 setTimeout(initCharts,200);
+
+
+// ======== CALENDAR DATA ========
+const CAL_EVENTS=[
+  {date:"2025-04-11",title:"Element451 Stripe Go-Live",time:"10:00 AM",campus:"All",color:"#00999A",type:"milestone"},
+  {date:"2025-04-14",title:"Admissions Leadership Sync",time:"2:00 PM",campus:"Virtual",color:"#185FA5",type:"meeting"},
+  {date:"2025-04-15",title:"Accreditation Submission Deadline",time:"All Day",campus:"Ponce PR",color:"#D84040",type:"deadline"},
+  {date:"2025-04-17",title:"SharePoint Training — All Staff",time:"11:00 AM",campus:"Virtual",color:"#7B61FF",type:"training"},
+  {date:"2025-04-22",title:"SharePoint Phase 1 Review",time:"11:00 AM",campus:"Virtual",color:"#185FA5",type:"meeting"},
+  {date:"2025-04-24",title:"STL Admissions Team Check-in",time:"3:00 PM",campus:"St. Louis",color:"#185FA5",type:"meeting"},
+  {date:"2025-04-28",title:"Salesforce Admin Monthly Review",time:"9:00 AM",campus:"Virtual",color:"#00999A",type:"meeting"},
+  {date:"2025-04-30",title:"Fall 2025 Admissions Cycle Close",time:"11:59 PM",campus:"All",color:"#3B6D11",type:"deadline"},
+  {date:"2025-05-05",title:"BVI Campus Check-in",time:"2:00 PM",campus:"BVI",color:"#C4721A",type:"meeting"},
+  {date:"2025-05-15",title:"SharePoint Intranet Deadline",time:"All Day",campus:"All",color:"#D84040",type:"deadline"},
+];
+const CAL_RECURRING=[
+  {day:"Monday",freq:"Weekly",title:"IT Stand-Up",time:"9:00 AM · 15 min",color:"#00999A"},
+  {day:"Tuesday",freq:"Bi-weekly",title:"Admissions Pipeline Review",time:"3:00 PM · 30 min",color:"#185FA5"},
+  {day:"1st Monday",freq:"Monthly",title:"All-Hands Operations",time:"10:00 AM · 60 min",color:"#7B61FF"},
+  {day:"Friday",freq:"Weekly",title:"Project Status Wrap",time:"4:00 PM · 30 min",color:"#E8920A"},
+];
+let calYear=2025,calMonth=3; // 0-indexed, 3=April
+function calNav(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCal();}
+function setCalView(el,v){document.querySelectorAll("#panel-calendar .fbtn").forEach(b=>b.classList.remove("on"));el.classList.add("on");}
+function renderCal(){
+  const mnames=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const mn=document.getElementById("cal-month-name");if(mn)mn.textContent=mnames[calMonth]+" "+calYear;
+  const dow=document.getElementById("cal-dow");
+  if(dow)dow.innerHTML=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>`<div class="cal-dow-cell">${d}</div>`).join("");
+  const first=new Date(calYear,calMonth,1).getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  const dd=document.getElementById("cal-days");if(!dd)return;
+  let cells=[];
+  for(let i=0;i<first;i++){const d=new Date(calYear,calMonth,0-(first-i-1));cells.push({day:d.getDate(),other:true,date:""});}
+  for(let d=1;d<=days;d++){
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const hasEv=CAL_EVENTS.some(e=>e.date===dateStr);
+    const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
+    cells.push({day:d,other:false,date:dateStr,hasEv,isToday});
+  }
+  while(cells.length%7!==0)cells.push({day:cells.length-days-first+1,other:true,date:""});
+  dd.innerHTML=cells.map(c=>`<div class="cal-day${c.other?" other-month":""}${c.isToday?" today":""}${c.hasEv?" has-event":""}" onclick="${c.date?`calDayClick('${c.date}')`:""}" ><div class="cal-day-num">${c.day}</div>${c.hasEv&&!c.other?`<div class="cal-event-dot" style="background:${CAL_EVENTS.find(e=>e.date===c.date)?.color||"var(--teal)"}"></div>`:""}</div>`).join("");
+  // upcoming events
+  const evl=document.getElementById("cal-ev-list");
+  if(evl){
+    const upcoming=CAL_EVENTS.filter(e=>e.date>=`${calYear}-${String(calMonth+1).padStart(2,"0")}-01`).slice(0,6);
+    evl.innerHTML=upcoming.map(e=>`<div class="cal-ev-item" onclick="openDrw('event',${JSON.stringify(e).replace(/"/g,'&quot;')})">
+      <div class="cal-ev-dot" style="background:${e.color}"></div>
+      <div><div class="cal-ev-title">${e.title}</div><div class="cal-ev-time">${e.date.split("-").slice(1).join("/")} · ${e.time}</div><span class="cal-ev-campus">${e.campus}</span></div>
+    </div>`).join("");
+  }
+  const rec=document.getElementById("cal-recurring");
+  if(rec)rec.innerHTML=CAL_RECURRING.map(r=>`<div class="cal-ev-item">
+    <div class="cal-ev-dot" style="background:${r.color}"></div>
+    <div><div class="cal-ev-title">${r.title}</div><div class="cal-ev-time">${r.time}</div><span class="cal-ev-campus">${r.day} · ${r.freq}</span></div>
+  </div>`).join("");
+}
+function calDayClick(date){
+  const evs=CAL_EVENTS.filter(e=>e.date===date);
+  if(evs.length){
+    const e=evs[0];
+    document.getElementById("drw-ico").innerHTML=`<div style="font-size:26px;background:${e.color}22;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">📅</div>`;
+    document.getElementById("drw-title").textContent=e.title;
+    document.getElementById("drw-sub").textContent=e.date+" · "+e.time;
+    document.getElementById("drw-body").innerHTML=`<div class="drw-section"><div class="drw-row"><div class="drw-key">Date</div><div class="drw-val">${e.date}</div></div><div class="drw-row"><div class="drw-key">Time</div><div class="drw-val">${e.time}</div></div><div class="drw-row"><div class="drw-key">Campus</div><div class="drw-val">${e.campus}</div></div><div class="drw-row"><div class="drw-key">Type</div><div class="drw-val"><span class="pill pa">${e.type}</span></div></div></div>`;
+    document.getElementById("drw-acts").innerHTML=`<button class="btn btn-p">Add to Outlook</button><button class="btn btn-ghost">Edit Event</button>`;
+    document.getElementById("drw-bg").classList.add("open");
+  }
+}
+
+// ======== ANALYTICS ========
+let analyticsChartsInit=false;
+function renderAnalytics(){
+  const metrics=[
+    {ico:"🎓",bg:"#E0F5F5",v:"2,847",l:"Total Applications (2025)",chg:"+12%",up:true,fill:72,fillColor:"var(--teal)"},
+    {ico:"✅",bg:"#EAF3DE",v:"1,203",l:"Accepted Students",chg:"+8%",up:true,fill:58,fillColor:"var(--gn)"},
+    {ico:"📋",bg:"#E6F1FB",v:"891",l:"Enrolled",chg:"+5%",up:true,fill:44,fillColor:"#185FA5"},
+    {ico:"💰",bg:"#FAEEDA",v:"$2.1M",l:"Financial Aid Awarded",chg:"+18%",up:true,fill:65,fillColor:"var(--am)"},
+    {ico:"🌎",bg:"#EEEDFE",v:"34",l:"Countries Represented",chg:"+3",up:true,fill:80,fillColor:"var(--pu)"},
+    {ico:"📊",bg:"#FDEAEA",v:"94%",l:"Retention Rate",chg:"-1%",up:false,fill:94,fillColor:"var(--rd)"},
+  ];
+  const mg=document.getElementById("analytics-metrics");
+  if(mg)mg.innerHTML=metrics.map(m=>`<div class="metric-card"><div class="metric-top"><div class="metric-ico" style="background:${m.bg}">${m.ico}</div><div class="metric-change" style="color:${m.up?"var(--gn)":"var(--rd)"}">${m.up?"↑":"↓"} ${m.chg}</div></div><div class="metric-v">${m.v}</div><div class="metric-l">${m.l}</div><div class="metric-bar"><div class="metric-fill" style="width:${m.fill}%;background:${m.fillColor}"></div></div></div>`).join("");
+  if(!analyticsChartsInit){
+    analyticsChartsInit=true;
+    setTimeout(()=>{
+      const ac=document.getElementById("admissions-chart");
+      if(ac)new Chart(ac,{type:"bar",data:{labels:["Ponce PR","St. Louis","San Juan","BVI"],datasets:[{label:"Applied",data:[1820,650,280,97],backgroundColor:"rgba(0,153,154,.25)",borderColor:"var(--teal)",borderWidth:1.5,borderRadius:4},{label:"Accepted",data:[780,280,112,31],backgroundColor:"rgba(0,153,154,.5)",borderRadius:4},{label:"Enrolled",data:[560,210,96,25],backgroundColor:"var(--teal)",borderRadius:4}]},options:{responsive:true,plugins:{legend:{position:"top",labels:{font:{size:10},boxWidth:10}}},scales:{y:{grid:{color:"rgba(0,0,0,.05)"},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+      const cc=document.getElementById("campus-chart");
+      if(cc)new Chart(cc,{type:"doughnut",data:{labels:["Puerto Rico","Global","St. Louis","BVI"],datasets:[{data:[18,14,7,2],backgroundColor:["#00999A","#185FA5","#7B61FF","#F7951D"],borderWidth:0,hoverOffset:4}]},options:{responsive:true,plugins:{legend:{position:"bottom",labels:{font:{size:10},boxWidth:10}}}}});
+      const tc=document.getElementById("trend-chart");
+      if(tc)new Chart(tc,{type:"line",data:{labels:["Nov","Dec","Jan","Feb","Mar","Apr"],datasets:[{label:"MD",data:[280,310,340,360,390,410],borderColor:"#00999A",borderWidth:2,pointRadius:3,tension:.4,fill:false},{label:"MSMS",data:[180,190,210,225,240,255],borderColor:"#185FA5",borderWidth:2,pointRadius:3,tension:.4,fill:false},{label:"PsyD",data:[95,102,108,112,118,124],borderColor:"#7B61FF",borderWidth:2,pointRadius:3,tension:.4,fill:false}]},options:{responsive:true,plugins:{legend:{position:"top",labels:{font:{size:10},boxWidth:10}}},scales:{y:{grid:{color:"rgba(0,0,0,.05)"},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+      const ihl=document.getElementById("int-health-list");
+      if(ihl)ihl.innerHTML=[{n:"SharePoint",pct:99.9,c:"var(--gn)"},{n:"Element451",pct:99.7,c:"var(--gn)"},{n:"Salesforce",pct:98.2,c:"var(--gn)"},{n:"Outlook",pct:99.5,c:"var(--gn)"},{n:"Microsoft Fabric",pct:0,c:"var(--rd)",note:"OAuth blocked"},{n:"Anthology",pct:0,c:"var(--am)",note:"Pending config"}].map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bg2)"><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--tx)">${i.n}</div>${i.note?`<div style="font-size:10px;color:var(--tx3)">${i.note}</div>`:""}</div><div style="font-size:12px;font-weight:700;color:${i.c}">${i.pct?i.pct+"% uptime":"—"}</div></div>`).join("");
+    },100);
+  }
+}
+
+// ======== MESSAGES ========
+const MSGS=[
+  {id:0,av:"MV",avClass:"av-it",name:"Michael Vega",role:"IT Director",preview:"Can you review the SharePoint embed approach?",time:"2m",unread:true,thread:[
+    {me:false,text:"Ana, I looked at the GitHub Pages hosting. Can you review the SharePoint embed approach and confirm the iframe will work with our tenant settings?",time:"2:14 PM"},
+    {me:true,text:"Yes — the Embed web part should work. I tested it already. The key is the iframe src pointing to the GitHub Pages URL, not a raw HTML file.",time:"2:18 PM"},
+    {me:false,text:"Perfect. I'll whitelist the domain on our tenant. What URL should I add?",time:"2:20 PM"},
+    {me:true,text:"amjarabo.github.io — add that to the allowed iframe domains in SharePoint admin.",time:"2:21 PM"},
+  ]},
+  {id:1,av:"LD",avClass:"av-exec",name:"Laura Dwyer",role:"VP Enrollment",preview:"Fall 2025 cycle numbers look great!",time:"1h",unread:true,thread:[
+    {me:false,text:"Ana, the Fall 2025 numbers are looking great! 90% complete. Can you pull a breakdown by program from Salesforce?",time:"11:30 AM"},
+    {me:true,text:"On it — I'll run the report from Salesforce and have it to you by EOD.",time:"11:45 AM"},
+    {me:false,text:"Thanks! Also, can we make sure Element451 is showing the right program availability for the next cycle?",time:"11:47 AM"},
+  ]},
+  {id:2,av:"MF",avClass:"av-it",name:"Michael Fitting",role:"Data Strategy & Reporting Mgr",preview:"Fabric OAuth — I think I found the fix",time:"3h",unread:true,thread:[
+    {me:false,text:"I think I found the Fabric OAuth issue. We need to use a named user credential in the Dataflow Gen2 connector instead of the API-only user.",time:"9:15 AM"},
+    {me:true,text:"Yes! That's exactly what I diagnosed. The API-only user doesn't support interactive OAuth flows. We need IT to set up the App Registration first though.",time:"9:22 AM"},
+    {me:false,text:"I'll reach out to Michael Vega today. Can you document the exact steps needed for the App Registration?",time:"9:25 AM"},
+  ]},
+  {id:3,av:"JS",avClass:"av-dir",name:"Jennifer Stovall",role:"VP Global Recruitment",preview:"BVI recruitment campaign ready to launch",time:"1d",unread:false,thread:[
+    {me:false,text:"Ana, the BVI recruitment campaign is ready. I need you to set up the Element451 touchpoints for the BVI applicant journey. Same structure as STL but with the BVI-specific landing page.",time:"Yesterday 3:45 PM"},
+    {me:true,text:"Got it. I'll configure the BVI program visibility rules and email sequence in Element451. Should be done by tomorrow.",time:"Yesterday 4:02 PM"},
+  ]},
+];
+let curMsg=0;
+function renderMessages(){
+  const ml=document.getElementById("msg-list");
+  if(!ml)return;
+  ml.innerHTML=MSGS.map((m,i)=>`<div class="msg-item${i===curMsg?" on":""}" onclick="openMsg(${i})">
+    <div class="msg-av ${m.avClass}" style="width:38px;height:38px;font-size:12px">${m.av}</div>
+    <div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;align-items:center"><div class="msg-name">${m.name}</div><div class="msg-time">${m.time}</div></div><div class="msg-preview">${m.preview}</div></div>
+    ${m.unread?`<div class="msg-unread"></div>`:""}
+  </div>`).join("");
+  renderThread(curMsg);
+}
+function openMsg(i){curMsg=i;MSGS[i].unread=false;renderMessages();}
+function renderThread(i){
+  const m=MSGS[i];
+  const mm=document.getElementById("msg-main");
+  if(!mm)return;
+  mm.innerHTML=`
+    <div class="msg-header">
+      <div class="msg-av ${m.avClass}" style="width:36px;height:36px;font-size:11px">${m.av}</div>
+      <div><div style="font-size:13px;font-weight:700;color:var(--tx)">${m.name}</div><div style="font-size:11px;color:var(--tx2)">${m.role}</div></div>
+      <div style="margin-left:auto;display:flex;gap:6px"><button class="btn btn-sm btn-ghost">&#128222; Call</button><a href="mailto:${STAFF.find(s=>s.n.includes(m.name.split(" ")[1]))||{e:""}}?.e" class="btn btn-sm btn-p">&#9993; Email</a></div>
+    </div>
+    <div class="msg-body">${m.thread.map(b=>`<div><div class="msg-bubble ${b.me?"me":"them"}">${b.text}<div class="msg-bubble-time">${b.time}</div></div></div>`).join("")}</div>
+    <div class="msg-input-bar">
+      <input class="msg-inp" placeholder="Type a message..." id="msg-inp-${i}" onkeydown="if(event.key==='Enter')sendMsg(${i})">
+      <button class="btn btn-p btn-sm" onclick="sendMsg(${i})">Send &#8594;</button>
+    </div>`;
+}
+function sendMsg(i){
+  const inp=document.getElementById("msg-inp-"+i);
+  if(!inp||!inp.value.trim())return;
+  MSGS[i].thread.push({me:true,text:inp.value,time:"Just now"});
+  MSGS[i].preview=inp.value;
+  inp.value="";
+  renderThread(i);
+  const body=document.querySelector(".msg-body");
+  if(body)body.scrollTop=body.scrollHeight;
+}
+
+// ======== SETTINGS ========
+function setSettings(el,s){
+  document.querySelectorAll(".settings-nav-item").forEach(i=>i.classList.remove("on"));
+  document.querySelectorAll(".settings-panel").forEach(p=>p.classList.remove("on"));
+  el.classList.add("on");
+  document.getElementById("settings-"+s).classList.add("on");
+  if(s==="integrations"){
+    const sil=document.getElementById("settings-int-list");
+    if(sil)sil.innerHTML=INTS.map(p=>`<div class="setting-row"><div><div class="setting-label">${p.n}</div><div class="setting-sub">${p.t}</div></div><div class="istatus ${p.s}">${p.sl}</div></div>`).join("");
+  }
+}
+function toggleDarkSetting(){
+  toggleDark();
+  const t=document.getElementById("dark-toggle");
+  if(t)t.classList.toggle("on",document.documentElement.dataset.dark==="1");
+}
+function toggleCompact(){
+  const sb=document.getElementById("sidebar");
+  sbCollapsed=!sbCollapsed;sb.classList.toggle("collapsed",sbCollapsed);
+  document.getElementById("compact-toggle").classList.toggle("on",sbCollapsed);
+}
+function copyEmbed(){
+  const code='<iframe src="https://amjarabo.github.io/phsu-hub" width="100%" height="920" frameborder="0" style="border:none"></iframe>';
+  navigator.clipboard.writeText(code).then(()=>alert("Embed code copied to clipboard!"));
+}
+function exportData(){
+  const data={staff:STAFF,projects:PROJECTS,programs:PROGRAMS,raci:RACI,docs:DOCS,integrations:INTS,exported:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="phsu-hub-backup.json";a.click();
+}
+document.getElementById("deploy-date").textContent="Last pushed: April 2025 · v4.0";
+
+// ======== EVENT MODAL FORM ========
+MFORMS.event=`<div class="frow"><label class="flbl">Event Title</label><input class="finp" placeholder="e.g. Admissions Review Meeting"></div>
+  <div class="fr2"><div class="frow" style="margin:0"><label class="flbl">Date</label><input class="finp" type="date"></div>
+  <div class="frow" style="margin:0"><label class="flbl">Time</label><input class="finp" type="time" value="09:00"></div></div>
+  <div class="fr2"><div class="frow" style="margin:0"><label class="flbl">Campus</label><select class="fsel"><option>Virtual</option><option>Ponce PR</option><option>St. Louis</option><option>San Juan</option><option>BVI</option><option>All</option></select></div>
+  <div class="frow" style="margin:0"><label class="flbl">Type</label><select class="fsel"><option>meeting</option><option>deadline</option><option>milestone</option><option>training</option></select></div></div>
+  <div class="frow"><label class="flbl">Description</label><textarea class="ftxt" placeholder="Optional notes..."></textarea></div>`;
+MTITLES.event="Add Calendar Event";
+
+// ======== EXTEND goTab TO INIT NEW PANELS ========
+const _origGoTab=goTab;
+function goTab(name){
+  _origGoTab(name);
+  if(name==="calendar")renderCal();
+  if(name==="reports")renderAnalytics();
+  if(name==="messages")renderMessages();
+  if(name==="settings"&&document.getElementById("settings-profile")){
+    const t=document.getElementById("dark-toggle");
+    if(t)t.classList.toggle("on",document.documentElement.dataset.dark==="1");
+    const ct=document.getElementById("compact-toggle");
+    if(ct)ct.classList.toggle("on",sbCollapsed);
+  }
+}
+
+// Add calendar button to dashboard
+setTimeout(()=>{
+  const tb=document.querySelector(".ph-actions");
+  if(tb&&!document.getElementById("cal-dash-btn")){
+    const b=document.createElement("button");
+    b.className="btn btn-sm";b.id="cal-dash-btn";b.innerHTML="&#128197; Calendar";
+    b.onclick=()=>goTab("calendar");
+    tb.prepend(b);
+  }
+},300);
+
 </script>
 </body>
 </html>
