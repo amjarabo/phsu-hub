@@ -769,6 +769,13 @@ button,input,select,textarea{font-family:inherit}
     </div>
     <div class="sb-div"></div>
     <div class="sb-sec">
+      <div class="sb-label">My Work</div>
+      <div class="sb-it" data-tab="todos"><div class="sb-ico">&#9989;</div><span>My Tasks</span></div>
+      <div class="sb-it" data-tab="meetings"><div class="sb-ico">&#128221;</div><span>Meeting Notes</span></div>
+      <div class="sb-it" data-tab="notifications"><div class="sb-ico">&#128276;</div><span>Notifications</span></div>
+    </div>
+    <div class="sb-div"></div>
+    <div class="sb-sec">
       <div class="sb-label">Workspace</div>
       <div class="sb-it" data-tab="calendar"><div class="sb-ico">&#128197;</div><span>Calendar</span></div>
       <div class="sb-it" data-tab="reports"><div class="sb-ico">&#128202;</div><span>Reports</span></div>
@@ -1267,6 +1274,42 @@ button,input,select,textarea{font-family:inherit}
   <div class="training-grid" id="training-grid"></div>
   <div class="slbl" style="margin-bottom:10px">Certifications &amp; Achievements</div>
   <div style="display:flex;flex-direction:column;gap:8px" id="certs-list"></div>
+</div>
+
+
+<!-- MEETINGS PANEL -->
+<div class="panel" id="panel-meetings">
+  <div class="breadcrumb">&#8962; Home <span class="bc-sep">/</span> <span>Meeting Notes</span></div>
+  <div class="ph">
+    <div class="ph-left"><div class="ph-title">Meeting Notes</div><div class="ph-sub">Add notes and tasks are automatically extracted and assigned</div></div>
+    <div class="ph-actions"><button class="btn btn-p btn-sm" onclick="openModal('meeting')">+ Add Meeting Notes</button></div>
+  </div>
+  <div id="meetings-list" style="display:flex;flex-direction:column;gap:8px"></div>
+</div>
+
+<!-- TODOS PANEL -->
+<div class="panel" id="panel-todos">
+  <div class="breadcrumb">&#8962; Home <span class="bc-sep">/</span> <span>My Tasks</span></div>
+  <div class="ph">
+    <div class="ph-left"><div class="ph-title">My Tasks</div><div class="ph-sub">Tasks from projects, meetings, and tickets assigned to you</div></div>
+    <div class="ph-actions">
+      <button class="btn btn-sm" onclick="sendWeeklyDigest()">&#128231; Send Weekly Digest</button>
+      <button class="btn btn-p btn-sm" onclick="openModal('task')">+ Add Task</button>
+    </div>
+  </div>
+  <div id="todos-list"></div>
+</div>
+
+<!-- NOTIFICATIONS PANEL -->
+<div class="panel" id="panel-notifications">
+  <div class="breadcrumb">&#8962; Home <span class="bc-sep">/</span> <span>Notifications</span></div>
+  <div class="ph">
+    <div class="ph-left"><div class="ph-title">Notifications</div><div class="ph-sub">Project updates, ticket alerts, task reminders, and meeting notes</div></div>
+    <div class="ph-actions">
+      <button class="btn btn-sm" onclick="NOTIFICATIONS.forEach(function(n){n.read=true;});saveLS('notifications',NOTIFICATIONS);renderNotifications();updateNotifBadge();toast('All marked as read')">Mark All Read</button>
+    </div>
+  </div>
+  <div class="card" style="padding:0;border-radius:var(--rl);overflow:hidden" id="notif-panel-list"></div>
 </div>
 
 <!-- DRAWER -->
@@ -2601,61 +2644,6 @@ function startCourse(id){
 
 // Extend openDrw to handle ticket and issue types
 const _origOpenDrw=openDrw;
-function openDrw(type,data){
-  if(type==="ticket"){
-    const t=TICKETS[data];
-    if(!t)return;
-    document.getElementById("drw-ico").innerHTML=`<div style="font-size:26px;background:#FDEAEA;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">&#127381;</div>`;
-    document.getElementById("drw-title").textContent=t.title;
-    document.getElementById("drw-sub").textContent=t.id+" · "+t.sys+" · "+t.created;
-    const priColor={critical:"var(--rd)",high:"var(--rd)",medium:"var(--am)",low:"var(--gn)"}[t.pri];
-    const statusColor={open:"var(--rd)",resolved:"var(--gn)","in-progress":"var(--am)"}[t.status];
-    document.getElementById("drw-body").innerHTML=`
-      <div class="drw-section">
-        <div class="drw-row"><div class="drw-key">Status</div><div class="drw-val"><span class="pill" style="background:${statusColor}22;color:${statusColor}">${t.status}</span></div></div>
-        <div class="drw-row"><div class="drw-key">Priority</div><div class="drw-val"><span class="pill" style="background:${priColor}22;color:${priColor}">${t.pri}</span></div></div>
-        <div class="drw-row"><div class="drw-key">System</div><div class="drw-val">${t.sys}</div></div>
-        <div class="drw-row"><div class="drw-key">Reported by</div><div class="drw-val">${t.by}</div></div>
-        <div class="drw-row"><div class="drw-key">Campus</div><div class="drw-val">${t.campus}</div></div>
-        ${t.resolved?`<div class="drw-row"><div class="drw-key">Resolved</div><div class="drw-val" style="color:var(--gn)">${t.resolved}</div></div>`:""}
-      </div>
-      <div class="drw-section"><div class="drw-sec-title">Description</div><p style="font-size:12px;color:var(--tx2);line-height:1.7">${t.desc}</p></div>
-      ${t.comments.length?`<div class="drw-section"><div class="drw-sec-title">Comments (${t.comments.length})</div>
-        ${t.comments.map(c=>`<div style="padding:10px;background:var(--bg);border-radius:var(--r);margin-bottom:8px">
-          <div style="font-size:11px;font-weight:700;color:var(--tx)">${c.author} <span style="font-weight:400;color:var(--tx3)">${c.time}</span></div>
-          <div style="font-size:12px;color:var(--tx2);margin-top:4px;line-height:1.6">${c.text}</div>
-        </div>`).join("")}
-      </div>`:""}
-      <div class="drw-section"><div class="drw-sec-title">Add Comment</div>
-        <textarea class="ftxt" id="ticket-comment-${data}" placeholder="Add a comment or update..." style="margin-top:8px;min-height:70px"></textarea>
-      </div>`;
-    document.getElementById("drw-acts").innerHTML=`
-      <button class="btn btn-p" onclick="addTicketComment(${data})">Post Comment</button>
-      <button class="btn btn-ghost" onclick="resolveTicket(${data})">${t.status==="resolved"?"Reopen":"Mark Resolved"}</button>
-      <button class="btn" onclick="goTab('kb');closeDrw()">&#128218; Find Fix</button>`;
-    document.getElementById("drw-bg").classList.add("open");
-    return;
-  }
-  if(type==="issue"){
-    const i=COMMON_ISSUES[data];
-    document.getElementById("drw-ico").innerHTML=`<div style="font-size:26px;background:#FDEAEA;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">${i.ico}</div>`;
-    document.getElementById("drw-title").textContent=i.title;
-    document.getElementById("drw-sub").textContent=i.count+" this month";
-    document.getElementById("drw-body").innerHTML=`
-      <div class="drw-section"><div class="drw-sec-title">Quick Fix</div>
-        <p style="font-size:12px;color:var(--tx2);line-height:1.8">${i.fix}</p>
-      </div>
-      <div class="drw-section"><div class="drw-sec-title">Related Articles</div>
-        ${KB_ARTICLES.filter(a=>a.cat===i.tag).map((a,ri)=>`<div class="kb-issue" onclick="closeDrw();goTab('kb');setTimeout(()=>{setKBCat('${a.cat}');setTimeout(()=>toggleKBArticle(${KB_ARTICLES.indexOf(a)}),200)},200)">
-          <div class="kb-issue-title">${a.ico} ${a.title}</div><div class="kb-issue-cnt">&#128065; ${a.views} views</div>
-        </div>`).join("")}
-      </div>`;
-    document.getElementById("drw-acts").innerHTML=`<button class="btn btn-p" onclick="openModal('ticket')">Open Ticket If Persists</button><button class="btn btn-ghost" onclick="goTab('kb');closeDrw()">Full KB Article</button>`;
-    document.getElementById("drw-bg").classList.add("open");
-    return;
-  }
-  _origOpenDrw(type,data);
-}
 
 function addTicketComment(i){
   const ta=document.getElementById("ticket-comment-"+i);
@@ -2677,45 +2665,429 @@ function resolveTicket(i){
 
 // Extend saveMod to handle tickets
 const _origSaveMod2=saveMod;
-function saveMod(){
-  const type=document.getElementById("m-title").textContent;
-  if(type.includes("Ticket")){
-    const inputs=document.querySelectorAll("#m-body .finp, #m-body .fsel, #m-body .ftxt");
-    const vals=[...inputs].map(i=>i.value);
-    if(vals[0]&&vals[0].trim()){
-      const newTicket={
-        id:"TKT-"+(String(TICKETS.length+1).padStart(3,"0")),
-        title:vals[0],sys:vals[1]||"Other",pri:(vals[2]||"medium").toLowerCase(),
-        status:"open",by:vals[3]||"Unknown",campus:vals[4]||"Global",
-        created:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),
-        desc:vals[5]||"",comments:[]
-      };
-      TICKETS.unshift(newTicket);
-      saveToStorage("tickets",TICKETS);
-      renderTickets();
-      toast("Ticket "+newTicket.id+" created!","success");
-      closeMod();
-      return;
-    }
-  }
-  _origSaveMod2();
-}
 
 // Extend goTab
 const _origGoTab2=goTab;
 function goTab(name){
-  _origGoTab2(name);
-  if(name==="support")renderTickets();
-  if(name==="kb")renderKB();
-  if(name==="training")renderTraining();
-
-  if(name==='support')   { if(typeof renderTickets==='function') renderTickets(); }
-  if(name==='kb')        { if(typeof renderKB==='function') renderKB(); }
-  if(name==='training')  { if(typeof renderTraining==='function') renderTraining(); }
-  if(name==='calendar')  { if(typeof renderCal==='function') renderCal(); }
-  if(name==='reports')   { if(typeof renderAnalytics==='function') renderAnalytics(); }
-  if(name==='messages')  { if(typeof renderMessages==='function') renderMessages(); }
+  document.querySelectorAll('.sb-it').forEach(i=>i.classList.toggle('on',i.dataset.tab===name));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+name));
+  var m=document.querySelector('.main'); if(m) m.scrollTo(0,0);
+  if(name==='dashboard')  { if(typeof renderDash==='function') renderDash(); }
+  if(name==='programs')   { if(typeof renderProgs==='function') renderProgs(); }
+  if(name==='staff')      { if(typeof renderStaff==='function') renderStaff(); }
+  if(name==='org')        { if(typeof renderOrg==='function') renderOrg(); }
+  if(name==='projects')   { if(typeof renderProjs==='function') renderProjs(); }
+  if(name==='kanban')     { if(typeof renderKanban==='function') renderKanban(); }
+  if(name==='gantt')      { if(typeof renderGantt==='function') renderGantt(); }
+  if(name==='raci')       { if(typeof renderRaci==='function') renderRaci(); }
+  if(name==='processes')  { if(typeof renderProcs==='function') renderProcs(); }
+  if(name==='docs')       { if(typeof renderDocs==='function') renderDocs(); }
+  if(name==='integrations'){ if(typeof renderInts==='function') renderInts(); }
+  if(name==='support')    { if(typeof renderTickets==='function') renderTickets(); }
+  if(name==='kb')         { if(typeof renderKB==='function') renderKB(); }
+  if(name==='training')   { if(typeof renderTraining==='function') renderTraining(); }
+  if(name==='calendar')   { if(typeof renderCal==='function') renderCal(); }
+  if(name==='reports')    { if(typeof renderAnalytics==='function') renderAnalytics(); }
+  if(name==='messages')   { if(typeof renderMessages==='function') renderMessages(); }
+  if(name==='settings')   { /* settings renders on demand via setSettings() */ }
 }
+
+
+
+// ═══════════════════════════════════════════════════════════
+// MEETING NOTES → TASKS ENGINE
+// ═══════════════════════════════════════════════════════════
+
+let MEETINGS = loadLS('meetings', []);
+let MY_TASKS = loadLS('my_tasks', [
+  {id:'t1', title:'Fix Element451 domain mapping', due:'Apr 12, 2025', project:'Element451 Integration', assignee:'Ana Jarabo', done:false, priority:'high'},
+  {id:'t2', title:'Update SharePoint embed whitelist with IT', due:'Apr 14, 2025', project:'SharePoint Intranet Rollout', assignee:'Ana Jarabo', done:false, priority:'medium'},
+  {id:'t3', title:'Document Fabric OAuth fix steps', due:'Apr 15, 2025', project:'MS Fabric to Salesforce', assignee:'Ana Jarabo', done:false, priority:'high'},
+  {id:'t4', title:'QA Stripe payment flow for BSN', due:'Apr 11, 2025', project:'Element451 Integration', assignee:'Ana Jarabo', done:false, priority:'critical'},
+  {id:'t5', title:'Review accreditation doc section 3.2', due:'Apr 28, 2025', project:'Accreditation Docs Review', assignee:'Ana Jarabo', done:true, priority:'low'},
+]);
+let WATCHERS = loadLS('watchers', {}); // {projectName: [email, email]}
+let NOTIFICATIONS = loadLS('notifications', [
+  {id:'n1', type:'project', msg:'SharePoint Intranet Rollout moved to At Risk', time:'1h ago', read:false, link:'projects'},
+  {id:'n2', type:'ticket', msg:'TKT-005 (Stripe blank page) opened — Critical', time:'2h ago', read:false, link:'support'},
+  {id:'n3', type:'task', msg:'Task "Fix Element451 domain mapping" due tomorrow', time:'3h ago', read:true, link:'todos'},
+  {id:'n4', type:'meeting', msg:'Meeting notes added: Admissions Leadership Sync', time:'Yesterday', read:true, link:'meetings'},
+]);
+
+// ── EMAIL STUB (replace with EmailJS or Power Automate) ──
+function sendNotificationEmail(to, subject, body) {
+  // When EmailJS is configured, uncomment and add your service/template IDs:
+  // emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {to_email:to, subject, body});
+  
+  // For now, log and show toast
+  console.log('[EMAIL] To:', to, '| Subject:', subject);
+  toast('📧 Notification queued for ' + to.split('@')[0], 'info', 3000);
+}
+
+function notifyWatchers(projectName, update) {
+  var watchers = WATCHERS[projectName] || [];
+  watchers.forEach(function(email) {
+    sendNotificationEmail(email, 'Project Update: ' + projectName, update);
+  });
+  // Add to in-app notifications
+  NOTIFICATIONS.unshift({id:'n'+Date.now(), type:'project', msg:projectName + ': ' + update, time:'Just now', read:false, link:'projects'});
+  saveLS('notifications', NOTIFICATIONS);
+  updateNotifBadge();
+}
+
+function notifyStakeholders(area, update, emails) {
+  (emails || []).forEach(function(email) {
+    sendNotificationEmail(email, 'PHSU Hub Update: ' + area, update);
+  });
+  NOTIFICATIONS.unshift({id:'n'+Date.now(), type:'update', msg:'['+area+'] '+update, time:'Just now', read:false, link:'dashboard'});
+  saveLS('notifications', NOTIFICATIONS);
+  updateNotifBadge();
+}
+
+function updateNotifBadge() {
+  var unread = NOTIFICATIONS.filter(function(n){return !n.read;}).length;
+  var badge = document.getElementById('notif-badge');
+  if(!badge) {
+    var btn = document.getElementById('notif-btn');
+    if(btn) {
+      badge = document.createElement('div');
+      badge.id = 'notif-badge';
+      badge.className = 'tb-badge';
+      btn.appendChild(badge);
+    }
+  }
+  if(badge) badge.style.display = unread ? 'block' : 'none';
+}
+
+// ── WATCH TOGGLE ──
+function toggleWatch(projectName) {
+  var myEmail = 'ajarabo@psm.edu';
+  if(!WATCHERS[projectName]) WATCHERS[projectName] = [];
+  var idx = WATCHERS[projectName].indexOf(myEmail);
+  if(idx >= 0) {
+    WATCHERS[projectName].splice(idx, 1);
+    toast('Stopped watching ' + projectName, 'info', 2000);
+  } else {
+    WATCHERS[projectName].push(myEmail);
+    toast('Watching ' + projectName + ' — you will get email updates', 'success', 3000);
+  }
+  saveLS('watchers', WATCHERS);
+  // Refresh drawer if open
+  var title = document.getElementById('drw-title');
+  if(title && title.textContent === projectName) {
+    var ri = PROJECTS.findIndex(function(p){return p.n===projectName;});
+    if(ri >= 0) openDrw('project', ri);
+  }
+}
+
+function isWatching(projectName) {
+  return (WATCHERS[projectName] || []).indexOf('ajarabo@psm.edu') >= 0;
+}
+
+// ── MEETING NOTES → TASKS PARSER ──
+function parseMeetingNotes(notes, projectName, attendees) {
+  var tasks = [];
+  var lines = notes.split('
+');
+  // Patterns: "- ACTION: ...", "@name will ...", "TODO: ...", "assigned to ..."
+  lines.forEach(function(line) {
+    var taskMatch = line.match(/(?:action|todo|task|follow.?up|assigned?(?:\s+to)?|will|@)[\s:]+(.{10,80})/i);
+    if(taskMatch) {
+      var text = taskMatch[1].trim();
+      // Extract assignee
+      var assignee = 'Ana Jarabo';
+      var assigneeMatch = line.match(/@(\w+)/);
+      if(assigneeMatch) {
+        var handle = assigneeMatch[1].toLowerCase();
+        var found = STAFF.find(function(s){return s.n.toLowerCase().includes(handle);});
+        if(found) assignee = found.n;
+      }
+      // Extract due date
+      var dueMatch = line.match(/(?:by|due|before)\s+((?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|\d+\/\d+)[^,
+]{0,20})/i);
+      var due = dueMatch ? dueMatch[1].trim() : 'TBD';
+      
+      tasks.push({
+        id: 't'+Date.now()+Math.random().toString(36).slice(2,6),
+        title: text,
+        due: due,
+        project: projectName || 'General',
+        assignee: assignee,
+        done: false,
+        priority: 'medium',
+        source: 'meeting'
+      });
+    }
+  });
+  return tasks;
+}
+
+function saveMeetingNotes() {
+  var title = document.getElementById('mt-title') ? document.getElementById('mt-title').value : '';
+  var notes = document.getElementById('mt-notes') ? document.getElementById('mt-notes').value : '';
+  var project = document.getElementById('mt-project') ? document.getElementById('mt-project').value : '';
+  var attendees = document.getElementById('mt-attendees') ? document.getElementById('mt-attendees').value : '';
+  var date = document.getElementById('mt-date') ? document.getElementById('mt-date').value : new Date().toLocaleDateString();
+  
+  if(!title || !notes) { toast('Please add a title and notes', 'warning'); return; }
+  
+  // Parse tasks from notes
+  var extractedTasks = parseMeetingNotes(notes, project, attendees);
+  
+  // Save meeting
+  var meeting = {
+    id: 'm'+Date.now(),
+    title: title,
+    date: date,
+    project: project,
+    attendees: attendees,
+    notes: notes,
+    tasks: extractedTasks
+  };
+  MEETINGS.unshift(meeting);
+  saveLS('meetings', MEETINGS);
+  
+  // Add tasks to MY_TASKS
+  extractedTasks.forEach(function(t) { MY_TASKS.unshift(t); });
+  saveLS('my_tasks', MY_TASKS);
+  
+  // Add tasks to project
+  if(project) {
+    var pj = PROJECTS.find(function(p){return p.n===project;});
+    if(pj) {
+      pj.tasks = (pj.tasks || []).concat(extractedTasks);
+      saveLS('projects', PROJECTS);
+    }
+  }
+  
+  // Notify attendees
+  var attendeeList = attendees.split(/[,;]/).map(function(a){return a.trim();}).filter(Boolean);
+  if(attendeeList.length) {
+    notifyStakeholders('Meeting Notes', title + ' — ' + extractedTasks.length + ' tasks extracted', attendeeList);
+  }
+  
+  closeMod();
+  toast('Meeting saved! ' + extractedTasks.length + ' tasks extracted and added to ' + (project || 'My Tasks'), 'success', 4000);
+  
+  // Open meeting result drawer
+  setTimeout(function() { openDrw('meeting', 0); }, 300);
+}
+
+// ── RENDER MEETINGS PANEL ──
+function renderMeetings() {
+  var el = document.getElementById('meetings-list');
+  if(!el) return;
+  if(!MEETINGS.length) {
+    el.innerHTML = '<div style="padding:32px;text-align:center;color:var(--tx2)">No meetings yet. Add meeting notes to extract tasks automatically.</div>';
+    return;
+  }
+  el.innerHTML = MEETINGS.map(function(m, i) {
+    return '<div class="pjrow" onclick="openDrw('meeting',' + i + ')" style="grid-template-columns:1fr auto auto">' +
+      '<div><div class="pjtask">' + m.title + '</div><div class="pjown">' + m.date + (m.project ? ' &middot; ' + m.project : '') + (m.attendees ? ' &middot; ' + m.attendees.split(',')[0] : '') + '</div></div>' +
+      '<span class="pill pa">' + (m.tasks||[]).length + ' tasks</span>' +
+      '<div style="font-size:10px;color:var(--tx2)">' + m.date + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ── RENDER TODOS PANEL ──
+function renderTodos() {
+  var el = document.getElementById('todos-list');
+  if(!el) return;
+  
+  var pending = MY_TASKS.filter(function(t){return !t.done;});
+  var done = MY_TASKS.filter(function(t){return t.done;});
+  
+  var priColor = {critical:'var(--rd)',high:'var(--rd)',medium:'var(--am)',low:'var(--gn)'};
+  
+  el.innerHTML = '<div class="slbl">Pending (' + pending.length + ')</div>' +
+    pending.map(function(t, i) {
+      var ri = MY_TASKS.indexOf(t);
+      return '<div class="pjrow" style="grid-template-columns:auto 1fr auto auto" onclick="openDrw('task',' + ri + ')">' +
+        '<input type="checkbox" onclick="event.stopPropagation();toggleTask(' + ri + ')" style="cursor:pointer;width:16px;height:16px">' +
+        '<div><div class="pjtask">' + t.title + '</div><div class="pjown">' + t.project + (t.assignee ? ' &middot; ' + t.assignee : '') + '</div></div>' +
+        '<span class="pill" style="background:' + (priColor[t.priority]||'var(--am)') + '22;color:' + (priColor[t.priority]||'var(--am)') + ';font-size:9px">' + t.priority + '</span>' +
+        '<div style="font-size:10px;color:var(--tx2)">' + t.due + '</div>' +
+      '</div>';
+    }).join('') +
+    (done.length ? '<div class="slbl" style="margin-top:16px">Completed (' + done.length + ')</div>' + done.map(function(t) {
+      var ri = MY_TASKS.indexOf(t);
+      return '<div class="pjrow" style="grid-template-columns:auto 1fr auto;opacity:.55" onclick="openDrw('task',' + ri + ')">' +
+        '<input type="checkbox" checked onclick="event.stopPropagation();toggleTask(' + ri + ')" style="cursor:pointer;width:16px;height:16px">' +
+        '<div><div class="pjtask" style="text-decoration:line-through">' + t.title + '</div><div class="pjown">' + t.project + '</div></div>' +
+        '<div style="font-size:10px;color:var(--gn)">Done</div>' +
+      '</div>';
+    }).join('') : '');
+}
+
+function toggleTask(i) {
+  MY_TASKS[i].done = !MY_TASKS[i].done;
+  saveLS('my_tasks', MY_TASKS);
+  renderTodos();
+  if(MY_TASKS[i].done) toast('Task completed! ✓', 'success', 2000);
+}
+
+// ── RENDER NOTIFICATIONS PANEL ──
+function renderNotifications() {
+  var el = document.getElementById('notif-panel-list');
+  if(!el) return;
+  var typeColor = {project:'var(--teal)',ticket:'var(--rd)',task:'var(--am)',meeting:'var(--pu)',update:'var(--gn)'};
+  var typeIco = {project:'📌',ticket:'🎫',task:'✅',meeting:'📝',update:'📣'};
+  el.innerHTML = NOTIFICATIONS.map(function(n, i) {
+    return '<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid var(--bdr);cursor:pointer;background:' + (n.read?'var(--w)':'rgba(0,153,154,.04)') + '" onclick="markNotifRead(' + i + ')">' +
+      '<div style="width:32px;height:32px;border-radius:50%;background:' + (typeColor[n.type]||'var(--teal)') + '22;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px">' + (typeIco[n.type]||'ℹ️') + '</div>' +
+      '<div style="flex:1"><div style="font-size:12px;font-weight:' + (n.read?'500':'700') + ';color:var(--tx)">' + n.msg + '</div><div style="font-size:10px;color:var(--tx3);margin-top:3px">' + n.time + '</div></div>' +
+      (!n.read ? '<div style="width:8px;height:8px;border-radius:50%;background:var(--teal);flex-shrink:0;margin-top:4px"></div>' : '') +
+    '</div>';
+  }).join('') || '<div style="padding:32px;text-align:center;color:var(--tx2)">No notifications</div>';
+}
+
+function markNotifRead(i) {
+  NOTIFICATIONS[i].read = true;
+  saveLS('notifications', NOTIFICATIONS);
+  renderNotifications();
+  updateNotifBadge();
+  if(NOTIFICATIONS[i].link) goTab(NOTIFICATIONS[i].link);
+}
+
+// ── WEEKLY DIGEST ──
+function sendWeeklyDigest() {
+  var summary = 'PHSU Weekly Operations Summary\n\n';
+  summary += 'Projects: ' + PROJECTS.filter(function(p){return p.s==='active';}).length + ' active, ';
+  summary += PROJECTS.filter(function(p){return p.s==='blocked';}).length + ' blocked, ';
+  summary += PROJECTS.filter(function(p){return p.s==='risk';}).length + ' at risk\n';
+  summary += 'Open Tickets: ' + TICKETS.filter(function(t){return t.status==='open';}).length + '\n';
+  summary += 'Recent Meetings: ' + MEETINGS.filter(function(m){return true;}).length + ' this week\n';
+  summary += 'Tasks Completed: ' + MY_TASKS.filter(function(t){return t.done;}).length + '\n\n';
+  summary += 'See the full hub at: https://amjarabo.github.io/phsu-hub';
+  
+  var allEmails = ['ldwyer@psm.edu','evazquez@psm.edu','jstovall@psm.edu','avelazquez@psm.edu','mvega@psm.edu','ajarabo@psm.edu'];
+  allEmails.forEach(function(email) {
+    sendNotificationEmail(email, 'PHSU Weekly Ops Digest — ' + new Date().toLocaleDateString(), summary);
+  });
+  toast('Weekly digest sent to ' + allEmails.length + ' recipients', 'success', 4000);
+}
+
+// ── EXTEND openDrw for new types ──
+var _prevOpenDrw = openDrw;
+function openDrw(type, data) {
+  if(type === 'meeting') {
+    var m = MEETINGS[data];
+    if(!m) return;
+    document.getElementById('drw-ico').innerHTML = '<div style="font-size:26px;background:#EEEDFE;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">📝</div>';
+    document.getElementById('drw-title').textContent = m.title;
+    document.getElementById('drw-sub').textContent = m.date + (m.project ? ' · ' + m.project : '');
+    document.getElementById('drw-body').innerHTML =
+      '<div class="drw-section"><div class="drw-sec-title">Attendees</div><p style="font-size:12px;color:var(--tx2)">' + (m.attendees || 'Not recorded') + '</p></div>' +
+      '<div class="drw-section"><div class="drw-sec-title">Notes</div><p style="font-size:12px;color:var(--tx2);line-height:1.7;white-space:pre-wrap">' + m.notes + '</p></div>' +
+      (m.tasks && m.tasks.length ? '<div class="drw-section"><div class="drw-sec-title">Extracted Tasks (' + m.tasks.length + ')</div>' +
+        m.tasks.map(function(t){return '<div class="drw-step"><div class="drw-step-n">T</div><div style="font-size:12px;color:var(--tx)">' + t.title + ' <span style="color:var(--tx3)">— ' + t.assignee + ' — Due: ' + t.due + '</span></div></div>';}).join('') +
+      '</div>' : '<div class="drw-section"><p style="font-size:12px;color:var(--tx2)">No tasks were extracted from these notes.</p></div>');
+    document.getElementById('drw-acts').innerHTML = '<button class="btn btn-p" onclick="goTab('todos')">View My Tasks</button><button class="btn btn-ghost" onclick="goTab('projects')">View Projects</button>';
+    document.getElementById('drw-bg').classList.add('open');
+    return;
+  }
+  if(type === 'task') {
+    var t = MY_TASKS[data];
+    if(!t) return;
+    var pc = {critical:'var(--rd)',high:'var(--rd)',medium:'var(--am)',low:'var(--gn)'}[t.priority]||'var(--am)';
+    document.getElementById('drw-ico').innerHTML = '<div style="font-size:26px;background:#EAF3DE;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">✅</div>';
+    document.getElementById('drw-title').textContent = t.title;
+    document.getElementById('drw-sub').textContent = t.project + ' · ' + t.assignee;
+    document.getElementById('drw-body').innerHTML =
+      '<div class="drw-section">' +
+      '<div class="drw-row"><div class="drw-key">Priority</div><div class="drw-val"><span class="pill" style="background:'+pc+'22;color:'+pc+'">' + t.priority + '</span></div></div>' +
+      '<div class="drw-row"><div class="drw-key">Due Date</div><div class="drw-val">' + t.due + '</div></div>' +
+      '<div class="drw-row"><div class="drw-key">Project</div><div class="drw-val">' + t.project + '</div></div>' +
+      '<div class="drw-row"><div class="drw-key">Assignee</div><div class="drw-val">' + t.assignee + '</div></div>' +
+      '<div class="drw-row"><div class="drw-key">Status</div><div class="drw-val">' + (t.done ? '<span class="pill pd">Done</span>' : '<span class="pill pa">Pending</span>') + '</div></div>' +
+      (t.source ? '<div class="drw-row"><div class="drw-key">Source</div><div class="drw-val">' + t.source + '</div></div>' : '') +
+      '</div>';
+    document.getElementById('drw-acts').innerHTML =
+      '<button class="btn btn-p" onclick="toggleTask(' + data + ');closeDrw()">' + (t.done ? 'Reopen Task' : 'Mark Complete') + '</button>' +
+      '<button class="btn btn-ghost" onclick="goTab('projects')">View Project</button>';
+    document.getElementById('drw-bg').classList.add('open');
+    return;
+  }
+  // For project drawer, add watch button and tasks
+  if(type === 'project') {
+    var p = PROJECTS[data]; if(!p) return;
+    var pc2 = {active:'var(--teal)',risk:'var(--or)',blocked:'var(--rd)',done:'var(--gn)',review:'var(--am)'}[p.s]||'var(--teal)';
+    document.getElementById('drw-ico').innerHTML = '<div style="font-size:26px;background:var(--tl);width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">📌</div>';
+    document.getElementById('drw-title').textContent = p.n;
+    document.getElementById('drw-sub').textContent = p.o;
+    var watching = isWatching(p.n);
+    var projTasks = MY_TASKS.filter(function(t){return t.project===p.n;});
+    document.getElementById('drw-body').innerHTML =
+      '<div class="drw-section"><div class="drw-sec-title">Progress</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span style="font-size:14px;font-weight:700;color:var(--td)">' + p.p + '% complete</span>' + pillH(p.s) + '</div>' +
+      '<div class="pbar-lg"><div class="pfill-lg" id="drw-prog" style="width:0;background:' + pc2 + '"></div></div>' +
+      '</div>' +
+      '<div class="drw-section"><div class="drw-sec-title">Details</div>' +
+      '<div class="drw-row"><div class="drw-key">Owner</div><div class="drw-val">' + p.o + '</div></div>' +
+      '<div class="drw-row"><div class="drw-key">Due</div><div class="drw-val">' + p.due + '</div></div>' +
+      '<div class="drw-row"><div class="drw-key">Sprint</div><div class="drw-val">' + (p.sprint||'—') + '</div></div>' +
+      '<div class="drw-row"><div class="drw-key">Status</div><div class="drw-val">' + pillH(p.s) + '</div></div>' +
+      '<div class="drw-row"><div class="drw-key">Watchers</div><div class="drw-val">' + ((WATCHERS[p.n]||[]).length) + ' watching</div></div>' +
+      '</div>' +
+      '<div class="drw-section"><div class="drw-sec-title">Description</div><p style="font-size:12px;color:var(--tx2);line-height:1.7">' + (p.desc||'') + '</p></div>' +
+      (projTasks.length ? '<div class="drw-section"><div class="drw-sec-title">Tasks (' + projTasks.length + ')</div>' +
+        projTasks.map(function(t){return '<div class="drw-step"><div class="drw-step-n" style="background:' + (t.done?'var(--gn)':'var(--teal)') + '">' + (t.done?'✓':'T') + '</div><div style="font-size:12px;color:var(--tx);' + (t.done?'text-decoration:line-through':'') + '">' + t.title + ' <span style="color:var(--tx3)">— ' + t.due + '</span></div></div>';}).join('') +
+      '</div>' : '') +
+      '<div class="drw-section"><div class="drw-sec-title">Tags</div><div style="display:flex;gap:5px;flex-wrap:wrap">' + (p.tags||[]).map(function(tg){return '<span class="ctag ct-p">'+tg+'</span>';}).join('') + '</div></div>';
+    document.getElementById('drw-acts').innerHTML =
+      '<button class="btn btn-p" onclick="openModal('project')">Edit</button>' +
+      '<button class="btn ' + (watching?'btn-ghost':'') + '" onclick="toggleWatch('' + p.n.replace(/'/g,"\'") + '')">' + (watching ? '🔔 Watching' : '🔕 Watch') + '</button>' +
+      '<button class="btn" onclick="goTab('meetings')">Add Meeting Notes</button>';
+    document.getElementById('drw-bg').classList.add('open');
+    setTimeout(function(){var pf=document.getElementById('drw-prog');if(pf)pf.style.width=p.p+'%';},60);
+    return;
+  }
+  _prevOpenDrw(type, data);
+}
+
+// ── INIT NOTIFICATION BADGE ──
+updateNotifBadge();
+
+// ── MODAL FORMS for new panels ──
+MFORMS.meeting = '<div class="frow"><label class="flbl">Meeting Title</label><input class="finp" id="mt-title" placeholder="e.g. Admissions Leadership Sync"></div>' +
+  '<div class="fr2"><div class="frow" style="margin:0"><label class="flbl">Date</label><input class="finp" id="mt-date" type="date"></div>' +
+  '<div class="frow" style="margin:0"><label class="flbl">Linked Project</label><select class="fsel" id="mt-project"><option value="">None</option>' +
+  PROJECTS.map(function(p){return '<option>'+p.n+'</option>';}).join('') +
+  '</select></div></div>' +
+  '<div class="frow"><label class="flbl">Attendees (email or name, comma separated)</label><input class="finp" id="mt-attendees" placeholder="ldwyer@psm.edu, avelazquez@psm.edu"></div>' +
+  '<div class="frow"><label class="flbl">Meeting Notes — use "Action:" or "TODO:" or "@name will..." to auto-create tasks</label><textarea class="ftxt" id="mt-notes" style="min-height:150px" placeholder="Discussed Fall 2025 pipeline...&#10;Action: @Ana review Stripe config by Apr 12&#10;TODO: Laura to send Salesforce report by end of week&#10;@Michael Vega will whitelist github.io by Apr 14"></textarea></div>';
+MTITLES.meeting = 'Add Meeting Notes';
+
+// Override saveMod to handle meetings
+var _prevSaveMod = saveMod;
+function saveMod() {
+  var type = document.getElementById('m-title').textContent;
+  if(type.includes('Meeting')) { saveMeetingNotes(); return; }
+  if(type.includes('Task') && !type.includes('Meeting')) {
+    var v=[...document.querySelectorAll('#m-body .finp,#m-body .fsel')].map(function(i){return i.value;});
+    if(v[0]) {
+      MY_TASKS.unshift({id:'t'+Date.now(),title:v[0],due:v[1]||'TBD',priority:v[2]||'medium',project:v[3]||'General',assignee:v[4]||'Ana Jarabo',done:false});
+      saveLS('my_tasks',MY_TASKS); renderTodos(); toast('Task added!'); closeMod(); return;
+    }
+  }
+  _prevSaveMod();
+}
+
+// ── CSS for new panels ──
+var extraCSS = document.createElement('style');
+extraCSS.textContent = '.notification-panel{background:var(--w);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden}';
+document.head.appendChild(extraCSS);
+
+
+MFORMS.task = '<div class="frow"><label class="flbl">Task Title</label><input class="finp" placeholder="e.g. Fix Stripe config"></div>' +
+  '<div class="fr2"><div class="frow" style="margin:0"><label class="flbl">Due Date</label><input class="finp" type="date"></div>' +
+  '<div class="frow" style="margin:0"><label class="flbl">Priority</label><select class="fsel"><option>medium</option><option>high</option><option>critical</option><option>low</option></select></div></div>' +
+  '<div class="fr2"><div class="frow" style="margin:0"><label class="flbl">Project</label><select class="fsel" id="task-project"><option value="">None</option>' +
+  PROJECTS.map(function(p){return '<option>'+p.n+'</option>';}).join('') +
+  '</select></div>' +
+  '<div class="frow" style="margin:0"><label class="flbl">Assignee</label><input class="finp" value="Ana Jarabo" placeholder="Name"></div></div>';
+MTITLES.task = 'Add Task';
 
 </script>
 </body>
