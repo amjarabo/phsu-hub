@@ -1127,6 +1127,7 @@ button,input,select,textarea{font-family:inherit}
       <div class="settings-nav-item" data-s="notifications" onclick="setSettings(this,'notifications')">&#128276; Notifications</div>
       <div class="settings-nav-item" data-s="integrations" onclick="setSettings(this,'integrations')">&#9889; Integrations</div>
       <div class="settings-nav-item" data-s="data" onclick="setSettings(this,'data')">&#128202; Data &amp; Export</div>
+      <div class="settings-nav-item" data-s="pa" onclick="setSettings(this,'pa')">&#9889; Power Automate</div>
       <div class="settings-nav-item" data-s="security" onclick="setSettings(this,'security')">&#128274; Security</div>
     </div>
     <div>
@@ -1189,6 +1190,7 @@ button,input,select,textarea{font-family:inherit}
           <div class="setting-row"><div><div class="setting-label">Import Staff from CSV</div><div class="setting-sub">Upload a CSV from Element451 or Salesforce</div></div><div><input type="file" accept=".csv" style="display:none" id="csv-upload"><button class="btn btn-sm btn-ghost" onclick="document.getElementById('csv-upload').click()">Upload CSV</button></div></div>
         </div>
       </div>
+      <div class="settings-panel" id="settings-pa"></div>
       <div class="settings-panel" id="settings-security">
         <div class="settings-section">
           <div class="settings-section-title">Access &amp; Security</div>
@@ -1980,16 +1982,7 @@ function sendMsg(i){
 }
 
 // ======== SETTINGS ========
-function setSettings(el,s){
-  document.querySelectorAll(".settings-nav-item").forEach(i=>i.classList.remove("on"));
-  document.querySelectorAll(".settings-panel").forEach(p=>p.classList.remove("on"));
-  el.classList.add("on");
-  document.getElementById("settings-"+s).classList.add("on");
-  if(s==="integrations"){
-    const sil=document.getElementById("settings-int-list");
-    if(sil)sil.innerHTML=INTS.map(p=>`<div class="setting-row"><div><div class="setting-label">${p.n}</div><div class="setting-sub">${p.t}</div></div><div class="istatus ${p.s}">${p.sl}</div></div>`).join("");
-  }
-}
+
 function toggleDarkSetting(){
   toggleDark();
   const t=document.getElementById("dark-toggle");
@@ -2654,14 +2647,7 @@ function addTicketComment(i){
   openDrw("ticket",i);
 }
 
-function resolveTicket(i){
-  TICKETS[i].status=TICKETS[i].status==="resolved"?"open":"resolved";
-  if(TICKETS[i].status==="resolved")TICKETS[i].resolved=new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
-  saveToStorage("tickets",TICKETS);
-  toast(TICKETS[i].status==="resolved"?"Ticket resolved! ✓":"Ticket reopened",TICKETS[i].status==="resolved"?"success":"warning",2500);
-  closeDrw();
-  renderTickets();
-}
+
 
 // Extend saveMod to handle tickets
 const _origSaveMod2=saveMod;
@@ -2822,56 +2808,7 @@ function parseMeetingNotes(notes, projectName, attendees) {
   return tasks;
 }
 
-function saveMeetingNotes() {
-  var title = document.getElementById('mt-title') ? document.getElementById('mt-title').value : '';
-  var notes = document.getElementById('mt-notes') ? document.getElementById('mt-notes').value : '';
-  var project = document.getElementById('mt-project') ? document.getElementById('mt-project').value : '';
-  var attendees = document.getElementById('mt-attendees') ? document.getElementById('mt-attendees').value : '';
-  var date = document.getElementById('mt-date') ? document.getElementById('mt-date').value : new Date().toLocaleDateString();
-  
-  if(!title || !notes) { toast('Please add a title and notes', 'warning'); return; }
-  
-  // Parse tasks from notes
-  var extractedTasks = parseMeetingNotes(notes, project, attendees);
-  
-  // Save meeting
-  var meeting = {
-    id: 'm'+Date.now(),
-    title: title,
-    date: date,
-    project: project,
-    attendees: attendees,
-    notes: notes,
-    tasks: extractedTasks
-  };
-  MEETINGS.unshift(meeting);
-  saveLS('meetings', MEETINGS);
-  
-  // Add tasks to MY_TASKS
-  extractedTasks.forEach(function(t) { MY_TASKS.unshift(t); });
-  saveLS('my_tasks', MY_TASKS);
-  
-  // Add tasks to project
-  if(project) {
-    var pj = PROJECTS.find(function(p){return p.n===project;});
-    if(pj) {
-      pj.tasks = (pj.tasks || []).concat(extractedTasks);
-      saveLS('projects', PROJECTS);
-    }
-  }
-  
-  // Notify attendees
-  var attendeeList = attendees.split(/[,;]/).map(function(a){return a.trim();}).filter(Boolean);
-  if(attendeeList.length) {
-    notifyStakeholders('Meeting Notes', title + ' — ' + extractedTasks.length + ' tasks extracted', attendeeList);
-  }
-  
-  closeMod();
-  toast('Meeting saved! ' + extractedTasks.length + ' tasks extracted and added to ' + (project || 'My Tasks'), 'success', 4000);
-  
-  // Open meeting result drawer
-  setTimeout(function() { openDrw('meeting', 0); }, 300);
-}
+
 
 // ── RENDER MEETINGS PANEL ──
 function renderMeetings() {
@@ -3061,18 +2998,7 @@ MTITLES.meeting = 'Add Meeting Notes';
 
 // Override saveMod to handle meetings
 var _prevSaveMod = saveMod;
-function saveMod() {
-  var type = document.getElementById('m-title').textContent;
-  if(type.includes('Meeting')) { saveMeetingNotes(); return; }
-  if(type.includes('Task') && !type.includes('Meeting')) {
-    var v=[...document.querySelectorAll('#m-body .finp,#m-body .fsel')].map(function(i){return i.value;});
-    if(v[0]) {
-      MY_TASKS.unshift({id:'t'+Date.now(),title:v[0],due:v[1]||'TBD',priority:v[2]||'medium',project:v[3]||'General',assignee:v[4]||'Ana Jarabo',done:false});
-      saveLS('my_tasks',MY_TASKS); renderTodos(); toast('Task added!'); closeMod(); return;
-    }
-  }
-  _prevSaveMod();
-}
+
 
 // ── CSS for new panels ──
 var extraCSS = document.createElement('style');
@@ -3088,6 +3014,386 @@ MFORMS.task = '<div class="frow"><label class="flbl">Task Title</label><input cl
   '</select></div>' +
   '<div class="frow" style="margin:0"><label class="flbl">Assignee</label><input class="finp" value="Ana Jarabo" placeholder="Name"></div></div>';
 MTITLES.task = 'Add Task';
+
+
+
+// ═══════════════════════════════════════════════════════════
+// POWER AUTOMATE / SHAREPOINT INTEGRATION LAYER
+// ═══════════════════════════════════════════════════════════
+
+// ── CONFIG: set your SharePoint site URL here ──
+var SP_SITE = 'https://phsu.sharepoint.com/sites/operations'; // ← update this
+var PA_WEBHOOKS = {
+  projectUpdate:   '', // Power Automate HTTP trigger URL — paste after creating Flow
+  newTicket:       '', // Power Automate HTTP trigger URL
+  meetingNotes:    '', // Power Automate HTTP trigger URL
+  weeklyDigest:    '', // Power Automate HTTP trigger URL
+};
+
+// ── SHAREPOINT LIST NAMES (create these in your SP site) ──
+var SP_LISTS = {
+  projects:     'HubProjects',
+  tickets:      'HubTickets',
+  tasks:        'HubTasks',
+  meetings:     'HubMeetings',
+  notifications:'HubNotifications',
+};
+
+// ── POST TO POWER AUTOMATE HTTP TRIGGER ──
+function triggerFlow(webhookKey, payload) {
+  var url = PA_WEBHOOKS[webhookKey];
+  if(!url) {
+    // Not configured yet — show setup instructions
+    showPASetupGuide(webhookKey);
+    return;
+  }
+  fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  }).then(function(r) {
+    if(r.ok) toast('Flow triggered — emails being sent', 'success', 3000);
+    else toast('Flow error — check Power Automate', 'warning', 4000);
+  }).catch(function() {
+    toast('Could not reach Power Automate — check the webhook URL', 'error', 4000);
+  });
+}
+
+// ── SHAREPOINT LIST WRITE (works when hub is embedded in SP iframe) ──
+function writeToSPList(listName, item) {
+  var url = SP_SITE + "/_api/web/lists/getbytitle('" + listName + "')/items";
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json;odata=verbose',
+      'Content-Type': 'application/json;odata=verbose',
+      'X-RequestDigest': window.__spRequestDigest || ''
+    },
+    credentials: 'include',
+    body: JSON.stringify({'__metadata': {'type': 'SP.Data.' + listName + 'ListItem'}, ...item})
+  }).then(function(r) {
+    if(r.ok) console.log('[SP] Written to', listName);
+  }).catch(function(e) {
+    console.log('[SP] Write skipped (not in SP context):', e.message);
+  });
+}
+
+// ── GET SP REQUEST DIGEST (needed for writes) ──
+fetch(SP_SITE + '/_api/contextinfo', {
+  method: 'POST',
+  headers: {'Accept': 'application/json;odata=verbose'},
+  credentials: 'include'
+}).then(function(r){ return r.json(); })
+  .then(function(d){ window.__spRequestDigest = d.d.GetContextWebInformation.FormDigestValue; })
+  .catch(function(){});
+
+// ── OUTLOOK CALENDAR EVENT CREATION ──
+// When hub is in SP context, creates real Outlook calendar events via Graph API
+// Requires: App Registration OR uses the user's own session if available
+function createOutlookCalendarEvent(title, date, time, attendees, body) {
+  var startDT = date + 'T' + (time || '09:00') + ':00';
+  var endDT   = date + 'T' + (time ? (parseInt(time.split(':')[0])+1).toString().padStart(2,'0')+':00' : '10:00') + ':00';
+  
+  var eventPayload = {
+    subject: title,
+    body: { contentType: 'HTML', content: body || title },
+    start: { dateTime: startDT, timeZone: 'America/Puerto_Rico' },
+    end:   { dateTime: endDT,   timeZone: 'America/Puerto_Rico' },
+    attendees: (attendees||[]).map(function(email) {
+      return { emailAddress: { address: email }, type: 'required' };
+    }),
+    isReminderOn: true,
+    reminderMinutesBeforeStart: 1440 // 24 hours
+  };
+  
+  // Try Graph API (works if user has delegated auth)
+  fetch('https://graph.microsoft.com/v1.0/me/events', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + (window.__graphToken || '')
+    },
+    body: JSON.stringify(eventPayload)
+  }).then(function(r) {
+    if(r.ok) {
+      toast('Outlook calendar event created', 'success', 3000);
+    } else {
+      // Fallback: create .ics file for manual import
+      downloadICS(title, startDT, endDT, body, attendees);
+    }
+  }).catch(function() {
+    downloadICS(title, startDT, endDT, body, attendees);
+  });
+}
+
+// ── ICS DOWNLOAD FALLBACK (always works, no auth needed) ──
+function downloadICS(title, startDT, endDT, description, attendees) {
+  var start = startDT.replace(/[-:]/g,'').replace('T','T');
+  var end   = endDT.replace(/[-:]/g,'').replace('T','T');
+  var uid   = 'phsu-' + Date.now() + '@phsu.edu';
+  var attendeeLines = (attendees||[]).map(function(e){
+    return 'ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT:mailto:'+e;
+  }).join('\r\n');
+  
+  var ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//PHSU Ops Hub//EN',
+    'METHOD:REQUEST',
+    'BEGIN:VEVENT',
+    'UID:'+uid,
+    'DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z',
+    'DTSTART:'+start,
+    'DTEND:'+end,
+    'SUMMARY:'+title,
+    'DESCRIPTION:'+(description||'').replace(/\n/g,'\n'),
+    attendeeLines,
+    'BEGIN:VALARM',
+    'TRIGGER:-PT1440M',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:Reminder: '+title,
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+  
+  var blob = new Blob([ics], {type: 'text/calendar'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = title.replace(/[^a-z0-9]/gi,'_') + '.ics';
+  a.click();
+  toast('Calendar event (.ics) downloaded — open to add to Outlook', 'success', 4000);
+}
+
+// ── POWER AUTOMATE SETUP GUIDE ──
+function showPASetupGuide(flowType) {
+  var guides = {
+    projectUpdate: 'Flow: "When SP list item changes" → "Send email" + "Create Outlook task"',
+    newTicket:     'Flow: "When SP list item is created" in HubTickets → "Send email to owner"',
+    meetingNotes:  'Flow: "When SP list item is created" in HubMeetings → "Create Outlook events for tasks"',
+    weeklyDigest:  'Flow: "Recurrence (weekly)" → "Get items" from all Hub lists → "Send email"',
+  };
+  document.getElementById('drw-ico').innerHTML = '<div style="font-size:26px;background:#E6F1FB;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">⚡</div>';
+  document.getElementById('drw-title').textContent = 'Set Up Power Automate';
+  document.getElementById('drw-sub').textContent = 'One-time setup — no IT admin required';
+  document.getElementById('drw-body').innerHTML = 
+    '<div class="drw-section"><div class="drw-sec-title">What you need to create</div>' +
+    '<div class="drw-step"><div class="drw-step-n">1</div><div style="font-size:12px;color:var(--tx)"><strong>Create SharePoint Lists</strong> in your operations site — one button does all of them</div></div>' +
+    '<div class="drw-step"><div class="drw-step-n">2</div><div style="font-size:12px;color:var(--tx)"><strong>Create 4 Flows</strong> in Power Automate — templates below, takes ~10 min each</div></div>' +
+    '<div class="drw-step"><div class="drw-step-n">3</div><div style="font-size:12px;color:var(--tx)"><strong>Paste webhook URLs</strong> into the hub Settings → Integrations tab</div></div>' +
+    '<div class="drw-step"><div class="drw-step-n">4</div><div style="font-size:12px;color:var(--tx)"><strong>Done</strong> — all updates, tickets, and meeting tasks trigger real emails + Outlook events</div></div>' +
+    '</div>' +
+    '<div class="drw-section"><div class="drw-sec-title">Flow you need right now</div>' +
+    '<p style="font-size:12px;color:var(--tx2);background:var(--bg);padding:10px;border-radius:var(--r);line-height:1.7">' + (guides[flowType]||'See Settings → Integrations → Power Automate Setup') + '</p></div>' +
+    '<div class="drw-section"><div class="drw-sec-title">Your SharePoint Site URL</div>' +
+    '<input class="finp" id="sp-site-input" value="' + SP_SITE + '" placeholder="https://phsu.sharepoint.com/sites/..."><button class="btn btn-p" style="margin-top:8px;width:100%" onclick="saveSPSite()">Save Site URL</button></div>';
+  document.getElementById('drw-acts').innerHTML = 
+    '<a href="https://make.powerautomate.com" target="_blank" class="btn btn-p">Open Power Automate</a>' +
+    '<button class="btn btn-ghost" onclick="createSPLists()">Create SP Lists</button>';
+  document.getElementById('drw-bg').classList.add('open');
+}
+
+function saveSPSite() {
+  var input = document.getElementById('sp-site-input');
+  if(input) { SP_SITE = input.value; localStorage.setItem('phsu_sp_site', SP_SITE); toast('SharePoint site URL saved', 'success'); }
+}
+SP_SITE = localStorage.getItem('phsu_sp_site') || SP_SITE;
+
+function saveWebhookURL(key, url) {
+  PA_WEBHOOKS[key] = url;
+  localStorage.setItem('phsu_pa_'+key, url);
+  toast('Webhook URL saved for ' + key, 'success');
+}
+Object.keys(PA_WEBHOOKS).forEach(function(k){
+  var saved = localStorage.getItem('phsu_pa_'+k);
+  if(saved) PA_WEBHOOKS[k] = saved;
+});
+
+function createSPLists() {
+  toast('Opening SharePoint — create these Lists: HubProjects, HubTickets, HubTasks, HubMeetings', 'info', 5000);
+  setTimeout(function(){ window.open(SP_SITE + '/_layouts/15/addanapp.aspx', '_blank'); }, 1000);
+}
+
+// ── ENHANCED: Meeting save now triggers Flow + creates calendar ──
+var _origSaveMeetingNotes = saveMeetingNotes;
+function saveMeetingNotes() {
+  var title  = document.getElementById('mt-title')     ? document.getElementById('mt-title').value     : '';
+  var notes  = document.getElementById('mt-notes')     ? document.getElementById('mt-notes').value     : '';
+  var project= document.getElementById('mt-project')   ? document.getElementById('mt-project').value   : '';
+  var attend = document.getElementById('mt-attendees') ? document.getElementById('mt-attendees').value : '';
+  var date   = document.getElementById('mt-date')      ? document.getElementById('mt-date').value      : new Date().toISOString().split('T')[0];
+
+  if(!title || !notes) { toast('Please add a title and notes', 'warning'); return; }
+
+  var extractedTasks = parseMeetingNotes(notes, project, attend);
+
+  var meeting = {
+    id: 'm'+Date.now(), title: title, date: date,
+    project: project, attendees: attend, notes: notes, tasks: extractedTasks
+  };
+  MEETINGS.unshift(meeting);
+  saveLS('meetings', MEETINGS);
+  extractedTasks.forEach(function(t){ MY_TASKS.unshift(t); });
+  saveLS('my_tasks', MY_TASKS);
+
+  var attendeeEmails = attend.split(/[,;]/).map(function(a){return a.trim();}).filter(function(a){return a.includes('@');});
+
+  // 1. Write to SharePoint List
+  writeToSPList(SP_LISTS.meetings, {
+    Title: title, Notes: notes, Project: project,
+    Attendees: attend, MeetingDate: date,
+    TasksJSON: JSON.stringify(extractedTasks)
+  });
+
+  // 2. Trigger Power Automate Flow (sends emails to attendees)
+  triggerFlow('meetingNotes', {
+    meeting: meeting,
+    tasks: extractedTasks,
+    attendees: attendeeEmails,
+    hubUrl: 'https://amjarabo.github.io/phsu-hub'
+  });
+
+  // 3. Create Outlook calendar reminders for each task
+  extractedTasks.forEach(function(task) {
+    if(task.due && task.due !== 'TBD') {
+      // Parse due date - convert "Apr 12" → "2025-04-12"
+      var dueDate = parseDueDate(task.due);
+      if(dueDate) {
+        createOutlookCalendarEvent(
+          '[PHSU Task] ' + task.title,
+          dueDate, '09:00',
+          [task.assignee.includes('@') ? task.assignee : task.assignee.toLowerCase().replace(' ','') + '@psm.edu'],
+          'Project: ' + task.project + '\nAssigned to: ' + task.assignee + '\nExtracted from meeting: ' + title
+        );
+      }
+    }
+  });
+
+  // 4. Notify watchers if linked to project
+  if(project) {
+    notifyWatchers(project, 'Meeting notes added: ' + title + ' — ' + extractedTasks.length + ' tasks created');
+  }
+
+  closeMod();
+  toast('Meeting saved! ' + extractedTasks.length + ' tasks → Outlook reminders being created', 'success', 5000);
+  
+  if(typeof renderMeetings === 'function') renderMeetings();
+  if(typeof renderTodos === 'function') renderTodos();
+}
+
+function parseDueDate(dueStr) {
+  if(!dueStr || dueStr === 'TBD') return null;
+  var months = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+  var m = dueStr.match(/([a-z]+)\s*(\d+)/i);
+  if(m) {
+    var mo = months[m[1].toLowerCase().slice(0,3)];
+    if(mo) return '2025-' + mo + '-' + m[2].padStart(2,'0');
+  }
+  // Already formatted
+  if(dueStr.match(/^\d{4}-\d{2}-\d{2}$/)) return dueStr;
+  return null;
+}
+
+// ── ENHANCED: Project update triggers Flow ──
+var _origResolveTicket = resolveTicket;
+function resolveTicket(i) {
+  _origResolveTicket(i);
+  var t = TICKETS[i];
+  writeToSPList(SP_LISTS.tickets, {Title: t.id+': '+t.title, Status: t.status, Priority: t.pri, System: t.sys});
+  triggerFlow('newTicket', {ticket: t, action: t.status==='resolved'?'resolved':'updated'});
+}
+
+// ── ENHANCED: New ticket triggers Flow ──
+// Patch saveMod to also trigger flow for tickets
+var _baseSaveMod = saveMod;
+function saveMod() {
+  var type = document.getElementById('m-title').textContent;
+  if(type.includes('Ticket')) {
+    var v=[...document.querySelectorAll('#m-body .finp,#m-body .fsel,#m-body .ftxt')].map(function(i){return i.value;});
+    if(v[0]&&v[0].trim()){
+      var newT={id:'TKT-'+String(TICKETS.length+1).padStart(3,'0'),title:v[0],sys:v[1]||'Other',pri:v[2]||'medium',status:'open',by:v[3]||'Unknown',campus:v[4]||'Global',created:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),desc:v[5]||'',comments:[]};
+      TICKETS.unshift(newT);
+      saveLS('tickets',TICKETS);
+      // Write to SP + trigger Flow
+      writeToSPList(SP_LISTS.tickets, {Title:newT.id+': '+newT.title, Status:'open', Priority:newT.pri, System:newT.sys, Reporter:newT.by, Campus:newT.campus, Description:newT.desc});
+      triggerFlow('newTicket', {ticket:newT, action:'created', hubUrl:'https://amjarabo.github.io/phsu-hub'});
+      if(typeof renderTickets==='function') renderTickets();
+      toast('Ticket '+newT.id+' created — email notification sent via Power Automate','success');
+      closeMod(); return;
+    }
+  }
+  _baseSaveMod();
+}
+
+// ── SETTINGS: Power Automate configuration tab ──
+function renderPASettings() {
+  var el = document.getElementById('settings-pa');
+  if(!el) return;
+  el.innerHTML = 
+    '<div class="settings-section">' +
+    '<div class="settings-section-title">SharePoint Site</div>' +
+    '<div class="frow"><label class="flbl">Your Operations Site URL</label>' +
+    '<input class="finp" id="pa-sp-site" value="' + SP_SITE + '" placeholder="https://phsu.sharepoint.com/sites/operations"></div>' +
+    '<button class="btn btn-p" onclick="var v=document.getElementById('pa-sp-site').value;if(v){SP_SITE=v;localStorage.setItem('phsu_sp_site',v);toast('Saved!');}">Save Site URL</button>' +
+    '</div>' +
+    '<div class="settings-section">' +
+    '<div class="settings-section-title">Power Automate Webhook URLs</div>' +
+    '<p style="font-size:11px;color:var(--tx2);margin-bottom:12px;line-height:1.6">Create each Flow in <a href="https://make.powerautomate.com" target="_blank">Power Automate</a> using the "When an HTTP request is received" trigger. Paste the generated URL here.</p>' +
+    ['projectUpdate','newTicket','meetingNotes','weeklyDigest'].map(function(k) {
+      var labels = {projectUpdate:'Project Updates (emails watchers on changes)',newTicket:'New Tickets (emails owner + IT)',meetingNotes:'Meeting Notes (emails attendees + creates tasks)',weeklyDigest:'Weekly Digest (emails all staff every Monday)'};
+      return '<div class="frow"><label class="flbl">' + labels[k] + '</label>' +
+        '<div style="display:flex;gap:8px">' +
+        '<input class="finp" id="pa-wh-'+k+'" value="' + (PA_WEBHOOKS[k]||'') + '" placeholder="https://prod-xx.westus.logic.azure.com/...">' +
+        '<button class="btn btn-ghost btn-sm" onclick="saveWebhookURL(''+k+'',document.getElementById('pa-wh-'+k+'').value)">Save</button>' +
+        '<button class="btn btn-sm" onclick="testFlow(''+k+'')">Test</button>' +
+        '</div></div>';
+    }).join('') +
+    '</div>' +
+    '<div class="settings-section">' +
+    '<div class="settings-section-title">SharePoint Lists — Create Once</div>' +
+    '<p style="font-size:11px;color:var(--tx2);margin-bottom:12px">Create these 5 custom lists in your SP site. The hub writes to them; Power Automate reads from them.</p>' +
+    ['HubProjects','HubTickets','HubTasks','HubMeetings','HubNotifications'].map(function(l) {
+      return '<div class="setting-row"><div><div class="setting-label">' + l + '</div><div class="setting-sub">Custom list in your SP site</div></div><button class="btn btn-sm btn-ghost" onclick="window.open(SP_SITE+'/_layouts/15/addanapp.aspx','_blank')">Create</button></div>';
+    }).join('') +
+    '</div>' +
+    '<div class="settings-section">' +
+    '<div class="settings-section-title">Flow Templates (copy these)</div>' +
+    '<div style="background:var(--bg);border-radius:var(--r);padding:12px;font-size:11px;color:var(--tx2);line-height:1.8">' +
+    '<strong>Flow 1 — New Ticket Alert:</strong><br>' +
+    'Trigger: "When HTTP request received"<br>' +
+    'Action 1: Send email (To: dynamic from JSON body → ticket.sys owner)<br>' +
+    'Action 2: Create Outlook task (Title: body.ticket.title, Due: today+2d)<br><br>' +
+    '<strong>Flow 2 — Project Watcher Emails:</strong><br>' +
+    'Trigger: "When HTTP request received"<br>' +
+    'Action: Apply to each → body.watchers → Send email<br><br>' +
+    '<strong>Flow 3 — Meeting Notes → Calendar:</strong><br>' +
+    'Trigger: "When HTTP request received"<br>' +
+    'Action 1: Apply to each → body.tasks → Create Outlook event (title: task.title, start: task.due)<br>' +
+    'Action 2: Apply to each → body.attendees → Send email with meeting summary<br><br>' +
+    '<strong>Flow 4 — Weekly Digest:</strong><br>' +
+    'Trigger: "Recurrence" every Monday 8am<br>' +
+    'Action 1: Get items from HubProjects, HubTickets, HubTasks<br>' +
+    'Action 2: Compose summary HTML<br>' +
+    'Action 3: Send email to all staff distribution list' +
+    '</div></div>';
+}
+
+function testFlow(key) {
+  if(!PA_WEBHOOKS[key]) { toast('No webhook URL set for ' + key, 'warning'); return; }
+  fetch(PA_WEBHOOKS[key], {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({test: true, source: 'PHSU Hub', timestamp: new Date().toISOString()})
+  }).then(function(r){ toast(r.ok ? 'Flow responded OK! ✓' : 'Flow returned error: '+r.status, r.ok?'success':'error', 3000); })
+    .catch(function(){ toast('Could not reach flow — check URL and CORS settings', 'error', 4000); });
+}
+
+// Patch setSettings to render PA tab
+var _origSetSettings = setSettings;
+function setSettings(el, s) {
+  _origSetSettings(el, s);
+  if(s === 'pa') renderPASettings();
+}
 
 </script>
 </body>
