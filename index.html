@@ -763,7 +763,18 @@ button,input,select,textarea{font-family:inherit}
     <div class="sb-label">Resources</div>
     <div class="sb-it" data-tab="docs"><div class="sb-ico">&#128193;</div><span>Documents</span></div>
     <div class="sb-it" data-tab="integrations"><div class="sb-ico">&#9889;</div><span>Integrations</span></div>
-  </div>
+      <div class="sb-it" data-tab="support"><div class="sb-ico">&#127381;</div><span>Support Tickets</span><div class="sb-badge sb-br" id="open-ticket-cnt">8</div></div>
+      <div class="sb-it" data-tab="kb"><div class="sb-ico">&#128218;</div><span>Knowledge Base</span></div>
+      <div class="sb-it" data-tab="training"><div class="sb-ico">&#127979;</div><span>Training Center</span></div>
+    </div>
+    <div class="sb-div"></div>
+    <div class="sb-sec">
+      <div class="sb-label">Workspace</div>
+      <div class="sb-it" data-tab="calendar"><div class="sb-ico">&#128197;</div><span>Calendar</span></div>
+      <div class="sb-it" data-tab="reports"><div class="sb-ico">&#128202;</div><span>Reports</span></div>
+      <div class="sb-it" data-tab="messages"><div class="sb-ico">&#128172;</div><span>Messages</span><div class="sb-badge sb-br">3</div></div>
+    </div>
+    <div class="sb-div"></div>
     <div class="sb-sec"><div class="sb-label">Account</div><div class="sb-it" data-tab="settings"><div class="sb-ico">&#9881;</div><span>Settings</span></div></div>
   <div class="sb-div"></div>
   <div class="sb-bottom">
@@ -1481,11 +1492,7 @@ if(localStorage.getItem("phsu-dark")==="1"){document.documentElement.dataset.dar
 
 // ======== SIDEBAR TOGGLE ========
 let sbCollapsed=false;
-function toggleSidebar(){
-  const sb=document.getElementById("sidebar");
-  if(window.innerWidth<=800){sb.classList.toggle("mob-open")}
-  else{sbCollapsed=!sbCollapsed;sb.classList.toggle("collapsed",sbCollapsed);}
-}
+
 
 // ======== DROPDOWNS ========
 function toggleNotif(){const d=document.getElementById("notif-dd");d.classList.toggle("open");document.getElementById("av-dd").classList.remove("open");}
@@ -1493,12 +1500,7 @@ function toggleAvDD(){const d=document.getElementById("av-dd");d.classList.toggl
 document.addEventListener("click",e=>{if(!e.target.closest("#notif-btn"))document.getElementById("notif-dd").classList.remove("open");if(!e.target.closest(".tb-avatar-wrap"))document.getElementById("av-dd").classList.remove("open");});
 
 // ======== GLOBAL SEARCH ========
-function globalSearch(q){
-  if(!q){return;}
-  const ql=q.toLowerCase();
-  const match=STAFF.find(s=>s.n.toLowerCase().includes(ql)||s.t.toLowerCase().includes(ql));
-  if(match){goTab("staff");setTimeout(()=>{document.getElementById("sf-q").value=q;filterStaff();},100);}
-}
+
 
 // ======== LANGUAGE ========
 let LG="en";
@@ -1512,127 +1514,7 @@ function setLang(lang){
 }
 
 // ======== DRAWER ========
-function openDrw(type,data){
-  const bg=document.getElementById("drw-bg");
-  let ico="",title="",sub="",body="",acts="";
-  if(type==="staff"){
-    const s=STAFF[data];
-    ico=`<div class="av ${s.av}" style="width:44px;height:44px;font-size:15px">${ini(s.n)}</div>`;
-    title=s.n;sub=s.t;
-    body=`<div class="drw-section"><div class="drw-sec-title">Contact</div>
-      <div class="drw-row"><div class="drw-key">Email</div><div class="drw-val"><a href="mailto:${s.e}">${s.e}</a></div></div>
-      <div class="drw-row"><div class="drw-key">Campus</div><div class="drw-val">${s.c}</div></div>
-      <div class="drw-row"><div class="drw-key">Department</div><div class="drw-val">${s.d}</div></div>
-    </div><div class="drw-section"><div class="drw-sec-title">Profile</div>
-      <p style="font-size:12px;color:var(--tx2);line-height:1.7">${s.bio}</p>
-    </div>`;
-    acts=`<a href="mailto:${s.e}" class="btn btn-p">Send Email</a><button class="btn btn-ghost">Edit Profile</button>`;
-  }
-  else if(type==="project"){
-    const p=PROJECTS[data];
-    ico=`<div style="font-size:28px;background:var(--tl);width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">📌</div>`;
-    title=p.n;sub=p.o;
-    body=`<div class="drw-section"><div class="drw-sec-title">Progress</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <span style="font-size:14px;font-weight:700;color:var(--td)">${p.p}% complete</span>${pillH(p.s)}
-      </div>
-      <div class="pbar-lg"><div class="pfill-lg" id="drw-prog" style="width:0;background:${pjCol[p.s]||'var(--teal)'}"></div></div>
-    </div>
-    <div class="drw-section"><div class="drw-sec-title">Details</div>
-      <div class="drw-row"><div class="drw-key">Owner</div><div class="drw-val">${p.o}</div></div>
-      <div class="drw-row"><div class="drw-key">Due Date</div><div class="drw-val">${p.due}</div></div>
-      <div class="drw-row"><div class="drw-key">Sprint</div><div class="drw-val">${p.sprint||"—"}</div></div>
-      <div class="drw-row"><div class="drw-key">Status</div><div class="drw-val">${pillH(p.s)}</div></div>
-    </div>
-    <div class="drw-section"><div class="drw-sec-title">Description</div>
-      <p style="font-size:12px;color:var(--tx2);line-height:1.7">${p.desc}</p>
-    </div>
-    <div class="drw-section"><div class="drw-sec-title">Tags</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap">${(p.tags||[]).map(tg=>`<span class="ctag ct-p">${tg}</span>`).join("")}</div>
-    </div>`;
-    acts=`<button class="btn btn-p" onclick="openModal('project')">Edit Project</button><button class="btn btn-ghost" onclick="goTab('kanban')">View in Kanban</button>`;
-  }
-  else if(type==="program"){
-    const p=PROGRAMS[data];
-    ico=`<div style="font-size:26px;background:var(--tl);width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">${p.icon||"🎓"}</div>`;
-    title=p.name;sub=p.degree;
-    const rows=[["Duration",p.duration],["Tuition",p.tuition],["Apply via",p.apply],["Requirements",p.req],["Accreditation",p.accred]];
-    if(p.tracks)rows.push(["Tracks",p.tracks]);
-    if(p.note)rows.push(["Note",`<strong style="color:var(--teal)">${p.note}</strong>`]);
-    body=`<div class="drw-section"><div class="drw-sec-title">About this program</div>
-      <p style="font-size:12px;color:var(--tx2);line-height:1.7">${p.desc||""}</p>
-    </div>
-    <div class="drw-section">
-      ${rows.map(r=>`<div class="drw-row"><div class="drw-key">${r[0]}</div><div class="drw-val">${r[1]}</div></div>`).join("")}
-      <div style="margin-top:10px;display:flex;gap:5px;flex-wrap:wrap">${p.campuses.map(c=>`<span class="ctag ${cTag[c]||"ct-o"}">${c}</span>`).join("")}${p.modality.includes("Online")?'<span class="ctag ct-o">Online</span>':""}</div>
-    </div>`;
-    acts=`<a href="https://phsu.edu/admissions-and-aid/" target="_blank" class="btn btn-p">How to Apply</a>`;
-  }
-  else if(type==="process"){
-    const p=PROCS[data];
-    ico=`<div style="font-size:26px;background:var(--tl);width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">${p.ico}</div>`;
-    title=p.n;sub=`${p.d} · ${p.o}`;
-    body=`<div class="drw-section"><div class="drw-sec-title">Process Steps</div>
-      <div class="drw-steps">${p.steps.map((s,i)=>`<div class="drw-step"><div class="drw-step-n">${i+1}</div><div style="font-size:12px;color:var(--tx)">${s}</div></div>`).join("")}</div>
-    </div>`;
-    acts=`<button class="btn btn-p" onclick="openModal('process')">Edit Process</button>`;
-  }
-  else if(type==="doc"){
-    const p=DOCS[data.k][data.i];
-    ico=`<div style="font-size:26px;background:var(--tl);width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">${p.i}</div>`;
-    title=p.n;sub=p.m;
-    body=`<div class="drw-section">
-      <div class="drw-row"><div class="drw-key">Type</div><div class="drw-val"><span class="pill ${dCol[p.t]||"pg"}">${p.t}</span></div></div>
-      <div class="drw-row"><div class="drw-key">Owner</div><div class="drw-val">${p.m}</div></div>
-    </div>`;
-    acts=p.url&&p.url!=="#"?`<a href="${p.url}" target="_blank" class="btn btn-p">Open Document</a>`:`<button class="btn btn-p" onclick="alert('Link your OneDrive URL to open this document.')">Open Document</button>`;
-  }
-  else if(type==="integration"){
-    const p=INTS[data];
-    ico=`<div class="ilogo" style="background:${p.bg};color:${p.fg};width:44px;height:44px;font-size:14px">${p.l}</div>`;
-    title=p.n;sub=p.t;
-    body=`<div class="drw-section">
-      <div class="drw-row"><div class="drw-key">Status</div><div class="drw-val"><div class="istatus ${p.s}">${p.sl}</div></div></div>
-    </div>
-    <div class="drw-section"><div class="drw-sec-title">Details</div>
-      <p style="font-size:12px;color:var(--tx2);line-height:1.7">${p.detail}</p>
-    </div>
-    <div class="drw-section"><div class="drw-sec-title">Capabilities</div>
-      <div class="drw-steps">${p.items.map(item=>`<div class="drw-step"><div style="font-size:12px;color:var(--tx)">${item}</div></div>`).join("")}</div>
-    </div>`;
-    acts=`<button class="btn btn-p">Configure</button>`;
-  }
-  else if(type==="raci"){
-    const r=RACI[data.ri];const ci=data.ci;
-    const roleMap={R:"Responsible — does the work",A:"Accountable — owns the outcome",C:"Consulted — provides input",I:"Informed — kept in loop"};
-    const v=r.c[ci];
-    ico=`<div style="font-size:26px;background:var(--tl);width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">📋</div>`;
-    title=r.p;sub=RCOLS[ci].split("|").join(" · ");
-    body=`<div class="drw-section">
-      <div class="drw-row"><div class="drw-key">Assignment</div><div class="drw-val"><span class="rb rb${v}" style="width:32px;height:32px;font-size:13px">${v}</span></div></div>
-      <div class="drw-row"><div class="drw-key">Role</div><div class="drw-val" style="font-size:11px;text-align:right">${roleMap[v]||v}</div></div>
-      <div class="drw-row"><div class="drw-key">Process</div><div class="drw-val">${r.p}</div></div>
-      <div class="drw-row"><div class="drw-key">Department</div><div class="drw-val">${r.d}</div></div>
-      <div class="drw-row"><div class="drw-key">Person</div><div class="drw-val">${RCOLS[ci].split("|")[1]||""}</div></div>
-    </div>`;
-    acts="";
-  }
-  else if(type==="campus"){
-    const p=CAMPUS[data];
-    ico=`<div style="font-size:26px;background:var(--tl);width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center">${p.icon}</div>`;
-    title=p.name;sub="PHSU Campus";
-    body=`<div class="drw-section">${p.rows.map(r=>`<div class="drw-row"><div class="drw-key">${r[0]}</div><div class="drw-val">${r[1]}</div></div>`).join("")}</div>`;
-    acts=`<a href="https://phsu.edu" target="_blank" class="btn btn-p">PHSU Website</a>`;
-  }
 
-  document.getElementById("drw-ico").innerHTML=ico;
-  document.getElementById("drw-title").textContent=title;
-  document.getElementById("drw-sub").textContent=sub;
-  document.getElementById("drw-body").innerHTML=body;
-  document.getElementById("drw-acts").innerHTML=acts;
-  bg.classList.add("open");
-  setTimeout(()=>{const pf=document.getElementById("drw-prog");if(pf){const w=pf.style.background;pf.style.width="0";requestAnimationFrame(()=>{const idx=parseInt(pf.id?.split("-")[2]);pf.style.width=PROJECTS[data]?.p+"%"||"0";})}},60);
-}
 function closeDrw(){document.getElementById("drw-bg").classList.remove("open")}
 function closeDrwBg(e){if(e.target===document.getElementById("drw-bg"))closeDrw()}
 
@@ -1671,12 +1553,7 @@ function openModal(type){
 }
 function closeMod(){document.getElementById("mbg").classList.remove("open")}
 function closeMbg(e){if(e.target===document.getElementById("mbg"))closeMod()}
-function saveMod(){
-  const sv=document.getElementById("m-saved");
-  sv.textContent="Saved! In the full deployed version this writes to your SharePoint List.";
-  sv.style.display="block";
-  setTimeout(closeMod,1800);
-}
+
 
 // ======== RENDER PROGRAMS ========
 let curPF="all";
@@ -1852,31 +1729,7 @@ function renderInts(){
 }
 
 // ======== KANBAN ========
-function renderKanban(){
-  const kb=document.getElementById("kanban-board");
-  if(!kb)return;
-  kb.innerHTML=KANBAN_COLS.map(col=>`
-    <div class="kb-col">
-      <div class="kb-head">
-        <div style="display:flex;align-items:center;gap:7px">
-          <div style="width:8px;height:8px;border-radius:50%;background:${col.color}"></div>
-          <div class="kb-title">${col.title}</div>
-        </div>
-        <div class="kb-cnt">${col.items.length}</div>
-      </div>
-      ${col.items.map((card,ci)=>`
-        <div class="kb-card" onclick="openDrw('project',${PROJECTS.findIndex(p=>p.n.includes(card.title.split(" ")[0]))})">
-          <span class="kb-tag" style="background:${card.tagC};color:${card.tagTC}">${card.tag}</span>
-          <div class="kb-name">${card.title}</div>
-          <div class="kb-pbar"><div class="kb-pfill" style="width:${card.p}%"></div></div>
-          <div class="kb-meta">
-            <div class="kb-avatars">${card.avs.map((av,ai)=>`<div class="kb-av av-${ai===0?"it":"adm"}" style="width:22px;height:22px;font-size:8px">${av}</div>`).join("")}</div>
-            <div class="kb-due">${card.due}</div>
-          </div>
-        </div>`).join("")}
-      <button class="kb-add" onclick="openModal('project')">+ Add Card</button>
-    </div>`).join("");
-}
+
 
 // ======== DASHBOARD FEEDS ========
 function renderDash(){
@@ -1915,12 +1768,7 @@ let ccType="bar";
 function setCCTab(el,type){ccType=type;document.querySelectorAll(".cc-tab").forEach(b=>b.classList.remove("on"));el.classList.add("on");if(projChart){projChart.config.type=type;projChart.update();}}
 
 // ======== TAB ROUTING ========
-function goTab(name){
-  document.querySelectorAll(".sb-it").forEach(i=>i.classList.toggle("on",i.dataset.tab===name));
-  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("active",p.id==="panel-"+name));
-  document.querySelector(".main").scrollTo(0,0);
-  if(name==="dashboard")setTimeout(initCharts,100);
-}
+
 document.querySelectorAll(".sb-it[data-tab]").forEach(i=>i.addEventListener("click",()=>goTab(i.dataset.tab)));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeDrw();closeMod();}});
 
@@ -2138,18 +1986,7 @@ MTITLES.event="Add Calendar Event";
 
 // ======== EXTEND goTab TO INIT NEW PANELS ========
 const _origGoTab=goTab;
-function goTab(name){
-  _origGoTab(name);
-  if(name==="calendar")renderCal();
-  if(name==="reports")renderAnalytics();
-  if(name==="messages")renderMessages();
-  if(name==="settings"&&document.getElementById("settings-profile")){
-    const t=document.getElementById("dark-toggle");
-    if(t)t.classList.toggle("on",document.documentElement.dataset.dark==="1");
-    const ct=document.getElementById("compact-toggle");
-    if(ct)ct.classList.toggle("on",sbCollapsed);
-  }
-}
+
 
 // Add calendar button to dashboard
 setTimeout(()=>{
@@ -2191,66 +2028,7 @@ function loadFromStorage(key,fallback){try{const d=localStorage.getItem("phsu_"+
 
 // Override saveMod to actually save data
 const _origSaveMod=saveMod;
-function saveMod(){
-  const type=document.getElementById("m-title").textContent;
-  const inputs=document.querySelectorAll("#m-body .finp, #m-body .fsel, #m-body .ftxt");
-  const vals=[...inputs].map(i=>i.value);
 
-  if(type.includes("Project")){
-    if(vals[0]&&vals[0].trim()){
-      const newProj={n:vals[0],o:vals[1]||"Unassigned",p:0,s:(vals[3]||"active").toLowerCase().replace(" ",""),due:vals[2]||"TBD",desc:vals[4]||"",tags:[],sprint:vals[3]||""};
-      PROJECTS.unshift(newProj);
-      saveToStorage("projects",PROJECTS);
-      renderProjs();renderDash();
-      if(document.getElementById("panel-kanban").classList.contains("active"))renderKanban();
-      toast("Project added successfully!","success");
-    }
-  }
-  else if(type.includes("Staff")){
-    if(vals[0]&&vals[1]){
-      const ini2=vals[0].split(" ").filter((_,i,a)=>i===0||i===a.length-1).map(x=>x[0]||"").join("").toUpperCase();
-      const newStaff={n:vals[0],e:vals[1],t:vals[2]||"",c:vals[4]||"Global",d:vals[3]||"General",av:"av-gen",bio:`${vals[2]||""} at PHSU.`};
-      STAFF.push(newStaff);
-      saveToStorage("staff",STAFF);
-      renderStaff();
-      toast("Staff member added!","success");
-    }
-  }
-  else if(type.includes("Process")){
-    if(vals[0]){
-      const steps=(vals[2]||"").split("\n").filter(s=>s.trim());
-      PROCS.push({n:vals[0],d:vals[1]||"General",ico:"⬡",o:vals[1]||"",steps});
-      renderProcs();
-      toast("Process added!","success");
-    }
-  }
-  else if(type.includes("Document")){
-    if(vals[0]){
-      const newDoc={i:"📄",n:vals[0],m:vals[3]||"",t:vals[2]||"PDF",url:vals[4]||"#"};
-      DOCS[vals[1]==="Operations"?"o":"s"].unshift(newDoc);
-      saveToStorage("docs",DOCS);
-      renderDocs();
-      toast("Document added!","success");
-    }
-  }
-  else if(type.includes("Event")){
-    if(vals[0]&&vals[1]){
-      CAL_EVENTS.push({date:vals[1],title:vals[0],time:vals[2]||"TBD",campus:vals[3]||"Virtual",color:"#00999A",type:vals[4]||"meeting"});
-      CAL_EVENTS.sort((a,b)=>a.date.localeCompare(b.date));
-      renderCal();
-      toast("Event added to calendar!","success");
-    }
-  }
-  else if(type.includes("RACI")){
-    if(vals[0]){
-      RACI.push({p:vals[0],d:vals[1]||"General",c:Array(RCOLS.length).fill("I")});
-      renderRaci();
-      toast("Process added to RACI!","success");
-    }
-  }
-
-  closeMod();
-}
 
 // ======== ENHANCED GLOBAL SEARCH ========
 function globalSearch(q){
@@ -2930,6 +2708,13 @@ function goTab(name){
   if(name==="support")renderTickets();
   if(name==="kb")renderKB();
   if(name==="training")renderTraining();
+
+  if(name==='support')   { if(typeof renderTickets==='function') renderTickets(); }
+  if(name==='kb')        { if(typeof renderKB==='function') renderKB(); }
+  if(name==='training')  { if(typeof renderTraining==='function') renderTraining(); }
+  if(name==='calendar')  { if(typeof renderCal==='function') renderCal(); }
+  if(name==='reports')   { if(typeof renderAnalytics==='function') renderAnalytics(); }
+  if(name==='messages')  { if(typeof renderMessages==='function') renderMessages(); }
 }
 
 </script>
