@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PHSU Intelligence Platform</title>
+<title>PHSU Analytics Platform</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
@@ -26,7 +26,7 @@
 <div id="loading-screen">
   <div style="font-size:32px">P</div>
   <div class="loader"></div>
-  <p>Loading PHSU Intelligence Platform...</p>
+  <p>Loading PHSU Analytics Platform...</p>
 </div>
 <div style="position:fixed;bottom:20px;right:20px;z-index:200">
   <a href="index.html" style="display:flex;align-items:center;gap:7px;padding:8px 14px;background:rgba(2,71,72,.9);border:1px solid #00999A44;border-radius:20px;color:#00999A;font-size:11px;font-weight:600;text-decoration:none;backdrop-filter:blur(8px);box-shadow:0 4px 16px rgba(0,0,0,.3)">
@@ -203,7 +203,7 @@ function PHSUIntelligence() {
   const [tab, setTab] = useState("overview");
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState([
-    { role: "assistant", content: "Hi Ana! I'm your PHSU data analyst. I have access to your full admissions funnel, touchpoint data, and program performance across all campuses. Ask me anything — or upload a document for analysis." }
+    { role: "assistant", content: "Welcome to PHSU Analytics. I have access to your full admissions funnel, touchpoint data, and program performance across all campuses. Ask me anything — or upload a document for analysis." }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -477,7 +477,7 @@ Provide specific, actionable insights. When asked for recommendations, give conc
                   <button onClick={() => {
                     setChatInput(`Analyze ${p.program}: ${p.apps} apps, ${p.conv}% conversion, dropping at ${p.drop_stage}. What specific actions should we take to improve?`);
                     setTab("analyze");
-                  }} style={{ ...s.btnGhost, padding: "4px 10px", fontSize: 10 }}>Ask Claude</button>
+                  }} style={{ ...s.btnGhost, padding: "4px 10px", fontSize: 10 }}>Analyze</button>
                 </td>
               </tr>
             ))}
@@ -513,10 +513,10 @@ Provide specific, actionable insights. When asked for recommendations, give conc
       <div style={{ ...s.row, marginBottom: 16 }}>
         <div style={{ flex: 1 }}>
           <div style={s.h1}>AI-Generated Insights</div>
-          <div style={{ fontSize: 12, color: C.tx2, marginTop: 3 }}>Based on your admissions data — click any insight to ask Claude for a detailed action plan</div>
+          <div style={{ fontSize: 12, color: C.tx2, marginTop: 3 }}>Based on your admissions data — click any insight for a detailed action plan</div>
         </div>
         <button onClick={() => { setChatInput("Based on all the PHSU admissions data, what are the top 3 highest-ROI improvements we could make this semester?"); setTab("analyze"); }}
-          style={s.btn()}>Ask Claude for More Insights</button>
+          style={s.btn()}>Analyze for More Insights</button>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {INSIGHTS.map((ins, i) => (
@@ -540,11 +540,11 @@ Provide specific, actionable insights. When asked for recommendations, give conc
     </div>
   );
 
-  // ── ANALYZE TAB (Claude Chat) ─────────────────────────────────────────────
+  // ── ANALYZE TAB ─────────────────────────────────────────────
   const AnalyzeTab = () => (
     <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 180px)" }}>
       <div style={{ ...s.row, marginBottom: 14 }}>
-        <div style={s.h1}>Ask Claude</div>
+        <div style={s.h1}>Analyze</div>
         <div style={{ marginLeft: "auto", ...s.row, gap: 8 }}>
           <button onClick={() => setChatMessages([{ role: "assistant", content: "Chat cleared. What would you like to analyze?" }])} style={s.btnGhost}>Clear Chat</button>
           <button onClick={() => setChatInput("What is the single most impactful change PHSU could make to increase enrollment this semester?")} style={s.btn()}>Quick Insight</button>
@@ -579,7 +579,7 @@ Provide specific, actionable insights. When asked for recommendations, give conc
         ))}
         {isLoading && (
           <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.teal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff" }}>C</div>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.teal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff" }}>AI</div>
             <div style={{ padding: "10px 14px", borderRadius: "3px 12px 12px 12px", background: C.bg3 }}>
               <div style={{ display: "flex", gap: 4 }}>
                 {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: C.teal, animation: `pulse 1.2s ease-in-out ${i*0.2}s infinite`, opacity: 0.5 }} />)}
@@ -608,7 +608,7 @@ Provide specific, actionable insights. When asked for recommendations, give conc
         </button>
       </div>
       <div style={{ fontSize: 10, color: C.tx3, marginTop: 6 }}>
-        Upload PDFs, images, or documents for Claude to analyze in context. Supports accreditation docs, reports, exports, etc.
+        Upload PDFs, images, or documents for analysis in context. Supports accreditation docs, reports, exports, etc.
       </div>
     </div>
   );
@@ -641,7 +641,7 @@ Provide specific, actionable insights. When asked for recommendations, give conc
                 </div>
                 <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" }}>
                   <button onClick={() => triggerMakeScenario(sc.id)} style={s.btn()}>▶ Run Now</button>
-                  <button onClick={() => { setChatInput(`Design the full logic for the "${sc.name}" automation scenario for PHSU. Include the exact steps, conditions, data fields from Element451, email templates, and Make.com module configuration.`); setTab("analyze"); }} style={s.btnGhost}>Design with Claude</button>
+                  <button onClick={() => { setChatInput(`Design the full logic for the "${sc.name}" automation scenario for PHSU. Include the exact steps, conditions, data fields from Element451, email templates, and Make.com module configuration.`); setTab("analyze"); }} style={s.btnGhost}>Auto-Design</button>
                 </div>
               </div>
             </div>
@@ -673,7 +673,7 @@ Provide specific, actionable insights. When asked for recommendations, give conc
           <div style={{ ...s.sep }} />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
             {[
-              { label: "Claude API", sub: "AI Analysis\nInsights\nDoc processing", color: C.or },
+              { label: "AI Engine", sub: "Smart Analysis\nInsights\nDoc processing", color: C.or },
               { label: "Power Automate", sub: "Outlook events\nEmail alerts\nTeams notifications", color: "#185FA5" },
               { label: "PHSU Hub", sub: "Dashboard\nReporting\nTeam visibility", color: C.teal },
             ].map(n => (
@@ -709,7 +709,7 @@ Provide specific, actionable insights. When asked for recommendations, give conc
         <div style={{ fontSize: 12, color: C.tx2, marginTop: 3, marginBottom: 20 }}>All credentials are stored locally in your browser only — never sent to any server except the respective API.</div>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {[
-            { label: "Anthropic API Key", val: localApiKey, set: setLocalApiKey, ph: "sk-ant-...", help: "Get from console.anthropic.com → API Keys. Powers the Claude analysis chat." },
+            { label: "Anthropic API Key", val: localApiKey, set: setLocalApiKey, ph: "sk-ant-...", help: "Get from console.anthropic.com → API Keys. Powers the AI analysis engine." },
             { label: "Element451 API Key", val: localE451, set: setLocalE451, ph: "e451_...", help: "Get from Element451 Admin → Settings → Manage Users → Security → API Keys." },
             { label: "Salesforce Access Token", val: localSF, set: setLocalSF, ph: "00D...", help: "Get from Salesforce → Setup → API → OAuth token or Named Credentials." },
           ].map(f => (
@@ -740,7 +740,7 @@ Provide specific, actionable insights. When asked for recommendations, give conc
     ["overview", "📊 Overview"],
     ["programs", "🎓 Programs"],
     ["insights", "💡 Insights"],
-    ["analyze", "🤖 Ask Claude"],
+    ["analyze", "🔍 Analysis"],
     ["automation", "⚡ Automation"],
     ["settings", "⚙ Settings"],
   ];
@@ -758,8 +758,8 @@ Provide specific, actionable insights. When asked for recommendations, give conc
       <div style={s.topbar}>
         <div style={s.logo}>P</div>
         <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>PHSU Intelligence Platform</div>
-          <div style={{ fontSize: 10, color: C.tx3 }}>Admissions Analytics · AI Analysis · Automation</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>PHSU Analytics Platform</div>
+          <div style={{ fontSize: 10, color: C.tx3 }}>Admissions Analytics · Smart Analysis · Automation</div>
         </div>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
           <button onClick={fetchAll} style={{ ...s.btn(), padding: "6px 12px", fontSize: 11 }}>↻ Sync All Data</button>
