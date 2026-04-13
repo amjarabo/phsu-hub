@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>PHSU Operations Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" async></script>
 <style>/* panels hidden by default — JS shows them via inline style */
 .panel { display: none; }
 
@@ -382,8 +382,8 @@ button,input,select,textarea{font-family:inherit}
 .qstat-l{font-size:10px;color:var(--tx2);font-weight:500;margin-top:2px}
 
 /* DRAWER */
-.drw-bg{position:fixed;inset:0;background:rgba(1,46,47,.52);z-index:400;display:flex;align-items:flex-end;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(4px)}
-.drw-bg.open{opacity:1;pointer-events:all}
+.drw-bg{position:fixed;inset:0;background:rgba(1,46,47,.52);z-index:400;display:none;align-items:flex-end;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .2s}
+.drw-bg.open{display:flex;opacity:1;pointer-events:all}
 .drw{background:var(--w);width:480px;max-width:95vw;height:100%;overflow-y:auto;box-shadow:var(--shlg);transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
 .drw-bg.open .drw{transform:translateX(0)}
 .drw-head{padding:18px 20px 14px;border-bottom:1px solid var(--bdr);position:sticky;top:0;background:var(--w);z-index:5;display:flex;align-items:flex-start;gap:12px}
@@ -407,7 +407,7 @@ button,input,select,textarea{font-family:inherit}
 .pfill-lg{height:8px;border-radius:4px;background:linear-gradient(90deg,var(--teal),var(--tm));transition:width .8s ease}
 
 /* MODAL */
-.mbg{position:fixed;inset:0;background:rgba(1,46,47,.48);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(3px)}
+.mbg{position:fixed;inset:0;background:rgba(1,46,47,.48);z-index:500;align-items:center;justify-content:center;display:none;transition:opacity .2s;backdrop-filter:blur(3px)}
 .mbg.open{opacity:1;pointer-events:all}
 .mbox{background:var(--w);border-radius:var(--rxl);padding:24px;width:92%;max-width:490px;box-shadow:var(--shlg);transform:scale(.96);transition:transform .22s}
 .mbg.open .mbox{transform:scale(1)}
@@ -1832,9 +1832,10 @@ function openDrw(type,data){
   document.getElementById('drw-sub').textContent=sub;
   document.getElementById('drw-body').innerHTML=body;
   document.getElementById('drw-acts').innerHTML=acts;
-  bg.classList.add('open');
+  bg.style.display='flex';
+  requestAnimationFrame(()=>bg.classList.add('open'));
 }
-function closeDrw(){document.getElementById('drw-bg').classList.remove('open');}
+function closeDrw(){const bg=document.getElementById('drw-bg');bg.classList.remove('open');bg.style.display='none';}
 
 // ── GLOBAL SEARCH ──
 function globalSearch(q){
@@ -1998,11 +1999,14 @@ function renderDash(){
     if(el){el.style.cursor='pointer';el.onclick=()=>openDrw('campus',k);}
   });
 
-  setTimeout(()=>{
-    ['spark1','spark2','spark3','spark4'].forEach((id,i)=>{const el=document.getElementById(id);if(!el||el._done)return;el._done=true;const data=[[400,420,410,450,480,500],[32,35,36,38,40,41],[5,6,7,6,7,7],[4,5,6,6,7,8]][i];new Chart(el,{type:'line',data:{labels:['','','','','',''],datasets:[{data,borderColor:['var(--teal)','#378ADD','var(--or)','var(--pu)'][i],borderWidth:1.5,pointRadius:0,tension:.4,fill:true,backgroundColor:['rgba(0,153,154,.1)','rgba(55,138,221,.1)','rgba(232,146,10,.1)','rgba(123,97,255,.1)'][i]}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});});
-    if(!projChart){const pc=document.getElementById('proj-chart');if(pc)projChart=new Chart(pc,{type:'bar',data:{labels:PROJECTS.map(p=>p.n.length>14?p.n.slice(0,14)+'…':p.n),datasets:[{label:'Progress %',data:PROJECTS.map(p=>p.p),backgroundColor:PROJECTS.map(p=>pjCol[p.s]||'var(--teal)'),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{max:100,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:9}}}}}});}
-    if(!deptChart){const dc=document.getElementById('dept-chart');if(dc){const depts={};STAFF.forEach(s=>{depts[s.d]=(depts[s.d]||0)+1;});const labels=Object.keys(depts),data2=Object.values(depts);deptChart=new Chart(dc,{type:'doughnut',data:{labels,datasets:[{data:data2,backgroundColor:['#00999A','#F7951D','#185FA5','#7B61FF','#1D9E75','#D84040','#E8920A','#5DCAA5'].slice(0,labels.length),borderWidth:0,hoverOffset:4}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:8}}}}});}}
-  },100);
+  // Charts — deferred, non-blocking, safe
+  function tryInitCharts(){
+    if(typeof Chart==='undefined'){setTimeout(tryInitCharts,200);return;}
+    try{['spark1','spark2','spark3','spark4'].forEach((id,i)=>{const el=document.getElementById(id);if(!el||el._done)return;el._done=true;const data=[[400,420,410,450,480,500],[32,35,36,38,40,41],[5,6,7,6,7,7],[4,5,6,6,7,8]][i];new Chart(el,{type:'line',data:{labels:['','','','','',''],datasets:[{data,borderColor:['var(--teal)','#378ADD','var(--or)','var(--pu)'][i],borderWidth:1.5,pointRadius:0,tension:.4,fill:true,backgroundColor:['rgba(0,153,154,.1)','rgba(55,138,221,.1)','rgba(232,146,10,.1)','rgba(123,97,255,.1)'][i]}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});})}catch(e){}
+    try{if(!projChart){const pc=document.getElementById('proj-chart');if(pc)projChart=new Chart(pc,{type:'bar',data:{labels:PROJECTS.map(p=>p.n.length>14?p.n.slice(0,14)+'…':p.n),datasets:[{label:'Progress %',data:PROJECTS.map(p=>p.p),backgroundColor:PROJECTS.map(p=>pjCol[p.s]||'var(--teal)'),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{max:100,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:9}}}}}});}}catch(e){}
+    try{if(!deptChart){const dc=document.getElementById('dept-chart');if(dc){const depts={};STAFF.forEach(s=>{depts[s.d]=(depts[s.d]||0)+1;});const labels=Object.keys(depts),data2=Object.values(depts);deptChart=new Chart(dc,{type:'doughnut',data:{labels,datasets:[{data:data2,backgroundColor:['#00999A','#F7951D','#185FA5','#7B61FF','#1D9E75','#D84040','#E8920A','#5DCAA5'].slice(0,labels.length),borderWidth:0,hoverOffset:4}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:8}}}}});}}}catch(e){}
+  }
+  setTimeout(tryInitCharts,300);
 }
 
 
@@ -2212,9 +2216,26 @@ function closeMobMore(){document.getElementById('mob-more-sheet').classList.remo
     sessionStorage.setItem('phsu-w','1');
   }
 
+  // Wire campus cards (in case renderDash onclick didn't attach)
+  setTimeout(()=>{
+    [['campus-ponce','ponce'],['campus-stl','stl'],['campus-sj','sj'],['campus-bvi','bvi']].forEach(([id,key])=>{
+      const el=document.getElementById(id);
+      if(el){el.style.cursor='pointer';el.onclick=function(){openDrw('campus',key);};}
+    });
+    // Wire mob nav items explicitly
+    document.querySelectorAll('.mob-nav-item[data-tab]').forEach(el=>{
+      el.addEventListener('click',function(e){
+        e.stopPropagation();
+        goTab(el.dataset.tab);
+        document.querySelectorAll('.mob-nav-item').forEach(i=>i.classList.remove('on'));
+        el.classList.add('on');
+      });
+    });
+    // Wire more button
+    const moreBtn=document.querySelector('.mob-nav-item:not([data-tab])');
+    if(moreBtn)moreBtn.addEventListener('click',openMobMore);
+  },100);
+
   console.log('[PHSU Hub v5] Ready ✓');
 })();
 
-</script>
-</body>
-</html>
