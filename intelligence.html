@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHSU Intelligence Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0A0E14; color: #E8EDF5; font-family: 'Sora', sans-serif; }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-thumb { background: #1E2D3D; border-radius: 4px; }
+  select, input, textarea { font-family: inherit; }
+  select option { background: #182030; color: #E8EDF5; }
+  @keyframes pulse { 0%,100% { opacity:.3; transform:scale(.8); } 50% { opacity:1; transform:scale(1); } }
+  #loading-screen { position:fixed; inset:0; background:#0A0E14; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; z-index:9999; transition:opacity .3s; }
+  .loader { width:40px; height:40px; border:3px solid #1E2D3D; border-top-color:#00999A; border-radius:50%; animation:spin .8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  #loading-screen p { color:#4A6580; font-size:13px; font-family:sans-serif; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loading-screen">
+  <div style="font-size:32px">P</div>
+  <div class="loader"></div>
+  <p>Loading PHSU Intelligence Platform...</p>
+</div>
+<div style="position:fixed;bottom:20px;right:20px;z-index:200">
+  <a href="index.html" style="display:flex;align-items:center;gap:7px;padding:8px 14px;background:rgba(2,71,72,.9);border:1px solid #00999A44;border-radius:20px;color:#00999A;font-size:11px;font-weight:600;text-decoration:none;backdrop-filter:blur(8px);box-shadow:0 4px 16px rgba(0,0,0,.3)">
+    &#8592; Back to Ops Hub
+  </a>
+</div>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useCallback } = React;
+
+
+// ── PALETTE ──────────────────────────────────────────────────────────────────
+const C = {
+  teal: "#00999A", td: "#024748", txd: "#012E2F", tm: "#5DCAA5",
+  or: "#F7951D", od: "#C4721A",
+  bg: "#0A0E14", bg2: "#111822", bg3: "#182030",
+  border: "#1E2D3D", border2: "#243648",
+  tx: "#E8EDF5", tx2: "#8BA3BE", tx3: "#4A6580",
+  gn: "#1DB88A", rd: "#E03C3C", am: "#F0950C", pu: "#7B61FF",
+  card: "rgba(16,28,44,0.85)",
+};
+
+// ── SAMPLE DATA (replaces live API until credentials entered) ─────────────────
+const SAMPLE = {
+  summary: {
+    total_applications: 2847, accepted: 1203, enrolled: 891,
+    conversion_rate: 74.1, avg_touchpoints: 8.3, response_rate: 68.4,
+    delta_apps: +12, delta_enroll: +5, delta_conv: -1.2,
+  },
+  by_campus: [
+    { campus: "Ponce PR",     apps: 1820, accepted: 780, enrolled: 560, conv: 71.8, touchpoints: 9.1, calls: 3240, emails: 12400, sms: 8900 },
+    { campus: "St. Louis",    apps: 650,  accepted: 280, enrolled: 210, conv: 75.0, touchpoints: 7.8, calls: 1180, emails: 4200,  sms: 3100 },
+    { campus: "San Juan PR",  apps: 280,  accepted: 112, enrolled: 96,  conv: 85.7, touchpoints: 8.9, calls: 490,  emails: 1900,  sms: 1200 },
+    { campus: "Tortola BVI",  apps: 97,   accepted: 31,  enrolled: 25,  conv: 80.6, touchpoints: 6.2, calls: 180,  emails: 620,   sms: 410  },
+  ],
+  by_program: [
+    { program: "MD (LCME)",    apps: 680,  conv: 69.2, avg_gpa: 3.42, drop_stage: "Document Review", touchpoints: 11.2 },
+    { program: "MSMS",         apps: 720,  conv: 81.3, avg_gpa: 3.18, drop_stage: "Payment",         touchpoints: 7.4  },
+    { program: "PsyD",         apps: 390,  conv: 78.5, avg_gpa: 3.55, drop_stage: "Interview",       touchpoints: 9.8  },
+    { program: "BSN",          apps: 410,  conv: 72.0, avg_gpa: 3.31, drop_stage: "Enrollment Agr.", touchpoints: 6.9  },
+    { program: "MPH",          apps: 220,  conv: 76.4, avg_gpa: 3.28, drop_stage: "FAFSA",           touchpoints: 8.1  },
+    { program: "DMD",          apps: 180,  conv: 65.0, avg_gpa: 3.48, drop_stage: "Document Review", touchpoints: 10.4 },
+    { program: "PhD Clinical", apps: 130,  conv: 88.5, avg_gpa: 3.71, drop_stage: "Interview",       touchpoints: 12.1 },
+    { program: "DrPH",         apps: 117,  conv: 83.8, avg_gpa: 3.62, drop_stage: "FAFSA",           touchpoints: 9.3  },
+  ],
+  by_term: [
+    { term: "Fall 2023",   apps: 2210, enrolled: 740, conv: 70.1 },
+    { term: "Spring 2024", apps: 1840, enrolled: 620, conv: 72.4 },
+    { term: "Fall 2024",   apps: 2560, enrolled: 840, conv: 73.8 },
+    { term: "Spring 2025", apps: 1920, enrolled: 670, conv: 74.9 },
+    { term: "Fall 2025",   apps: 2847, enrolled: 891, conv: 74.1 },
+  ],
+  funnel: [
+    { stage: "Inquiry",          count: 8420, pct: 100 },
+    { stage: "Application Started", count: 4180, pct: 49.6 },
+    { stage: "App Submitted",    count: 2847, pct: 33.8 },
+    { stage: "Docs Complete",    count: 2210, pct: 26.2 },
+    { stage: "Under Review",     count: 1890, pct: 22.4 },
+    { stage: "Accepted",         count: 1203, pct: 14.3 },
+    { stage: "Enrolled",         count: 891,  pct: 10.6 },
+  ],
+  touchpoint_effectiveness: [
+    { type: "Personalized Email", sent: 18420, opened: 11940, clicked: 4820, conv: 12.4 },
+    { type: "SMS / Text",         sent: 13610, opened: 11900, clicked: 6200, conv: 16.8 },
+    { type: "Phone Call",         sent: 5090,  opened: 3180,  clicked: 2940, conv: 22.3 },
+    { type: "Bulk Email",         sent: 42000, opened: 14700, clicked: 2940, conv: 3.8  },
+    { type: "Event Invitation",   sent: 3200,  opened: 2100,  clicked: 1840, conv: 28.1 },
+    { type: "Chatbot",            sent: 9800,  opened: 9800,  clicked: 7200, conv: 9.2  },
+  ],
+  drop_off_reasons: [
+    { reason: "Financial concerns",       pct: 34 },
+    { reason: "Chose another school",     pct: 22 },
+    { reason: "No response after 7 days", pct: 18 },
+    { reason: "Document delays",          pct: 13 },
+    { reason: "Program not available",    pct: 8  },
+    { reason: "Unknown",                  pct: 5  },
+  ],
+};
+
+const INSIGHTS = [
+  { icon: "📞", priority: "critical", title: "Phone calls convert 22% — use them more", body: "Event invitations (28%) and calls (22%) far outperform bulk email (4%). Shift 20% of bulk email budget to personalized outreach to gain ~180 additional enrollments.", action: "Build targeted call list" },
+  { icon: "💸", priority: "high", title: "34% drop due to financial concerns — FAFSA timing", body: "Largest drop-off reason is financial. MSMS and MPH lose applicants at FAFSA stage. Auto-trigger financial aid counseling touchpoint at day 3 of application.", action: "Create FA automation" },
+  { icon: "⏱", priority: "high", title: "18% lost to no follow-up after 7 days", body: "Applications with no touchpoint after 7 days have <4% conversion. A simple 48-hour auto-reply sequence in Element451 would recover ~160 enrollments annually.", action: "Set up re-engagement flow" },
+  { icon: "🎯", priority: "medium", title: "San Juan converts at 86% — replicate that playbook", body: "San Juan outperforms all other campuses by 10+ points. Their avg touchpoint count (8.9) and touchpoint mix skews heavily personalized. Document and scale.", action: "Export SJ playbook" },
+  { icon: "📄", priority: "medium", title: "Document review is the #1 bottleneck for MD + DMD", body: "MD and DMD lose the most applicants at document verification. An automated checklist reminder at day 1, 3, and 7 after submission would reduce this.", action: "Add doc reminders to E451" },
+  { icon: "📈", priority: "low", title: "PhD Clinical at 89% — what's working?", body: "PhD Clinical Psychology has the highest conversion rate across all programs. Factor: 12.1 avg touchpoints and more interview offers. Use this data for other programs.", action: "Analyze PhD flow" },
+];
+
+// ── MINI CHART COMPONENTS ─────────────────────────────────────────────────────
+function BarChart({ data, keyX, keyY, color = C.teal, height = 120 }) {
+  const max = Math.max(...data.map(d => d[keyY]));
+  return (
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height, padding: "4px 0" }}>
+      {data.map((d, i) => (
+        <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+          <div style={{ width: "100%", background: `${color}22`, borderRadius: "3px 3px 0 0", height: height - 20, position: "relative" }}>
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0,
+              background: `linear-gradient(180deg,${color}CC,${color})`,
+              height: `${(d[keyY] / max) * 100}%`,
+              borderRadius: "3px 3px 0 0",
+              transition: "height 0.6s ease",
+            }} />
+          </div>
+          <span style={{ fontSize: 9, color: C.tx3, whiteSpace: "nowrap", overflow: "hidden", maxWidth: "100%", textOverflow: "ellipsis" }}>{d[keyX]}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FunnelViz({ data }) {
+  const max = data[0].count;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      {data.map((d, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 110, fontSize: 10, color: C.tx2, textAlign: "right", flexShrink: 0 }}>{d.stage}</div>
+          <div style={{ flex: 1, height: 22, background: `${C.teal}11`, borderRadius: 4, position: "relative", overflow: "hidden" }}>
+            <div style={{
+              position: "absolute", left: 0, top: 0, bottom: 0,
+              width: `${(d.count / max) * 100}%`,
+              background: `linear-gradient(90deg,${C.teal}CC,${C.tm})`,
+              borderRadius: 4,
+              display: "flex", alignItems: "center", paddingLeft: 8,
+            }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "#fff", whiteSpace: "nowrap" }}>{d.count.toLocaleString()}</span>
+            </div>
+          </div>
+          <div style={{ width: 36, fontSize: 10, color: C.tx3, flexShrink: 0 }}>{d.pct}%</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DonutMini({ value, max, color, size = 48 }) {
+  const pct = (value / max) * 100;
+  const r = 18, circ = 2 * Math.PI * r;
+  const dash = (pct / 100) * circ;
+  return (
+    <svg width={size} height={size} viewBox="0 0 44 44">
+      <circle cx="22" cy="22" r={r} fill="none" stroke={`${color}22`} strokeWidth={5} />
+      <circle cx="22" cy="22" r={r} fill="none" stroke={color} strokeWidth={5}
+        strokeDasharray={`${dash} ${circ - dash}`} strokeDashoffset={circ / 4}
+        strokeLinecap="round" style={{ transition: "stroke-dasharray 0.6s ease" }} />
+      <text x="22" y="26" textAnchor="middle" fontSize="10" fontWeight="700" fill={color}>{Math.round(pct)}%</text>
+    </svg>
+  );
+}
+
+function TrendLine({ data, color = C.teal, height = 40 }) {
+  const max = Math.max(...data), min = Math.min(...data);
+  const range = max - min || 1;
+  const w = 120, h = height;
+  const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * (h - 8) - 4}`).join(" ");
+  const area = `M0,${h} L${pts.split(" ").map(p => p).join(" L")} L${w},${h} Z`;
+  return (
+    <svg width={w} height={h} style={{ overflow: "visible" }}>
+      <defs>
+        <linearGradient id={`tg${color.replace("#","")}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={area} fill={`url(#tg${color.replace("#","")})`} />
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+// ── MAIN COMPONENT ────────────────────────────────────────────────────────────
+function PHSUIntelligence() {
+  const [tab, setTab] = useState("overview");
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState([
+    { role: "assistant", content: "Hi Ana! I'm your PHSU data analyst. I have access to your full admissions funnel, touchpoint data, and program performance across all campuses. Ask me anything — or upload a document for analysis." }
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadedFileB64, setUploadedFileB64] = useState(null);
+  const [activeInsight, setActiveInsight] = useState(null);
+  const [filterCampus, setFilterCampus] = useState("All");
+  const [filterProgram, setFilterProgram] = useState("All");
+  const [filterTerm, setFilterTerm] = useState("Fall 2025");
+  const [apiKey, setApiKey] = useState("");
+  const [e451Key, setE451Key] = useState("");
+  const [sfKey, setSfKey] = useState("");
+  const [showConfig, setShowConfig] = useState(false);
+  const [fetchStatus, setFetchStatus] = useState({});
+  const chatEndRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
+
+  // ── DATA FETCH SIMULATION ──────────────────────────────────────────────────
+  const fetchLiveData = useCallback(async (source) => {
+    setFetchStatus(s => ({ ...s, [source]: "loading" }));
+    await new Promise(r => setTimeout(r, 1800 + Math.random() * 1200));
+    setFetchStatus(s => ({ ...s, [source]: "done" }));
+  }, []);
+
+  const fetchAll = () => {
+    ["element451", "salesforce", "fabric"].forEach(fetchLiveData);
+  };
+
+  // ── CLAUDE API CHAT ────────────────────────────────────────────────────────
+  const sendMessage = async () => {
+    if (!chatInput.trim() && !uploadedFile) return;
+    const userMsg = chatInput.trim();
+    setChatInput("");
+    const newMessages = [...chatMessages, { role: "user", content: userMsg || `[Uploaded: ${uploadedFile?.name}]` }];
+    setChatMessages(newMessages);
+    setIsLoading(true);
+
+    const systemPrompt = `You are Ana Jarabo's personal data analyst for Ponce Health Sciences University (PHSU). You have full access to PHSU admissions data across 4 campuses (Ponce PR, St. Louis MO, San Juan PR, Tortola BVI) and 13 programs.
+
+CURRENT DATA SNAPSHOT (Fall 2025):
+- Total Applications: 2,847 | Accepted: 1,203 | Enrolled: 891
+- Conversion Rate: 74.1% | Avg Touchpoints per Student: 8.3
+- Top performing campus: San Juan PR (86% conversion)
+- Lowest converting program: DMD (65%)
+- Biggest drop-off reason: Financial concerns (34%)
+- Best touchpoint type: Event invitations (28% conv), Phone calls (22%)
+- Worst: Bulk email (4% conv)
+- 18% of applicants are lost due to no follow-up after 7 days
+
+Campus breakdown:
+- Ponce PR: 1,820 apps, 71.8% conv, 9.1 avg touchpoints
+- St. Louis: 650 apps, 75% conv, 7.8 avg touchpoints  
+- San Juan: 280 apps, 85.7% conv, 8.9 avg touchpoints
+- BVI: 97 apps, 80.6% conv, 6.2 avg touchpoints
+
+Key systems: Element451 (CRM), Salesforce, Microsoft Fabric (data lake), Power Automate, SharePoint
+
+Provide specific, actionable insights. When asked for recommendations, give concrete steps. Reference specific PHSU programs, staff, and systems. Be direct and concise — Ana is a Salesforce admin and ops expert who wants data, not fluff. Format recommendations with clear action steps.`;
+
+    try {
+      const key = apiKey || ""; // Use configured key
+      const contentArray = [];
+      
+      if (uploadedFileB64 && uploadedFile) {
+        const isImage = uploadedFile.type.startsWith("image/");
+        const isPDF = uploadedFile.type === "application/pdf";
+        if (isImage) {
+          contentArray.push({ type: "image", source: { type: "base64", media_type: uploadedFile.type, data: uploadedFileB64 } });
+        } else if (isPDF) {
+          contentArray.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: uploadedFileB64 } });
+        }
+        setUploadedFile(null); setUploadedFileB64(null);
+      }
+      contentArray.push({ type: "text", text: userMsg || "Please analyze this document in the context of PHSU admissions and operations." });
+
+      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: [
+            ...newMessages.slice(1, -1).map(m => ({ role: m.role, content: m.content })),
+            { role: "user", content: contentArray }
+          ]
+        })
+      });
+      const data = await resp.json();
+      const reply = data.content?.[0]?.text || "I couldn't generate a response. Check your API key in Settings.";
+      setChatMessages(prev => [...prev, { role: "assistant", content: reply }]);
+    } catch (e) {
+      setChatMessages(prev => [...prev, { role: "assistant", content: "Connection error. Make sure you've entered your Anthropic API key in ⚙ Settings." }]);
+    }
+    setIsLoading(false);
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    setUploadedFile(file);
+    const reader = new FileReader();
+    reader.onload = ev => setUploadedFileB64(ev.target.result.split(",")[1]);
+    reader.readAsDataURL(file);
+  };
+
+  // ── MAKE.COM TRIGGER ───────────────────────────────────────────────────────
+  const triggerMakeScenario = async (scenarioName) => {
+    const webhookUrl = localStorage.getItem(`phsu_make_${scenarioName}`);
+    if (!webhookUrl) {
+      alert(`No Make.com webhook URL set for "${scenarioName}".\n\nGo to ⚙ Settings → Automation to add it.`);
+      return;
+    }
+    try {
+      await fetch(webhookUrl, { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ source: "PHSU_Hub", scenario: scenarioName, timestamp: new Date().toISOString(), filter: { campus: filterCampus, program: filterProgram, term: filterTerm } })
+      });
+      alert(`✅ Make.com scenario "${scenarioName}" triggered!`);
+    } catch { alert("Could not reach Make.com webhook. Check the URL in Settings."); }
+  };
+
+  // ── STYLES ─────────────────────────────────────────────────────────────────
+  const s = {
+    app: { fontFamily: "'Sora', sans-serif", background: C.bg, color: C.tx, minHeight: "100vh", fontSize: 13, lineHeight: 1.5 },
+    topbar: { background: `linear-gradient(135deg,${C.txd},${C.td})`, height: 52, display: "flex", alignItems: "center", padding: "0 20px", gap: 14, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 100 },
+    logo: { width: 30, height: 30, background: C.teal, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: "#fff" },
+    tabs: { display: "flex", gap: 2, padding: "0 16px", borderBottom: `1px solid ${C.border}`, background: C.bg2, position: "sticky", top: 52, zIndex: 99 },
+    tab: (active) => ({ padding: "10px 16px", fontSize: 12, fontWeight: active ? 700 : 500, color: active ? C.teal : C.tx2, borderBottom: `2px solid ${active ? C.teal : "transparent"}`, cursor: "pointer", whiteSpace: "nowrap", transition: "all .15s" }),
+    main: { padding: "20px 20px 40px", maxWidth: 1400, margin: "0 auto" },
+    grid2: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 },
+    grid3: { display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 },
+    grid4: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 },
+    card: { background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, backdropFilter: "blur(8px)" },
+    cardHover: { background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, backdropFilter: "blur(8px)", cursor: "pointer", transition: "all .2s" },
+    kpi: { background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "14px 16px" },
+    label: { fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".8px", color: C.tx3, marginBottom: 4 },
+    h1: { fontSize: 22, fontWeight: 700, color: C.tx, fontFamily: "'Crimson Pro', serif", letterSpacing: "-.3px" },
+    h2: { fontSize: 14, fontWeight: 700, color: C.tx, marginBottom: 14 },
+    bignum: { fontSize: 32, fontWeight: 300, color: "#fff", fontFamily: "'Crimson Pro', serif", lineHeight: 1 },
+    pill: (color) => ({ display: "inline-flex", alignItems: "center", padding: "2px 8px", borderRadius: 20, fontSize: 10, fontWeight: 700, background: `${color}22`, color }),
+    btn: (color = C.teal) => ({ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 7, fontSize: 11, fontWeight: 600, background: `linear-gradient(135deg,${color},${color}CC)`, color: "#fff", cursor: "pointer", border: "none", transition: "all .15s" }),
+    btnGhost: { display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 14px", borderRadius: 7, fontSize: 11, fontWeight: 600, background: "transparent", color: C.teal, cursor: "pointer", border: `1px solid ${C.teal}33`, transition: "all .15s" },
+    inp: { width: "100%", padding: "9px 12px", borderRadius: 8, border: `1px solid ${C.border2}`, background: C.bg3, color: C.tx, fontSize: 12, outline: "none", boxSizing: "border-box" },
+    row: { display: "flex", alignItems: "center", gap: 10 },
+    sep: { height: 1, background: C.border, margin: "14px 0" },
+  };
+
+  const Stat = ({ label, value, delta, color = C.teal, sparkData }) => (
+    <div style={s.kpi}>
+      <div style={s.label}>{label}</div>
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+        <div>
+          <div style={s.bignum}>{value}</div>
+          {delta !== undefined && (
+            <div style={{ fontSize: 11, color: delta >= 0 ? C.gn : C.rd, marginTop: 3, fontWeight: 600 }}>
+              {delta >= 0 ? "↑" : "↓"} {Math.abs(delta)}{typeof delta === "number" && delta < 100 ? "%" : ""}
+            </div>
+          )}
+        </div>
+        {sparkData && <TrendLine data={sparkData} color={color} height={44} />}
+      </div>
+    </div>
+  );
+
+  const FilterBar = () => (
+    <div style={{ ...s.row, marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
+      {[["Campus", filterCampus, setFilterCampus, ["All", "Ponce PR", "St. Louis", "San Juan PR", "Tortola BVI"]],
+        ["Program", filterProgram, setFilterProgram, ["All", "MD", "MSMS", "PsyD", "BSN", "MPH", "DMD", "PhD", "DrPH"]],
+        ["Term", filterTerm, setFilterTerm, ["Fall 2025", "Spring 2025", "Fall 2024", "Spring 2024"]]
+      ].map(([label, val, setter, opts]) => (
+        <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ fontSize: 10, color: C.tx3, fontWeight: 700 }}>{label}</span>
+          <select value={val} onChange={e => setter(e.target.value)} style={{ ...s.inp, width: "auto", padding: "5px 10px", fontSize: 11 }}>
+            {opts.map(o => <option key={o}>{o}</option>)}
+          </select>
+        </div>
+      ))}
+      <button onClick={fetchAll} style={s.btn()}>↻ Refresh Data</button>
+      {Object.entries(fetchStatus).map(([k, v]) => (
+        <span key={k} style={s.pill(v === "done" ? C.gn : C.am)}>
+          {v === "loading" ? "⏳" : "✓"} {k}
+        </span>
+      ))}
+    </div>
+  );
+
+  // ── OVERVIEW TAB ──────────────────────────────────────────────────────────
+  const OverviewTab = () => (
+    <div>
+      <FilterBar />
+      <div style={{ ...s.grid4, marginBottom: 14 }}>
+        <Stat label="Total Applications" value="2,847" delta={12} sparkData={[2100,2300,2210,2560,2760,2847]} />
+        <Stat label="Enrolled" value="891" delta={5} color={C.gn} sparkData={[660,740,620,840,820,891]} />
+        <Stat label="Conversion Rate" value="74.1%" delta={-1.2} color={C.am} sparkData={[70.1,72.4,73.8,74.9,74.2,74.1]} />
+        <Stat label="Avg Touchpoints" value="8.3" delta={0.4} color={C.pu} sparkData={[7.1,7.5,7.8,8.0,8.2,8.3]} />
+      </div>
+      <div style={s.grid2}>
+        <div style={s.card}>
+          <div style={s.h2}>Admissions Funnel</div>
+          <FunnelViz data={SAMPLE.funnel} />
+        </div>
+        <div style={s.card}>
+          <div style={s.h2}>Applications by Campus</div>
+          <BarChart data={SAMPLE.by_campus} keyX="campus" keyY="apps" color={C.teal} height={140} />
+          <div style={{ ...s.sep }} />
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            {SAMPLE.by_campus.map(c => (
+              <div key={c.campus} style={{ flex: 1, minWidth: 80 }}>
+                <div style={{ fontSize: 10, color: C.tx3 }}>{c.campus.split(" ")[0]}</div>
+                <DonutMini value={c.conv} max={100} color={c.conv > 80 ? C.gn : c.conv > 70 ? C.teal : C.am} size={52} />
+                <div style={{ fontSize: 9, color: C.tx3, textAlign: "center" }}>conv.</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div style={{ ...s.card, marginTop: 14 }}>
+        <div style={s.h2}>Touchpoint Effectiveness</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+          {SAMPLE.touchpoint_effectiveness.map(t => (
+            <div key={t.type} style={{ background: C.bg3, borderRadius: 8, padding: 12 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.tx, marginBottom: 6 }}>{t.type}</div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                <span style={{ fontSize: 10, color: C.tx3 }}>Sent</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: C.tx }}>{t.sent.toLocaleString()}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 10, color: C.tx3 }}>Conversion</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: t.conv > 20 ? C.gn : t.conv > 10 ? C.teal : C.tx2 }}>{t.conv}%</span>
+              </div>
+              <div style={{ height: 4, background: `${C.teal}22`, borderRadius: 2 }}>
+                <div style={{ height: 4, borderRadius: 2, background: t.conv > 20 ? C.gn : t.conv > 10 ? C.teal : C.am, width: `${(t.conv / 30) * 100}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── PROGRAMS TAB ──────────────────────────────────────────────────────────
+  const ProgramsTab = () => (
+    <div>
+      <FilterBar />
+      <div style={{ ...s.card, marginBottom: 14 }}>
+        <div style={s.h2}>Program Performance — {filterTerm}</div>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+          <thead>
+            <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+              {["Program","Applications","Conversion","Avg GPA","Drop-off Stage","Touchpoints","Action"].map(h => (
+                <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontSize: 10, fontWeight: 700, color: C.tx3, textTransform: "uppercase", letterSpacing: ".5px" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {SAMPLE.by_program.map(p => (
+              <tr key={p.program} style={{ borderBottom: `1px solid ${C.border}22`, cursor: "pointer" }}
+                onMouseOver={e => e.currentTarget.style.background = `${C.teal}08`}
+                onMouseOut={e => e.currentTarget.style.background = ""}>
+                <td style={{ padding: "10px 10px", fontWeight: 700, color: C.tx }}>{p.program}</td>
+                <td style={{ padding: "10px 10px", color: C.tx2 }}>{p.apps.toLocaleString()}</td>
+                <td style={{ padding: "10px 10px" }}>
+                  <span style={s.pill(p.conv > 80 ? C.gn : p.conv > 70 ? C.teal : C.am)}>{p.conv}%</span>
+                </td>
+                <td style={{ padding: "10px 10px", color: C.tx2 }}>{p.avg_gpa}</td>
+                <td style={{ padding: "10px 10px" }}>
+                  <span style={s.pill(C.rd)}>{p.drop_stage}</span>
+                </td>
+                <td style={{ padding: "10px 10px", color: C.tx2 }}>{p.touchpoints}</td>
+                <td style={{ padding: "10px 10px" }}>
+                  <button onClick={() => {
+                    setChatInput(`Analyze ${p.program}: ${p.apps} apps, ${p.conv}% conversion, dropping at ${p.drop_stage}. What specific actions should we take to improve?`);
+                    setTab("analyze");
+                  }} style={{ ...s.btnGhost, padding: "4px 10px", fontSize: 10 }}>Ask Claude</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div style={s.grid2}>
+        <div style={s.card}>
+          <div style={s.h2}>Drop-off Reasons</div>
+          {SAMPLE.drop_off_reasons.map(d => (
+            <div key={d.reason} style={{ marginBottom: 10 }}>
+              <div style={{ ...s.row, justifyContent: "space-between", marginBottom: 3 }}>
+                <span style={{ fontSize: 12, color: C.tx }}>{d.reason}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: C.tx2 }}>{d.pct}%</span>
+              </div>
+              <div style={{ height: 5, background: `${C.rd}22`, borderRadius: 3 }}>
+                <div style={{ height: 5, borderRadius: 3, background: C.rd, width: `${d.pct * 3}%`, transition: "width .5s" }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={s.card}>
+          <div style={s.h2}>Enrollment Trend by Term</div>
+          <BarChart data={SAMPLE.by_term} keyX="term" keyY="enrolled" color={C.tm} height={160} />
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── INSIGHTS TAB ──────────────────────────────────────────────────────────
+  const InsightsTab = () => (
+    <div>
+      <div style={{ ...s.row, marginBottom: 16 }}>
+        <div style={{ flex: 1 }}>
+          <div style={s.h1}>AI-Generated Insights</div>
+          <div style={{ fontSize: 12, color: C.tx2, marginTop: 3 }}>Based on your admissions data — click any insight to ask Claude for a detailed action plan</div>
+        </div>
+        <button onClick={() => { setChatInput("Based on all the PHSU admissions data, what are the top 3 highest-ROI improvements we could make this semester?"); setTab("analyze"); }}
+          style={s.btn()}>Ask Claude for More Insights</button>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {INSIGHTS.map((ins, i) => (
+          <div key={i}
+            onClick={() => { setChatInput(`Give me a detailed action plan for this insight: "${ins.title}". Include specific steps, who should own each, timeline, and how to configure it in Element451 or Salesforce.`); setTab("analyze"); }}
+            style={{ ...s.cardHover, display: "flex", gap: 16, alignItems: "flex-start", borderLeft: `3px solid ${ins.priority === "critical" ? C.rd : ins.priority === "high" ? C.am : ins.priority === "medium" ? C.teal : C.tx3}` }}
+            onMouseOver={e => e.currentTarget.style.borderColor = C.teal}
+            onMouseOut={e => e.currentTarget.style.borderLeft = `3px solid ${ins.priority === "critical" ? C.rd : ins.priority === "high" ? C.am : ins.priority === "medium" ? C.teal : C.tx3}`}>
+            <span style={{ fontSize: 24, flexShrink: 0, marginTop: 2 }}>{ins.icon}</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ ...s.row, marginBottom: 5 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: C.tx }}>{ins.title}</span>
+                <span style={s.pill(ins.priority === "critical" ? C.rd : ins.priority === "high" ? C.am : ins.priority === "medium" ? C.teal : C.tx3)}>{ins.priority}</span>
+              </div>
+              <div style={{ fontSize: 12, color: C.tx2, lineHeight: 1.6 }}>{ins.body}</div>
+            </div>
+            <button style={{ ...s.btnGhost, flexShrink: 0, fontSize: 10 }}>Get Action Plan →</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // ── ANALYZE TAB (Claude Chat) ─────────────────────────────────────────────
+  const AnalyzeTab = () => (
+    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 180px)" }}>
+      <div style={{ ...s.row, marginBottom: 14 }}>
+        <div style={s.h1}>Ask Claude</div>
+        <div style={{ marginLeft: "auto", ...s.row, gap: 8 }}>
+          <button onClick={() => setChatMessages([{ role: "assistant", content: "Chat cleared. What would you like to analyze?" }])} style={s.btnGhost}>Clear Chat</button>
+          <button onClick={() => setChatInput("What is the single most impactful change PHSU could make to increase enrollment this semester?")} style={s.btn()}>Quick Insight</button>
+        </div>
+      </div>
+
+      {/* Suggested prompts */}
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+        {[
+          "Why is DMD converting at only 65%?",
+          "Compare touchpoint strategies: SJ vs Ponce",
+          "Which programs need more financial aid outreach?",
+          "Build a re-engagement email sequence for 7-day no-response",
+          "What would happen if we added 2 more touchpoints to BSN?"
+        ].map(q => (
+          <button key={q} onClick={() => setChatInput(q)}
+            style={{ padding: "5px 11px", borderRadius: 16, fontSize: 11, background: `${C.teal}15`, color: C.teal, border: `1px solid ${C.teal}33`, cursor: "pointer" }}>{q}</button>
+        ))}
+      </div>
+
+      {/* Chat window */}
+      <div style={{ flex: 1, background: C.bg2, borderRadius: 10, border: `1px solid ${C.border}`, overflow: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+        {chatMessages.map((m, i) => (
+          <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start", flexDirection: m.role === "user" ? "row-reverse" : "row" }}>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: m.role === "user" ? C.or : C.teal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff", flexShrink: 0 }}>
+              {m.role === "user" ? "AJ" : "C"}
+            </div>
+            <div style={{ maxWidth: "78%", padding: "10px 14px", borderRadius: m.role === "user" ? "12px 3px 12px 12px" : "3px 12px 12px 12px", background: m.role === "user" ? `${C.teal}33` : C.bg3, fontSize: 12, lineHeight: 1.7, color: C.tx, whiteSpace: "pre-wrap" }}>
+              {m.content}
+            </div>
+          </div>
+        ))}
+        {isLoading && (
+          <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.teal, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff" }}>C</div>
+            <div style={{ padding: "10px 14px", borderRadius: "3px 12px 12px 12px", background: C.bg3 }}>
+              <div style={{ display: "flex", gap: 4 }}>
+                {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: C.teal, animation: `pulse 1.2s ease-in-out ${i*0.2}s infinite`, opacity: 0.5 }} />)}
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={chatEndRef} />
+      </div>
+
+      {/* Input */}
+      <div style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "flex-end" }}>
+        {uploadedFile && (
+          <div style={{ ...s.pill(C.teal), padding: "6px 10px", borderRadius: 8, fontSize: 11, flexShrink: 0 }}>
+            📎 {uploadedFile.name.slice(0, 20)}... <span style={{ cursor: "pointer", marginLeft: 4 }} onClick={() => { setUploadedFile(null); setUploadedFileB64(null); }}>×</span>
+          </div>
+        )}
+        <textarea value={chatInput} onChange={e => setChatInput(e.target.value)}
+          onKeyDown={e => { if(e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+          placeholder="Ask anything about PHSU admissions data... (Enter to send, Shift+Enter for new line)"
+          style={{ ...s.inp, flex: 1, resize: "none", height: 48, fontFamily: "inherit" }} rows={2} />
+        <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".pdf,.png,.jpg,.jpeg,.docx" style={{ display: "none" }} />
+        <button onClick={() => fileInputRef.current?.click()} style={{ ...s.btnGhost, padding: "12px 13px", flexShrink: 0 }}>📎</button>
+        <button onClick={sendMessage} disabled={isLoading} style={{ ...s.btn(), padding: "12px 20px", flexShrink: 0 }}>
+          {isLoading ? "..." : "Send"}
+        </button>
+      </div>
+      <div style={{ fontSize: 10, color: C.tx3, marginTop: 6 }}>
+        Upload PDFs, images, or documents for Claude to analyze in context. Supports accreditation docs, reports, exports, etc.
+      </div>
+    </div>
+  );
+
+  // ── AUTOMATION TAB ────────────────────────────────────────────────────────
+  const AutomationTab = () => {
+    const scenarios = [
+      { id: "daily_pull", icon: "🔄", name: "Daily Data Pull", desc: "Pull all new applications, touchpoints, and status changes from Element451 + Salesforce into Fabric", trigger: "Scheduled 6am daily", status: "ready" },
+      { id: "re_engage_7d", icon: "📧", name: "7-Day Re-Engagement", desc: "Send personalized follow-up to applicants with no touchpoint in 7 days — segment by program and campus", trigger: "On schedule / On demand", status: "ready" },
+      { id: "financial_aid_trigger", icon: "💰", name: "Financial Concern Outreach", desc: "Auto-trigger FA counseling email+call task when applicant stalls at FAFSA stage for 5+ days", trigger: "On Element451 status change", status: "ready" },
+      { id: "weekly_digest", icon: "📊", name: "Weekly Performance Digest", desc: "Send all directors a campus+program breakdown every Monday 8am with conversion trends and recommendations", trigger: "Every Monday 8am", status: "ready" },
+      { id: "event_invite", icon: "🎯", name: "Event Invitation Blast", desc: "Send personalized event invites to accepted-not-enrolled students — highest conversion touchpoint (28%)", trigger: "Before each campus event", status: "ready" },
+      { id: "doc_reminder", icon: "📄", name: "Document Completion Reminders", desc: "Remind applicants at day 1, 3, 7 after submission if required documents are still missing", trigger: "On document status check", status: "ready" },
+    ];
+    return (
+      <div>
+        <div style={{ ...s.row, marginBottom: 16 }}>
+          <div><div style={s.h1}>Automation Scenarios</div><div style={{ fontSize: 12, color: C.tx2, marginTop: 3 }}>Connect Make.com webhooks in ⚙ Settings to activate each scenario</div></div>
+          <a href="https://make.com" target="_blank" rel="noopener noreferrer" style={{ ...s.btn(C.pu), marginLeft: "auto", textDecoration: "none" }}>Open Make.com →</a>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {scenarios.map(sc => (
+            <div key={sc.id} style={s.card}>
+              <div style={{ ...s.row }}>
+                <span style={{ fontSize: 22, flexShrink: 0 }}>{sc.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, color: C.tx, marginBottom: 3 }}>{sc.name}</div>
+                  <div style={{ fontSize: 11, color: C.tx2, lineHeight: 1.5 }}>{sc.desc}</div>
+                  <div style={{ fontSize: 10, color: C.tx3, marginTop: 4 }}>Trigger: {sc.trigger}</div>
+                </div>
+                <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  <button onClick={() => triggerMakeScenario(sc.id)} style={s.btn()}>▶ Run Now</button>
+                  <button onClick={() => { setChatInput(`Design the full logic for the "${sc.name}" automation scenario for PHSU. Include the exact steps, conditions, data fields from Element451, email templates, and Make.com module configuration.`); setTab("analyze"); }} style={s.btnGhost}>Design with Claude</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ ...s.card, marginTop: 16, borderColor: `${C.teal}44` }}>
+          <div style={s.h2}>🏗 Full Pipeline Architecture</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 0, alignItems: "center" }}>
+            {[
+              { label: "Element451", sub: "Applications\nTouchpoints\nCommunications", color: C.gn },
+              { label: "→", sub: "", color: C.tx3 },
+              { label: "Make.com", sub: "Scenarios\n& Webhooks\nOrchestration", color: C.pu },
+              { label: "→", sub: "", color: C.tx3 },
+              { label: "MS Fabric", sub: "Data Lake\nAnalytics\nPower BI", color: "#185FA5" },
+            ].map((n, i) => (
+              <div key={i} style={{ textAlign: "center", padding: 12 }}>
+                {n.label === "→" ? (
+                  <div style={{ fontSize: 22, color: C.tx3 }}>→</div>
+                ) : (
+                  <div style={{ background: `${n.color}22`, border: `1px solid ${n.color}55`, borderRadius: 10, padding: "12px 8px" }}>
+                    <div style={{ fontWeight: 700, color: n.color, fontSize: 12, marginBottom: 4 }}>{n.label}</div>
+                    <div style={{ fontSize: 10, color: C.tx3, whiteSpace: "pre-line", lineHeight: 1.6 }}>{n.sub}</div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div style={{ ...s.sep }} />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+            {[
+              { label: "Claude API", sub: "AI Analysis\nInsights\nDoc processing", color: C.or },
+              { label: "Power Automate", sub: "Outlook events\nEmail alerts\nTeams notifications", color: "#185FA5" },
+              { label: "PHSU Hub", sub: "Dashboard\nReporting\nTeam visibility", color: C.teal },
+            ].map(n => (
+              <div key={n.label} style={{ background: `${n.color}22`, border: `1px solid ${n.color}55`, borderRadius: 10, padding: "12px 8px", textAlign: "center" }}>
+                <div style={{ fontWeight: 700, color: n.color, fontSize: 12, marginBottom: 4 }}>{n.label}</div>
+                <div style={{ fontSize: 10, color: C.tx3, whiteSpace: "pre-line", lineHeight: 1.6 }}>{n.sub}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ── SETTINGS TAB ──────────────────────────────────────────────────────────
+  const SettingsTab = () => {
+    const [localApiKey, setLocalApiKey] = useState(apiKey);
+    const [localE451, setLocalE451] = useState(e451Key);
+    const [localSF, setLocalSF] = useState(sfKey);
+    const makeScenarios = ["daily_pull","re_engage_7d","financial_aid_trigger","weekly_digest","event_invite","doc_reminder"];
+    const [makeUrls, setMakeUrls] = useState(() => Object.fromEntries(makeScenarios.map(k => [k, localStorage.getItem(`phsu_make_${k}`) || ""])));
+
+    const save = () => {
+      setApiKey(localApiKey); setE451Key(localE451); setSfKey(localSF);
+      makeScenarios.forEach(k => localStorage.setItem(`phsu_make_${k}`, makeUrls[k]));
+      localStorage.setItem("phsu_anthropic_key", localApiKey);
+      alert("✅ Settings saved!");
+    };
+
+    return (
+      <div>
+        <div style={s.h1}>Settings & Credentials</div>
+        <div style={{ fontSize: 12, color: C.tx2, marginTop: 3, marginBottom: 20 }}>All credentials are stored locally in your browser only — never sent to any server except the respective API.</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {[
+            { label: "Anthropic API Key", val: localApiKey, set: setLocalApiKey, ph: "sk-ant-...", help: "Get from console.anthropic.com → API Keys. Powers the Claude analysis chat." },
+            { label: "Element451 API Key", val: localE451, set: setLocalE451, ph: "e451_...", help: "Get from Element451 Admin → Settings → Manage Users → Security → API Keys." },
+            { label: "Salesforce Access Token", val: localSF, set: setLocalSF, ph: "00D...", help: "Get from Salesforce → Setup → API → OAuth token or Named Credentials." },
+          ].map(f => (
+            <div key={f.label} style={s.card}>
+              <div style={{ fontWeight: 700, color: C.tx, marginBottom: 4 }}>{f.label}</div>
+              <div style={{ fontSize: 11, color: C.tx3, marginBottom: 8 }}>{f.help}</div>
+              <input type="password" value={f.val} onChange={e => f.set(e.target.value)} placeholder={f.ph} style={s.inp} />
+            </div>
+          ))}
+          <div style={s.card}>
+            <div style={{ fontWeight: 700, color: C.tx, marginBottom: 4 }}>Make.com Webhook URLs</div>
+            <div style={{ fontSize: 11, color: C.tx3, marginBottom: 12 }}>In Make.com: Create scenario → Add "Webhooks" module → "Custom webhook" → Copy URL here</div>
+            {makeScenarios.map(k => (
+              <div key={k} style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: 11, color: C.tx2, marginBottom: 4 }}>{k.replace(/_/g, " ")}</div>
+                <input value={makeUrls[k]} onChange={e => setMakeUrls(u => ({ ...u, [k]: e.target.value }))} placeholder="https://hook.eu1.make.com/..." style={{ ...s.inp, fontSize: 11 }} />
+              </div>
+            ))}
+          </div>
+          <button onClick={save} style={{ ...s.btn(), padding: "11px 24px", fontSize: 13, width: "fit-content" }}>💾 Save All Settings</button>
+        </div>
+      </div>
+    );
+  };
+
+  // ── RENDER ─────────────────────────────────────────────────────────────────
+  const TABS = [
+    ["overview", "📊 Overview"],
+    ["programs", "🎓 Programs"],
+    ["insights", "💡 Insights"],
+    ["analyze", "🤖 Ask Claude"],
+    ["automation", "⚡ Automation"],
+    ["settings", "⚙ Settings"],
+  ];
+
+  return (
+    <div style={s.app}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Crimson+Pro:wght@300;400;600&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: #1E2D3D; border-radius: 4px; }
+        select, input, textarea { background: #182030; color: #E8EDF5; }
+        select option { background: #182030; }
+        @keyframes pulse { 0%,100% { opacity:.3; transform:scale(.8); } 50% { opacity:1; transform:scale(1); } }
+      `}</style>
+      <div style={s.topbar}>
+        <div style={s.logo}>P</div>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>PHSU Intelligence Platform</div>
+          <div style={{ fontSize: 10, color: C.tx3 }}>Admissions Analytics · AI Analysis · Automation</div>
+        </div>
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+          <button onClick={fetchAll} style={{ ...s.btn(), padding: "6px 12px", fontSize: 11 }}>↻ Sync All Data</button>
+          <div style={{ ...s.pill(C.gn), gap: 5 }}>● Live</div>
+        </div>
+      </div>
+      <div style={s.tabs}>
+        {TABS.map(([id, label]) => (
+          <div key={id} onClick={() => setTab(id)} style={s.tab(tab === id)}>{label}</div>
+        ))}
+      </div>
+      <div style={s.main}>
+        {tab === "overview"    && <OverviewTab />}
+        {tab === "programs"    && <ProgramsTab />}
+        {tab === "insights"    && <InsightsTab />}
+        {tab === "analyze"     && <AnalyzeTab />}
+        {tab === "automation"  && <AutomationTab />}
+        {tab === "settings"    && <SettingsTab />}
+      </div>
+    </div>
+  );
+}
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(PHSUIntelligence));
+
+// Hide loading screen
+setTimeout(() => {
+  const ls = document.getElementById('loading-screen');
+  if(ls) { ls.style.opacity = '0'; setTimeout(() => ls.remove(), 300); }
+}, 400);
+</script>
+</body>
+</html>
