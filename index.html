@@ -687,6 +687,217 @@ button,input,select,textarea{font-family:inherit}
 .lp-step-name{font-size:12px;font-weight:600;color:var(--tx)}
 .lp-step-sub{font-size:10px;color:var(--tx2);margin-top:2px}
 .lp-step-status{margin-left:auto;font-size:10px;font-weight:700;white-space:nowrap}
+
+/* ═══════════════════════════════════════════
+   MOBILE-FIRST RESPONSIVE — full overhaul
+   ═══════════════════════════════════════════ */
+
+/* Bottom nav for mobile */
+.mob-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--w);
+  border-top: 1px solid var(--bdr);
+  z-index: 300;
+  padding: 0 0 env(safe-area-inset-bottom);
+}
+.mob-nav-inner {
+  display: flex;
+  justify-content: space-around;
+  padding: 6px 0 4px;
+}
+.mob-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background .15s;
+  min-width: 52px;
+}
+.mob-nav-item:active { background: var(--bg); }
+.mob-nav-item.on .mob-nav-ico { color: var(--teal); }
+.mob-nav-item.on .mob-nav-lbl { color: var(--teal); font-weight: 700; }
+.mob-nav-ico { font-size: 20px; line-height: 1; }
+.mob-nav-lbl { font-size: 9px; font-weight: 500; color: var(--tx2); white-space: nowrap; }
+
+/* More menu for mobile */
+.mob-more-sheet {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+}
+.mob-more-sheet.open { display: block; }
+.mob-more-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+}
+.mob-more-content {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: var(--w);
+  border-radius: 18px 18px 0 0;
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.mob-more-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--tx3);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 10px;
+}
+.mob-more-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.mob-more-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 4px;
+  background: var(--bg);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.mob-more-item:active { transform: scale(.95); background: var(--tl); }
+.mob-more-item.on { background: var(--tl); }
+.mob-more-item.on .mob-more-ico { color: var(--teal); }
+.mob-more-item.on .mob-more-lbl { color: var(--td); }
+.mob-more-ico { font-size: 22px; }
+.mob-more-lbl { font-size: 10px; font-weight: 600; color: var(--tx2); text-align: center; }
+
+@media (max-width: 768px) {
+  /* Show mobile nav, hide desktop sidebar */
+  .sidebar { display: none !important; }
+  .mob-nav { display: block; }
+  
+  /* Topbar */
+  .topbar { padding: 0 12px; }
+  .tb-search { display: none; }
+  
+  /* Main content area — add bottom padding for nav bar */
+  .main {
+    padding: 14px 12px 90px !important;
+    margin-left: 0 !important;
+  }
+  .layout { grid-template-columns: 1fr !important; }
+  
+  /* Page headers */
+  .ph { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .ph-actions { width: 100%; display: flex; gap: 6px; flex-wrap: wrap; }
+  .ph-actions .btn { flex: 1; justify-content: center; }
+  
+  /* Cards — full width single column */
+  .dashboard-grid,
+  .analytics-grid,
+  .report-charts,
+  .cal-grid,
+  .settings-layout,
+  .kb-layout,
+  .ticket-layout {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Staff grid */
+  .sgrid { grid-template-columns: 1fr !important; }
+  
+  /* Programs grid */
+  #prog-grid { grid-template-columns: 1fr !important; }
+  
+  /* Training grid */
+  .training-grid { grid-template-columns: 1fr !important; }
+  
+  /* KPI cards — 2 per row on mobile */
+  .kpi-row { grid-template-columns: 1fr 1fr !important; }
+  
+  /* Metrics */
+  #analytics-metrics { grid-template-columns: 1fr 1fr !important; }
+  
+  /* RACI table — horizontal scroll */
+  .raci-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  
+  /* Messages — single column */
+  .messages-layout { grid-template-columns: 1fr !important; height: auto !important; }
+  .msg-sidebar { display: none; }
+  .msg-sidebar.show { display: flex; }
+  
+  /* Drawer — full screen on mobile */
+  .drw {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 18px 18px 0 0 !important;
+    top: auto !important;
+    bottom: 0 !important;
+    max-height: 90vh;
+  }
+  
+  /* Modal — full screen on mobile */
+  .modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 18px 18px 0 0 !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    top: auto !important;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .mbg { align-items: flex-end !important; }
+  
+  /* Kanban — horizontal scroll */
+  #kanban-board { flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; min-height: 200px; }
+  .kb-col { min-width: 260px; }
+  
+  /* Gantt — horizontal scroll */
+  #panel-gantt .card { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  
+  /* Tables — horizontal scroll */
+  .tbl-wrap, table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  
+  /* Ticket row — stack on mobile */
+  .ticket-row { grid-template-columns: auto 1fr !important; gap: 8px !important; }
+  .ticket-row .ticket-id,
+  .ticket-row .pill:not(:first-of-type) { display: none; }
+  
+  /* Filter bars — horizontal scroll */
+  .filter-bar, #pf-bar { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap !important; }
+  
+  /* Org chart — horizontal scroll */
+  .org-tree { overflow-x: auto; -webkit-overflow-scrolling: touch; min-width: 600px; }
+  #org-wrap { overflow-x: auto; }
+  
+  /* Buttons — larger tap targets */
+  .btn { min-height: 38px; }
+  .btn-sm { min-height: 32px; }
+  
+  /* Project rows — stack on mobile */
+  .pjrow { grid-template-columns: 1fr auto !important; }
+  .pjrow > div:nth-child(2) { display: none; }
+  
+  /* Bigger touch targets for sidebar items in "more" sheet */
+  .sb-it { min-height: 44px; }
+  
+  /* Breadcrumb — hide on mobile */
+  .breadcrumb { display: none; }
+}
+
+@media (max-width: 480px) {
+  .kpi-row { grid-template-columns: 1fr !important; }
+  #analytics-metrics { grid-template-columns: 1fr !important; }
+  .mob-more-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
 </style>
 </head>
 <body>
@@ -3458,6 +3669,92 @@ function setSettings(el, s) {
   console.log('[PHSU Hub] Init complete ✓');
 })();
 
+
+// ── MOBILE NAV ──
+function setMobActive(el) {
+  document.querySelectorAll('.mob-nav-item').forEach(i => i.classList.remove('on'));
+  if(el) el.classList.add('on');
+}
+function openMobMore() {
+  document.getElementById('mob-more-sheet').classList.add('open');
+}
+function closeMobMore() {
+  document.getElementById('mob-more-sheet').classList.remove('open');
+}
+// Sync mob nav when goTab is called
+// Patch goTab to also sync mobile nav
+(function() {
+  const _orig = goTab;
+  goTab = function(name) {
+    _orig(name);
+  // Update mobile nav highlight
+  document.querySelectorAll('.mob-nav-item[data-tab]').forEach(i => {
+    i.classList.toggle('on', i.dataset.tab === name);
+  });
+  // Update more sheet highlight
+    document.querySelectorAll('.mob-nav-item[data-tab]').forEach(i => {
+      i.classList.toggle('on', i.dataset.tab === name);
+    });
+    document.querySelectorAll('.mob-more-item').forEach(i => {
+      i.classList.toggle('on', (i.getAttribute('onclick')||'').includes("'"+name+"'"));
+    });
+  };
+})();
+// Viewport height fix for mobile browsers (handles address bar)
+function setVH() {
+  document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+}
+setVH();
+window.addEventListener('resize', setVH);
+
 </script>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mob-nav" id="mob-nav">
+  <div class="mob-nav-inner">
+    <div class="mob-nav-item on" data-tab="dashboard" onclick="goTab('dashboard');setMobActive(this)">
+      <div class="mob-nav-ico">🏠</div><div class="mob-nav-lbl">Dashboard</div>
+    </div>
+    <div class="mob-nav-item" data-tab="projects" onclick="goTab('projects');setMobActive(this)">
+      <div class="mob-nav-ico">📌</div><div class="mob-nav-lbl">Projects</div>
+    </div>
+    <div class="mob-nav-item" data-tab="support" onclick="goTab('support');setMobActive(this)">
+      <div class="mob-nav-ico">🎫</div><div class="mob-nav-lbl">Tickets</div>
+    </div>
+    <div class="mob-nav-item" data-tab="todos" onclick="goTab('todos');setMobActive(this)">
+      <div class="mob-nav-ico">✅</div><div class="mob-nav-lbl">My Tasks</div>
+    </div>
+    <div class="mob-nav-item" onclick="openMobMore()">
+      <div class="mob-nav-ico">⋯</div><div class="mob-nav-lbl">More</div>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE MORE SHEET -->
+<div class="mob-more-sheet" id="mob-more-sheet">
+  <div class="mob-more-overlay" onclick="closeMobMore()"></div>
+  <div class="mob-more-content">
+    <div class="mob-more-title">All Sections</div>
+    <div class="mob-more-grid">
+      <div class="mob-more-item" onclick="goTab('staff');closeMobMore()"><div class="mob-more-ico">👥</div><div class="mob-more-lbl">Staff</div></div>
+      <div class="mob-more-item" onclick="goTab('programs');closeMobMore()"><div class="mob-more-ico">🎓</div><div class="mob-more-lbl">Programs</div></div>
+      <div class="mob-more-item" onclick="goTab('kanban');closeMobMore()"><div class="mob-more-ico">📋</div><div class="mob-more-lbl">Kanban</div></div>
+      <div class="mob-more-item" onclick="goTab('calendar');closeMobMore()"><div class="mob-more-ico">📅</div><div class="mob-more-lbl">Calendar</div></div>
+      <div class="mob-more-item" onclick="goTab('kb');closeMobMore()"><div class="mob-more-ico">📚</div><div class="mob-more-lbl">Knowledge</div></div>
+      <div class="mob-more-item" onclick="goTab('training');closeMobMore()"><div class="mob-more-ico">🎯</div><div class="mob-more-lbl">Training</div></div>
+      <div class="mob-more-item" onclick="goTab('messages');closeMobMore()"><div class="mob-more-ico">💬</div><div class="mob-more-lbl">Messages</div></div>
+      <div class="mob-more-item" onclick="goTab('meetings');closeMobMore()"><div class="mob-more-ico">📝</div><div class="mob-more-lbl">Meetings</div></div>
+      <div class="mob-more-item" onclick="goTab('notifications');closeMobMore()"><div class="mob-more-ico">🔔</div><div class="mob-more-lbl">Alerts</div></div>
+      <div class="mob-more-item" onclick="goTab('reports');closeMobMore()"><div class="mob-more-ico">📊</div><div class="mob-more-lbl">Reports</div></div>
+      <div class="mob-more-item" onclick="goTab('org');closeMobMore()"><div class="mob-more-ico">🏛</div><div class="mob-more-lbl">Org Chart</div></div>
+      <div class="mob-more-item" onclick="goTab('raci');closeMobMore()"><div class="mob-more-ico">📐</div><div class="mob-more-lbl">RACI</div></div>
+      <div class="mob-more-item" onclick="goTab('integrations');closeMobMore()"><div class="mob-more-ico">⚡</div><div class="mob-more-lbl">Integrations</div></div>
+      <div class="mob-more-item" onclick="goTab('docs');closeMobMore()"><div class="mob-more-ico">📁</div><div class="mob-more-lbl">Docs</div></div>
+      <div class="mob-more-item" onclick="window.open('intelligence.html','_blank');closeMobMore()"><div class="mob-more-ico">🧠</div><div class="mob-more-lbl">Intelligence</div></div>
+      <div class="mob-more-item" onclick="goTab('settings');closeMobMore()"><div class="mob-more-ico">⚙️</div><div class="mob-more-lbl">Settings</div></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
