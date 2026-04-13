@@ -2187,7 +2187,17 @@ function closeMobMore(){document.getElementById('mob-more-sheet').classList.remo
 // ════════════════════════════════════════════════
 // INIT — runs once, wires everything
 // ════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {});
 (function(){
+  // Global error handler - show any JS error visibly
+  window.onerror = function(msg, src, line, col, err) {
+    var div = document.createElement('div');
+    div.style.cssText = 'position:fixed;top:80px;left:10px;right:10px;background:#ff4444;color:#fff;padding:16px;border-radius:8px;z-index:9999;font-size:13px;font-family:monospace;word-break:break-all';
+    div.textContent = 'JS Error: ' + msg + ' (line ' + line + ')';
+    document.body.appendChild(div);
+    return false;
+  };
+  try {
   // Show dashboard immediately - before anything else
   document.querySelectorAll('.panel').forEach(p=>{p.style.display='none';p.classList.remove('active');});
   const dash=document.getElementById('panel-dashboard');
@@ -2237,6 +2247,12 @@ function closeMobMore(){document.getElementById('mob-more-sheet').classList.remo
   },100);
 
   console.log('[PHSU Hub v5] Ready ✓');
+  } catch(e) {
+    var div = document.createElement('div');
+    div.style.cssText = 'position:fixed;top:80px;left:10px;right:10px;background:#ff4444;color:#fff;padding:16px;border-radius:8px;z-index:9999;font-size:13px;font-family:monospace;word-break:break-all';
+    div.textContent = 'Init Error: ' + e.message + ' | ' + e.stack;
+    document.body.appendChild(div);
+  }
 })();
 </script>
 </body>
