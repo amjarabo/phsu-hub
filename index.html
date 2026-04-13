@@ -6,7 +6,10 @@
 <title>PHSU Operations Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<style>
+<style>/* panels hidden by default — JS shows them via inline style */
+.panel { display: none; }
+
+
 
 
 :root{
@@ -105,8 +108,8 @@ button,input,select,textarea{font-family:inherit}
 
 /* MAIN */
 .main{flex:1;padding:20px 22px;background:var(--bg);min-width:0}
-.panel{display:none;animation:fin .2s ease both}
-.panel.active{display:block}
+
+
 @keyframes fin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 
 /* BREADCRUMB */
@@ -440,7 +443,7 @@ button,input,select,textarea{font-family:inherit}
 
 /* RESPONSIVE */
 @media(max-width:1100px){.stats,.qstat-bar{grid-template-columns:1fr 1fr}.pjrow{grid-template-columns:1fr 80px}.pjrow>*:nth-child(3),.pjrow>*:nth-child(4){display:none}}
-@media(max-width:800px){.sidebar{position:fixed;left:0;top:56px;height:calc(100vh - 56px);transform:translateX(-100%);z-index:250}.sidebar.mob-open{transform:translateX(0)}.drw{width:100%;max-width:100%}.g2,.qgrid,.camp-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.main{padding:14px}}
+@media(max-width:800px){.sidebar{position:fixed;left:0;top:56px;height:calc(100vh - 56px);transform:translateX(-100%);z-index:250}.sidebar.mob-open{transform:translateX(0)}.drw{width:100%;max-width:100%}.g2,.qgrid,.camp-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
 @media(max-width:480px){.stats,.qstat-bar{grid-template-columns:1fr}}
 
 
@@ -573,9 +576,9 @@ button,input,select,textarea{font-family:inherit}
 @media print{
   .topbar,.sidebar,.drw-bg,.mbg,.toast-wrap,.abar,.ph-actions,.pf-bar,.sf-bar,.tb-search{display:none!important}
   .shell{display:block}
-  .main{padding:0}
+  
   /* removed rogue rule */
-  .panel:not(.active){display:none!important}
+  
   .card,.chart-card,.tbl-wrap,.pjrow{box-shadow:none;border:1px solid #ccc}
   body{font-size:11px}
 }
@@ -711,7 +714,7 @@ button,input,select,textarea{font-family:inherit}
 @media(max-width:768px){
   .sidebar{display:none!important}
   .mob-nav{display:block}
-  .main{padding:14px 12px 88px!important;margin-left:0!important}
+  
   .ph{flex-direction:column;align-items:flex-start;gap:8px}
   .ph-actions{width:100%;flex-wrap:wrap}
   .kpi-row,.analytics-grid,.report-charts,.cal-grid,.settings-layout,.kb-layout,.ticket-layout{grid-template-columns:1fr!important}
@@ -731,7 +734,7 @@ button,input,select,textarea{font-family:inherit}
 }
 
 /* Ensure panels work with inline style approach */
-.panel { display: none; }
+
 </style>
 </head>
 <body>
@@ -844,7 +847,7 @@ button,input,select,textarea{font-family:inherit}
 <main class="main" id="main">
 
 <!-- DASHBOARD -->
-<div class="panel active" id="panel-dashboard" class="panel active">
+<div class="panel active" id="panel-dashboard">
   <div class="breadcrumb">&#8962; Home <span class="bc-sep">/</span> <span>Dashboard</span></div>
   <div class="ph">
     <div class="ph-left"><div class="ph-title" id="dash-title">Good morning, Ana!</div><div class="ph-sub" id="dash-sub">PHSU Operations Hub &mdash; Ponce PR &middot; San Juan PR &middot; St. Louis MO &middot; Tortola BVI</div></div>
@@ -2181,10 +2184,14 @@ function closeMobMore(){document.getElementById('mob-more-sheet').classList.remo
 // INIT — runs once, wires everything
 // ════════════════════════════════════════════════
 (function(){
-  // Show dashboard first
-  document.querySelectorAll('.panel').forEach(p=>{p.style.display='none';});
+  // Show dashboard immediately - before anything else
+  document.querySelectorAll('.panel').forEach(p=>{p.style.display='none';p.classList.remove('active');});
   const dash=document.getElementById('panel-dashboard');
-  if(dash)dash.style.display='block';
+  if(dash){dash.style.display='block';dash.style.visibility='visible';}
+  // Mark dashboard sidebar item
+  document.querySelectorAll('.sb-it').forEach(i=>i.classList.remove('on'));
+  const sbDash=document.querySelector('.sb-it[data-tab="dashboard"]');
+  if(sbDash)sbDash.classList.add('on');
 
   // Render all panels
   renderDash();renderProgs();renderStaff();renderOrg();renderProjs();renderGantt();
