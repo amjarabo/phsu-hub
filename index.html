@@ -3667,47 +3667,7 @@ function setSettings(el, s) {
   }
 
   console.log('[PHSU Hub] Init complete ✓');
-})();
-
-
-// ── MOBILE NAV ──
-function setMobActive(el) {
-  document.querySelectorAll('.mob-nav-item').forEach(i => i.classList.remove('on'));
-  if(el) el.classList.add('on');
-}
-function openMobMore() {
-  document.getElementById('mob-more-sheet').classList.add('open');
-}
-function closeMobMore() {
-  document.getElementById('mob-more-sheet').classList.remove('open');
-}
-// Sync mob nav when goTab is called
-// Patch goTab to also sync mobile nav
-(function() {
-  const _orig = goTab;
-  goTab = function(name) {
-    _orig(name);
-  // Update mobile nav highlight
-  document.querySelectorAll('.mob-nav-item[data-tab]').forEach(i => {
-    i.classList.toggle('on', i.dataset.tab === name);
-  });
-  // Update more sheet highlight
-    document.querySelectorAll('.mob-nav-item[data-tab]').forEach(i => {
-      i.classList.toggle('on', i.dataset.tab === name);
-    });
-    document.querySelectorAll('.mob-more-item').forEach(i => {
-      i.classList.toggle('on', (i.getAttribute('onclick')||'').includes("'"+name+"'"));
-    });
-  };
-})();
-// Viewport height fix for mobile browsers (handles address bar)
-function setVH() {
-  document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
-}
-setVH();
-window.addEventListener('resize', setVH);
-
-</script>
+})();</script>
 
 <!-- MOBILE BOTTOM NAV -->
 <nav class="mob-nav" id="mob-nav">
