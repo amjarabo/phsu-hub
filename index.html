@@ -1875,11 +1875,43 @@ function renderStaff(){
 }
 
 // ── ORG ──
-function onode(cls,name,title,email,si){const cl=si>=0?`onclick="openDrw('staff',${si})"`:'';;return`<div class="onode ${cls}" ${cl}><div class="on">${name}</div><div class="ot">${title}</div>${email?`<div class="oe">${email}</div>`:''}</div>`;}
+function onode(cls,name,title,email,si){
+  const cl=si>=0?`onclick="openDrw('staff',${si})" style="cursor:pointer"`:'';
+  return`<div class="onode ${cls}" ${cl}><div class="on">${name}</div><div class="ot">${title}</div>${email?`<div class="oe">${email}</div>`:''}</div>`;
+}
 function renderOrg(){
   const el=document.getElementById('org-wrap');if(!el)return;
-  el.innerHTML=`<div class="org-tree"><div class="olevel">${onode('root','Dr. Gino Natalicchio','President','president@psm.edu',0)}</div><div class="oconn"><div class="ovl"></div></div><div class="olevel">${onode('vp','Laura Dwyer','VP Enrollment','ldwyer@psm.edu',1)}${onode('vp','Emsley Vazquez','VP Mktg','evazquez@psm.edu',2)}${onode('vp','Karina Ball','CMO','kball@psm.edu',3)}${onode('vp','Jennifer Stovall','VP Global Recruitment','jstovall@psm.edu',4)}<div class="onode vp tbd"><div class="on">[VP Academic]</div><div class="ot">TBD</div></div></div><div class="oconn"><div class="ovl"></div></div><div class="olevel">${onode('dir','Astrid Velazquez','Admissions Dir','avelazquez@psm.edu',5)}${onode('dir','Michael Vega','IT Director','mvega@psm.edu',6)}${onode('dir','Jeniffer Molina','Dir. Fin. Svc','jemolina@psm.edu',7)}${onode('dir','Michael Fitting','Data Mgr','mfitting@psm.edu',10)}${onode('dir','Ana Jarabo','Sys Admin / Ops','ajarabo@psm.edu',17)}${onode('dir','John Reid','Telecom Mgr','jreid@psm.edu',14)}${onode('dir','Serenity Lowe','Admissions Mgr STL','slowe@psm.edu',15)}</div></div>`;
+  el.innerHTML=`<div class="org-tree">
+    <div class="olevel">${onode('root','Dr. Gino Natalicchio','President','president@psm.edu',0)}</div>
+    <div class="oconn"><div class="ovl"></div></div>
+    <div class="olevel">
+      ${onode('vp','Laura Dwyer','VP Enrollment','ldwyer@psm.edu',1)}
+      ${onode('vp','Emsley Vazquez','VP Mktg','evazquez@psm.edu',2)}
+      ${onode('vp','Karina Ball','CMO','kball@psm.edu',3)}
+      ${onode('vp','Jennifer Stovall','VP Global Recruitment','jstovall@psm.edu',4)}
+      <div class="onode vp tbd"><div class="on">[VP Academic]</div><div class="ot">TBD</div></div>
+    </div>
+    <div class="oconn"><div class="ovl"></div></div>
+    <div class="olevel">
+      ${onode('dir','Astrid Velazquez','Admissions Dir','avelazquez@psm.edu',5)}
+      ${onode('dir','Michael Vega','IT Director','mvega@psm.edu',6)}
+      ${onode('dir','Jeniffer Molina','Dir. Fin. Svc','jemolina@psm.edu',7)}
+      ${onode('dir','Michael Fitting','Data Mgr','mfitting@psm.edu',10)}
+      ${onode('dir','Ana Jarabo','Sys Admin / Ops','ajarabo@psm.edu',17)}
+      ${onode('dir','John Reid','Telecom Mgr','jreid@psm.edu',14)}
+      ${onode('dir','Serenity Lowe','Admissions Mgr STL','slowe@psm.edu',15)}
+    </div>
+    <div class="oconn"><div class="ovl"></div></div>
+    <div class="olevel">
+      <div class="onode staff" onclick="goTab('staff')" style="cursor:pointer"><div class="on">ADM Puerto Rico</div><div class="ot">Solymar P · Ariana G · Isaura S · Maria C + more</div></div>
+      <div class="onode staff" onclick="goTab('staff')" style="cursor:pointer"><div class="on">ADM St. Louis</div><div class="ot">Raven F · Stacey T · Andrew H · Yesenia G</div></div>
+      <div class="onode staff" onclick="goTab('staff')" style="cursor:pointer"><div class="on">ADM BVI</div><div class="ot">Victoria C · Hilario P · Lyanibel S</div></div>
+      <div class="onode staff" onclick="goTab('staff')" style="cursor:pointer"><div class="on">Marketing / Content</div><div class="ot">Crystal G · Ginady R · Luis M · Robert T</div></div>
+      <div class="onode staff" onclick="goTab('staff')" style="cursor:pointer"><div class="on">Telecom Team PR</div><div class="ot">Julitza C · Lizmarie H · Analaura Z</div></div>
+    </div>
+  </div>`;
 }
+
 
 // ── PROJECTS ──
 function renderProjs(){
@@ -1936,20 +1968,40 @@ function renderKanban(){
 // ── DASHBOARD ──
 let projChart=null,deptChart=null;
 function renderDash(){
+  // KPI cards
+  const kpis=[
+    {id:'kpi-apps',tab:'reports',ico:'spark1'},
+    {id:'kpi-staff',tab:'staff',ico:'spark2'},
+    {id:'kpi-projects',tab:'projects',ico:'spark3'},
+    {id:'kpi-tickets',tab:'support',ico:'spark4'},
+  ];
+  kpis.forEach(k=>{const el=document.getElementById(k.id);if(el){el.style.cursor='pointer';el.onclick=()=>goTab(k.tab);}});
+
   const dp=document.getElementById('dash-projs');
-  if(dp)dp.innerHTML=PROJECTS.map((p,i)=>`<div class="mil-row" onclick="openDrw('project',${i})"><div style="flex:1"><div class="mil-title">${p.n}</div><div class="mil-owner">${p.o}</div></div><div style="width:60px"><div class="pbar"><div class="pfill" style="width:${p.p}%;background:${pjCol[p.s]||'var(--teal)'}"></div></div></div>${pillH(p.s)}</div>`).join('');
+  if(dp)dp.innerHTML=PROJECTS.map((p,i)=>`<div class="mil-row" style="cursor:pointer" onclick="openDrw('project',${i})"><div style="flex:1"><div class="mil-title">${p.n}</div><div class="mil-owner">${p.o}</div></div><div style="width:60px"><div class="pbar"><div class="pfill" style="width:${p.p}%;background:${pjCol[p.s]||'var(--teal)'}"></div></div></div>${pillH(p.s)}</div>`).join('');
+
   const dm=document.getElementById('dash-mils');
-  if(dm)dm.innerHTML=[{d:'15',col:'var(--od)',bg:'var(--ol)',t:'Accreditation',s:'Academic'},{d:'22',col:'#185FA5',bg:'#E6F1FB',t:'SP Phase 1',s:'IT / Ops'},{d:'30',col:'#3B6D11',bg:'#EAF3DE',t:'Admissions Close',s:'J. Stovall'}].map(m=>`<div class="mil-row" style="background:${m.bg};cursor:pointer" onclick="goTab('calendar')"><div class="mil-date" style="background:rgba(255,255,255,.4)"><div class="mil-day" style="color:${m.col}">${m.d}</div><div class="mil-mon" style="color:${m.col}">APR</div></div><div><div class="mil-title">${m.t}</div><div class="mil-owner">${m.s}</div></div></div>`).join('');
+  if(dm)dm.innerHTML=[{d:'15',col:'var(--od)',bg:'var(--ol)',t:'Accreditation Deadline',s:'Academic'},{d:'22',col:'#185FA5',bg:'#E6F1FB',t:'SharePoint Phase 1',s:'IT / Ops'},{d:'30',col:'#3B6D11',bg:'#EAF3DE',t:'Admissions Close',s:'J. Stovall'}].map(m=>`<div class="mil-row" style="background:${m.bg};cursor:pointer" onclick="goTab('calendar')"><div class="mil-date" style="background:rgba(255,255,255,.4)"><div class="mil-day" style="color:${m.col}">${m.d}</div><div class="mil-mon" style="color:${m.col}">APR</div></div><div><div class="mil-title">${m.t}</div><div class="mil-owner">${m.s}</div></div></div>`).join('');
+
   const af=document.getElementById('activity-feed');
-  if(af)af.innerHTML=ACTIVITY.map(a=>`<div class="act-item"><div class="act-ico" style="background:${a.bg}">${a.ico}</div><div><div class="act-text">${a.text}</div><div class="act-time">${a.time}</div></div></div>`).join('');
+  if(af){
+    const actLinks=['projects','integrations','staff','projects','integrations','docs'];
+    af.innerHTML=ACTIVITY.map((a,i)=>`<div class="act-item" style="cursor:pointer" onclick="goTab('${actLinks[i]||'dashboard'}')"><div class="act-ico" style="background:${a.bg}">${a.ico}</div><div><div class="act-text">${a.text}</div><div class="act-time">${a.time}</div></div></div>`).join('');
+  }
+
+  // Campus cards
+  ['ponce','stl','sj','bvi'].forEach((k,i)=>{
+    const el=document.getElementById('campus-'+k);
+    if(el){el.style.cursor='pointer';el.onclick=()=>openDrw('campus',k);}
+  });
+
   setTimeout(()=>{
     ['spark1','spark2','spark3','spark4'].forEach((id,i)=>{const el=document.getElementById(id);if(!el||el._done)return;el._done=true;const data=[[400,420,410,450,480,500],[32,35,36,38,40,41],[5,6,7,6,7,7],[4,5,6,6,7,8]][i];new Chart(el,{type:'line',data:{labels:['','','','','',''],datasets:[{data,borderColor:['var(--teal)','#378ADD','var(--or)','var(--pu)'][i],borderWidth:1.5,pointRadius:0,tension:.4,fill:true,backgroundColor:['rgba(0,153,154,.1)','rgba(55,138,221,.1)','rgba(232,146,10,.1)','rgba(123,97,255,.1)'][i]}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}});});
-    const pc=document.getElementById('proj-chart');
-    if(pc&&!projChart)projChart=new Chart(pc,{type:'bar',data:{labels:PROJECTS.map(p=>p.n.length>14?p.n.slice(0,14)+'…':p.n),datasets:[{label:'Progress %',data:PROJECTS.map(p=>p.p),backgroundColor:PROJECTS.map(p=>pjCol[p.s]||'var(--teal)'),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{max:100,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:9}}}}}});
-    const dc=document.getElementById('dept-chart');
-    if(dc&&!deptChart){const depts={};STAFF.forEach(s=>{depts[s.d]=(depts[s.d]||0)+1;});const labels=Object.keys(depts),data2=Object.values(depts);deptChart=new Chart(dc,{type:'doughnut',data:{labels,datasets:[{data:data2,backgroundColor:['#00999A','#F7951D','#185FA5','#7B61FF','#1D9E75','#D84040','#E8920A','#5DCAA5'].slice(0,labels.length),borderWidth:0,hoverOffset:4}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:8}}}}});}
+    if(!projChart){const pc=document.getElementById('proj-chart');if(pc)projChart=new Chart(pc,{type:'bar',data:{labels:PROJECTS.map(p=>p.n.length>14?p.n.slice(0,14)+'…':p.n),datasets:[{label:'Progress %',data:PROJECTS.map(p=>p.p),backgroundColor:PROJECTS.map(p=>pjCol[p.s]||'var(--teal)'),borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{max:100,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:9}}}}}});}
+    if(!deptChart){const dc=document.getElementById('dept-chart');if(dc){const depts={};STAFF.forEach(s=>{depts[s.d]=(depts[s.d]||0)+1;});const labels=Object.keys(depts),data2=Object.values(depts);deptChart=new Chart(dc,{type:'doughnut',data:{labels,datasets:[{data:data2,backgroundColor:['#00999A','#F7951D','#185FA5','#7B61FF','#1D9E75','#D84040','#E8920A','#5DCAA5'].slice(0,labels.length),borderWidth:0,hoverOffset:4}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:8}}}}});}}
   },100);
 }
+
 
 // ── CALENDAR ──
 let calYear=2025,calMonth=3;
@@ -1973,15 +2025,27 @@ function calDayClick(date){const e=CAL_EVENTS.find(ev=>ev.date===date);if(e)open
 // ── ANALYTICS ──
 let analyticsInit=false;
 function renderAnalytics(){
-  const metrics=[{ico:'🎓',bg:'#E0F5F5',v:'2,847',l:'Total Applications',chg:'+12%',up:true,fill:72,fc:'var(--teal)'},{ico:'✅',bg:'#EAF3DE',v:'1,203',l:'Accepted Students',chg:'+8%',up:true,fill:58,fc:'var(--gn)'},{ico:'📋',bg:'#E6F1FB',v:'891',l:'Enrolled',chg:'+5%',up:true,fill:44,fc:'#185FA5'},{ico:'💰',bg:'#FAEEDA',v:'$2.1M',l:'Financial Aid Awarded',chg:'+18%',up:true,fill:65,fc:'var(--am)'},{ico:'🌎',bg:'#EEEDFE',v:'34',l:'Countries',chg:'+3',up:true,fill:80,fc:'var(--pu)'},{ico:'📊',bg:'#FDEAEA',v:'94%',l:'Retention Rate',chg:'-1%',up:false,fill:94,fc:'var(--rd)'}];
-  const mg=document.getElementById('analytics-metrics');if(mg)mg.innerHTML=metrics.map(m=>`<div class="metric-card"><div class="metric-top"><div class="metric-ico" style="background:${m.bg}">${m.ico}</div><div class="metric-change" style="color:${m.up?'var(--gn)':'var(--rd)'}">${m.up?'↑':'↓'} ${m.chg}</div></div><div class="metric-v">${m.v}</div><div class="metric-l">${m.l}</div><div class="metric-bar"><div class="metric-fill" style="width:${m.fill}%;background:${m.fc}"></div></div></div>`).join('');
+  const metrics=[
+    {ico:'🎓',bg:'#E0F5F5',v:'2,847',l:'Total Applications',chg:'+12%',up:true,fill:72,fc:'var(--teal)',tab:'reports'},
+    {ico:'✅',bg:'#EAF3DE',v:'1,203',l:'Accepted Students',chg:'+8%',up:true,fill:58,fc:'var(--gn)',tab:'reports'},
+    {ico:'📋',bg:'#E6F1FB',v:'891',l:'Enrolled',chg:'+5%',up:true,fill:44,fc:'#185FA5',tab:'reports'},
+    {ico:'💰',bg:'#FAEEDA',v:'$2.1M',l:'Financial Aid Awarded',chg:'+18%',up:true,fill:65,fc:'var(--am)',tab:'reports'},
+    {ico:'🌎',bg:'#EEEDFE',v:'34',l:'Countries',chg:'+3',up:true,fill:80,fc:'var(--pu)',tab:'staff'},
+    {ico:'📊',bg:'#FDEAEA',v:'94%',l:'Retention Rate',chg:'-1%',up:false,fill:94,fc:'var(--rd)',tab:'reports'}
+  ];
+  const mg=document.getElementById('analytics-metrics');
+  if(mg)mg.innerHTML=metrics.map(m=>`<div class="metric-card" style="cursor:pointer" onclick="goTab('${m.tab}')"><div class="metric-top"><div class="metric-ico" style="background:${m.bg}">${m.ico}</div><div class="metric-change" style="color:${m.up?'var(--gn)':'var(--rd)'}">${m.up?'↑':'↓'} ${m.chg}</div></div><div class="metric-v">${m.v}</div><div class="metric-l">${m.l}</div><div class="metric-bar"><div class="metric-fill" style="width:${m.fill}%;background:${m.fc}"></div></div></div>`).join('');
   if(analyticsInit)return;analyticsInit=true;
   setTimeout(()=>{
     const ac=document.getElementById('admissions-chart');if(ac)new Chart(ac,{type:'bar',data:{labels:['Ponce PR','St. Louis','San Juan','BVI'],datasets:[{label:'Applied',data:[1820,650,280,97],backgroundColor:'rgba(0,153,154,.25)',borderColor:'var(--teal)',borderWidth:1.5,borderRadius:4},{label:'Accepted',data:[780,280,112,31],backgroundColor:'rgba(0,153,154,.5)',borderRadius:4},{label:'Enrolled',data:[560,210,96,25],backgroundColor:'var(--teal)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
     const cc=document.getElementById('campus-chart');if(cc)new Chart(cc,{type:'doughnut',data:{labels:['Puerto Rico','Global','St. Louis','BVI'],datasets:[{data:[18,14,7,2],backgroundColor:['#00999A','#185FA5','#7B61FF','#F7951D'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10}}}}});
     const tc=document.getElementById('trend-chart');if(tc)new Chart(tc,{type:'line',data:{labels:['Nov','Dec','Jan','Feb','Mar','Apr'],datasets:[{label:'MD',data:[280,310,340,360,390,410],borderColor:'#00999A',borderWidth:2,pointRadius:3,tension:.4,fill:false},{label:'MSMS',data:[180,190,210,225,240,255],borderColor:'#185FA5',borderWidth:2,pointRadius:3,tension:.4,fill:false},{label:'PsyD',data:[95,102,108,112,118,124],borderColor:'#7B61FF',borderWidth:2,pointRadius:3,tension:.4,fill:false}]},options:{responsive:true,plugins:{legend:{position:'top',labels:{font:{size:10},boxWidth:10}}},scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
+    // System health list
+    const ihl=document.getElementById('int-health-list');
+    if(ihl)ihl.innerHTML=SYS_STATUS.map((s,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bg2);cursor:pointer" onclick="goTab('integrations')"><div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:${s.s==='operational'?'var(--gn)':s.s==='degraded'?'var(--am)':'var(--rd)'}"></div><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--tx)">${s.n}</div><div style="font-size:10px;color:var(--tx2)">${s.note}</div></div><span class="pill" style="font-size:9px;background:${s.s==='operational'?'var(--tl)':s.s==='degraded'?'var(--ol)':'#FDEAEA'};color:${s.s==='operational'?'#065E4A':s.s==='degraded'?'#8A4A10':'#8B2424'}">${s.s}</span></div>`).join('');
   },100);
 }
+
 
 // ── MESSAGES ──
 let curMsg=0;
