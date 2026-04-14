@@ -96,6 +96,22 @@ const SAMPLE = {
     { type: "Event Invitation",   sent: 3200,  opened: 2100,  clicked: 1840, conv: 28.1 },
     { type: "Chatbot",            sent: 9800,  opened: 9800,  clicked: 7200, conv: 9.2  },
   ],
+  by_year: [
+    { year: "2021", apps: 1820, enrolled: 620, conv: 68.1 },
+    { year: "2022", apps: 2090, enrolled: 720, conv: 70.4 },
+    { year: "2023", apps: 2340, enrolled: 790, conv: 71.9 },
+    { year: "2024", apps: 2610, enrolled: 850, conv: 73.2 },
+    { year: "2025", apps: 2847, enrolled: 891, conv: 74.1 },
+  ],
+  by_term: [
+    { term: "Fall 2022",   apps: 2090, enrolled: 720, conv: 70.4 },
+    { term: "Spring 2023", apps: 1640, enrolled: 560, conv: 71.2 },
+    { term: "Fall 2023",   apps: 2210, enrolled: 740, conv: 71.8 },
+    { term: "Spring 2024", apps: 1840, enrolled: 630, conv: 73.1 },
+    { term: "Fall 2024",   apps: 2560, enrolled: 850, conv: 73.8 },
+    { term: "Spring 2025", apps: 1920, enrolled: 670, conv: 74.9 },
+    { term: "Fall 2025",   apps: 2847, enrolled: 891, conv: 74.1 },
+  ],
   drop_off_reasons: [
     { reason: "Financial concerns",       pct: 34 },
     { reason: "Chose another school",     pct: 22 },
@@ -403,7 +419,19 @@ Provide specific, actionable insights. When asked for recommendations, give conc
       <div style={s.grid2}>
         <div style={s.card}>
           <div style={s.h2}>Admissions Funnel</div>
-          <FunnelViz data={SAMPLE.funnel} />
+          <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:8}}>
+            {SAMPLE.funnel.map((d,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:10}}>
+                <div style={{width:120,fontSize:11,color:C.tx2,textAlign:"right",flexShrink:0}}>{d.stage}</div>
+                <div style={{flex:1,height:28,background:`${C.teal}11`,borderRadius:5,overflow:"hidden",position:"relative"}}>
+                  <div style={{position:"absolute",left:0,top:0,bottom:0,width:`${(d.count/8420)*100}%`,background:`linear-gradient(90deg,${C.teal}CC,${C.tm})`,borderRadius:5,display:"flex",alignItems:"center",paddingLeft:10}}>
+                    <span style={{fontSize:11,fontWeight:700,color:"#fff",whiteSpace:"nowrap"}}>{d.count.toLocaleString()}</span>
+                  </div>
+                </div>
+                <div style={{width:36,fontSize:11,color:C.tx3,flexShrink:0,textAlign:"right"}}>{d.pct}%</div>
+              </div>
+            ))}
+          </div>
         </div>
         <div style={s.card}>
           <div style={s.h2}>Applications by Campus</div>
@@ -421,6 +449,37 @@ Provide specific, actionable insights. When asked for recommendations, give conc
         </div>
       </div>
       <div style={{ ...s.card, marginTop: 14 }}>
+          <div style={s.h2}>Applications by Year (2021–2025)</div>
+          <BarChart data={SAMPLE.by_year} keyX="year" keyY="apps" color={C.pu} height={140} />
+          <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {SAMPLE.by_year.map(y=>(
+              <div key={y.year} style={{ flex: 1, minWidth: 52, textAlign: "center" }}>
+                <div style={{ fontSize: 10, color: C.tx3, marginBottom: 4 }}>{y.year}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>{y.enrolled}</div>
+                <div style={{ fontSize: 9, color: C.tm }}>enrolled</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ ...s.card, marginTop: 14 }}>
+          <div style={s.h2}>Applications by Term</div>
+          <BarChart data={SAMPLE.by_term} keyX="term" keyY="apps" color={C.am} height={120} />
+          <div style={{ marginTop: 10 }}>
+            {SAMPLE.by_term.map(t=>(
+              <div key={t.term} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", borderBottom: `1px solid ${C.border}` }}>
+                <div style={{ width: 86, fontSize: 10, color: C.tx3, flexShrink: 0 }}>{t.term}</div>
+                <div style={{ flex: 1, height: 5, background: `${C.am}22`, borderRadius: 3 }}>
+                  <div style={{ height: 5, borderRadius: 3, background: C.am, width: `${(t.apps / 3000) * 100}%` }} />
+                </div>
+                <div style={{ width: 50, textAlign: "right" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "#fff" }}>{t.apps.toLocaleString()}</span>
+                  <span style={{ fontSize: 10, color: t.conv > 74 ? C.gn : C.am, marginLeft: 4 }}>{t.conv}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ ...s.card, marginTop: 14 }}>
         <div style={s.h2}>Touchpoint Effectiveness</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
           {SAMPLE.touchpoint_effectiveness.map(t => (
