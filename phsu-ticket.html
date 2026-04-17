@@ -588,7 +588,7 @@ function fSubmit() {
   document.getElementById('form-body').style.display  = 'none';
   document.getElementById('f-success').style.display  = 'block';
 
-  const webhook = localStorage.getItem('phsu_make_webhook');
+  const webhook = localStorage.getItem('phsu_make_webhook') || 'https://hook.us2.make.com/buarpte2pwjfyz9q6hdpreggfvetqqff';
   if (webhook) {
     fetch(webhook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'new_ticket',source:'standalone_form',lang,ticketId,subject,category:cat,requestType:typeLabel,priority:fPriority,requesterEmail:email,requestedBy:fEmployee?fEmployee.name:email,description:desc+(typeDetail?'\n\n'+typeDetail:''),attachmentCount:fAttachments.length,submittedAt:new Date().toISOString(),emailSubject:`🎫 [${fPriority}] ${ticketId}: ${subject}`,hubUrl:'https://amjarabo.github.io/phsu-hub'}),mode:'no-cors'}).catch(()=>{});
   }
