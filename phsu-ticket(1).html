@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHSU IT Support</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@iconscout/unicons@4.0.8/css/line.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f0f4f4;min-height:100vh;display:flex;flex-direction:column;}
+.topbar{background:#024748;padding:14px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.topbar-logo{width:36px;height:36px;background:#00999A;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:white;flex-shrink:0;}
+.topbar-name{font-size:14px;font-weight:700;color:white;}
+.topbar-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:1px;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.topbar-hint{font-size:11px;color:rgba(255,255,255,.45);}
+.lang-toggle{display:flex;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;overflow:hidden;flex-shrink:0;}
+.lang-btn{padding:5px 13px;font-size:11px;font-weight:700;font-family:inherit;border:none;background:transparent;color:rgba(255,255,255,.55);cursor:pointer;transition:all .15s;letter-spacing:.3px;}
+.lang-btn.active{background:#00999A;color:white;}
+.main{flex:1;display:flex;justify-content:center;align-items:flex-start;padding:32px 16px 48px;}
+.card{background:white;border-radius:16px;box-shadow:0 4px 32px rgba(0,0,0,.1);width:100%;max-width:640px;overflow:hidden;}
+.card-header{background:linear-gradient(135deg,#00999A,#024748);padding:28px 32px;color:white;}
+.card-header h1{font-size:20px;font-weight:700;color:white;margin-bottom:6px;}
+.card-header p{font-size:13px;color:rgba(255,255,255,.78);line-height:1.6;}
+.card-header-meta{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;}
+.meta-chip{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500;color:rgba(255,255,255,.9);display:flex;align-items:center;gap:5px;}
+.form-body{padding:28px 32px;display:flex;flex-direction:column;gap:18px;}
+.field-label{font-size:11px;font-weight:700;color:#9299B8;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px;}
+.field-note{font-weight:400;text-transform:none;letter-spacing:0;font-size:10px;color:#B0B4C8;margin-left:3px;}
+.field-input{width:100%;border:1.5px solid #E3E6EF;border-radius:9px;padding:10px 14px;font-size:13px;font-family:inherit;color:#272B41;outline:none;transition:border-color .15s;background:white;}
+.field-input:focus{border-color:#00999A;box-shadow:0 0 0 3px rgba(0,153,154,.08);}
+textarea.field-input{resize:vertical;min-height:100px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:520px){.field-row{grid-template-columns:1fr;}}
+.emp-strip{padding:9px 13px;border-radius:8px;font-size:12px;font-weight:500;margin-top:6px;align-items:center;gap:7px;display:none;}
+.emp-strip.found{background:rgba(0,153,154,.07);border:1px solid rgba(0,153,154,.2);color:#024748;display:flex;}
+.emp-strip.guest{background:rgba(247,149,29,.07);border:1px solid rgba(247,149,29,.2);color:#B86000;display:flex;}
+.pri-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.pri-pill{padding:9px 6px;border-radius:8px;border:2px solid #E3E6EF;font-size:11px;font-weight:600;cursor:pointer;text-align:center;user-select:none;color:#9299B8;background:white;transition:all .15s;}
+.pri-pill:hover{border-color:#00999A;color:#00999A;}
+.pri-pill.active[data-val="Low"]     {border-color:#00AACC;background:rgba(0,170,204,.08);color:#006B88;}
+.pri-pill.active[data-val="Medium"]  {border-color:#F7951D;background:rgba(247,149,29,.08);color:#B86000;}
+.pri-pill.active[data-val="High"]    {border-color:#FF4D4F;background:rgba(255,77,79,.08);color:#D40000;}
+.pri-pill.active[data-val="Critical"]{border-color:#8B0000;background:rgba(139,0,0,.08);color:#8B0000;}
+.type-extra{background:#F5F6F8;border-radius:9px;padding:14px;border:1px solid #E3E6EF;display:none;}
+.dropzone{border:2px dashed #E3E6EF;border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:#F5F6F8;}
+.dropzone:hover,.dropzone.over{border-color:#00999A;background:rgba(0,153,154,.04);}
+.preview-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.thumb{width:68px;height:68px;border-radius:8px;border:1px solid #E3E6EF;overflow:hidden;background:#F5F6F8;display:flex;align-items:center;justify-content:center;position:relative;font-size:24px;color:#9299B8;}
+.thumb img{width:100%;height:100%;object-fit:cover;}
+.thumb-rm{position:absolute;top:2px;right:2px;width:17px;height:17px;border-radius:50%;background:rgba(0,0,0,.5);color:white;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;}
+.thumb-rm:hover{background:#FF4D4F;}
+.attach-count{font-size:11px;color:#9299B8;margin-top:6px;}
+.btn-submit{background:linear-gradient(135deg,#00999A,#024748);color:white;border:none;border-radius:10px;padding:13px 28px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s;}
+.btn-submit:hover{opacity:.9;}
+.form-footer-note{font-size:11px;color:#9299B8;text-align:center;line-height:1.5;margin-top:-8px;}
+.success{display:none;text-align:center;padding:44px 32px;}
+.success-icon{width:72px;height:72px;background:rgba(1,184,26,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:32px;color:#01B81A;}
+.success h2{font-size:20px;font-weight:700;color:#272B41;margin-bottom:8px;}
+.success p{font-size:13px;color:#9299B8;line-height:1.6;margin-bottom:20px;}
+.ticket-ref{background:#F5F6F8;border-radius:10px;padding:14px 24px;display:inline-block;font-size:16px;font-weight:700;color:#024748;letter-spacing:.5px;margin-bottom:24px;}
+.btn-another{background:transparent;border:1.5px solid #E3E6EF;border-radius:9px;padding:9px 20px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;color:#5A5F7D;transition:all .15s;}
+.btn-another:hover{border-color:#00999A;color:#00999A;}
+footer{background:#024748;padding:14px 24px;text-align:center;font-size:11px;color:rgba(255,255,255,.35);}
+footer a{color:rgba(255,255,255,.55);text-decoration:none;}
+footer a:hover{color:white;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">PH</div>
+  <div>
+    <div class="topbar-name">PHSU Operations Hub</div>
+    <div class="topbar-sub">Ponce Health Sciences University</div>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-hint" id="topbar-hint"></span>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="btn-es" onclick="setLang('es')">ES</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="card">
+    <div class="card-header">
+      <h1 id="h-title"></h1>
+      <p id="h-desc"></p>
+      <div class="card-header-meta">
+        <div class="meta-chip"><i class="uil uil-clock"></i><span id="h-sla"></span></div>
+      </div>
+    </div>
+
+    <div class="form-body" id="form-body">
+      <div>
+        <label class="field-label" id="l-email-label"></label>
+        <div style="position:relative;">
+          <i class="uil uil-envelope" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#9299B8;font-size:15px;pointer-events:none;"></i>
+          <input id="f-email" type="email" class="field-input" style="padding-left:38px;" oninput="fLookup(this.value)" autocomplete="email">
+        </div>
+        <div id="f-emp-found" class="emp-strip found"></div>
+        <div id="f-emp-guest" class="emp-strip guest"></div>
+      </div>
+
+      <div>
+        <label class="field-label" id="l-subject"></label>
+        <input id="f-subject" type="text" class="field-input" maxlength="200">
+      </div>
+
+      <div class="field-row">
+        <div>
+          <label class="field-label" id="l-type"></label>
+          <select id="f-type" class="field-input" onchange="fTypeChanged(this.value)"></select>
+        </div>
+        <div>
+          <label class="field-label" id="l-cat"></label>
+          <select id="f-cat" class="field-input"></select>
+        </div>
+      </div>
+
+      <div id="f-type-extra" class="type-extra"></div>
+
+      <div>
+        <label class="field-label" id="l-priority"></label>
+        <div class="pri-grid">
+          <label class="pri-pill" data-val="Low"      onclick="fSetPri('Low')">     <span id="pri-low"></span></label>
+          <label class="pri-pill active" data-val="Medium"   onclick="fSetPri('Medium')">  <span id="pri-med"></span></label>
+          <label class="pri-pill" data-val="High"     onclick="fSetPri('High')">    <span id="pri-high"></span></label>
+          <label class="pri-pill" data-val="Critical" onclick="fSetPri('Critical')"><span id="pri-crit"></span></label>
+        </div>
+        <div id="pri-guide" style="font-size:11px;color:#9299B8;margin-top:6px;line-height:1.6;"></div>
+      </div>
+
+      <div>
+        <label class="field-label" id="l-desc"></label>
+        <textarea id="f-desc" class="field-input"></textarea>
+      </div>
+
+      <div>
+        <label class="field-label"><span id="l-attach"></span> <span class="field-note" id="l-attach-note"></span></label>
+        <div class="dropzone" id="f-dropzone"
+          onclick="document.getElementById('f-file').click()"
+          ondragover="fDragOver(event)" ondragleave="fDragLeave(event)" ondrop="fDrop(event)">
+          <i class="uil uil-image-upload" style="font-size:26px;color:#9299B8;display:block;margin-bottom:5px;"></i>
+          <div id="drop-title" style="font-size:13px;font-weight:600;color:#272B41;"></div>
+          <div id="drop-sub" style="font-size:11px;color:#9299B8;margin-top:3px;"></div>
+          <input id="f-file" type="file" multiple accept="image/*,.pdf,.txt,.log" style="display:none;" onchange="fFilesAdded(this.files)">
+        </div>
+        <div class="preview-strip" id="f-previews"></div>
+        <div class="attach-count" id="f-attach-count"></div>
+      </div>
+
+      <button class="btn-submit" onclick="fSubmit()">
+        <i class="uil uil-paper-plane"></i><span id="btn-submit-label"></span>
+      </button>
+      <div class="form-footer-note" id="footer-note"></div>
+    </div>
+
+    <div class="success" id="f-success">
+      <div class="success-icon"><i class="uil uil-check-circle"></i></div>
+      <h2 id="s-title"></h2>
+      <p id="s-desc"></p>
+      <div class="ticket-ref" id="f-ticket-ref">HD-000</div><br>
+      <button class="btn-another" onclick="fReset()">
+        <i class="uil uil-plus"></i> <span id="btn-another-label"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2026 Ponce Health Sciences University ·
+  <a href="https://amjarabo.github.io/phsu-hub">PHSU Operations Hub</a>
+</footer>
+
+<script>
+// ── TRANSLATIONS ─────────────────────────────────────────────
+const T = {
+  en: {
+    pageTitle:'PHSU IT Support — Submit a Ticket',
+    topbarHint:'Support Portal',
+    hTitle:'🎫 Submit a Support Ticket',
+    hDesc:'Fill out this form to request IT support, report an issue, or submit a system request. Our team will respond promptly based on priority.',
+    hSla:'Critical: 2hrs · High: 8hrs · Medium: 24hrs · Low: 48hrs',
+    lEmail:'Your Email',
+    lEmailNote:'— we\'ll identify you automatically',
+    emailPh:'yourname@psm.edu',
+    empFound:(n,r,d)=>`✓ ${n} · ${r} · ${d}`,
+    empGuest:'ℹ Email not in staff directory — will be submitted as guest.',
+    lSubject:'Subject *',
+    subjectPh:'Brief description of the issue or request',
+    lType:'Request Type *',
+    typePh:'Select type…',
+    lCat:'System / Category *',
+    catPh:'Select system…',
+    lPriority:'Priority *',
+    priLow:'🔵 Low', priMed:'🟡 Medium', priHigh:'🔴 High', priCrit:'🚨 Critical',
+    priGuide:'<strong>Critical</strong> = system down / data loss &nbsp;·&nbsp; <strong>High</strong> = blocking work &nbsp;·&nbsp; <strong>Medium</strong> = degraded &nbsp;·&nbsp; <strong>Low</strong> = question / enhancement',
+    lDesc:'Description *',
+    descPh:'Describe the issue or request in detail.\n• Steps to reproduce the problem\n• Error messages you see\n• Which users are affected\n• Any relevant deadlines',
+    lAttach:'Screenshots / Attachments',
+    lAttachNote:'(optional)',
+    dropTitle:'Drop files or click to upload',
+    dropSub:'Paste a screenshot with Ctrl+V · PNG, JPG, PDF · Max 10MB',
+    attachCount:(n)=>`${n} file(s) attached`,
+    btnSubmit:'Submit Ticket',
+    footerNote:'You\'ll receive an email confirmation once your ticket is submitted.',
+    sTitle:'Ticket Submitted!',
+    sDesc:'Your request has been received. You\'ll get an email confirmation shortly. Our team will respond based on the priority level.',
+    btnAnother:'Submit Another Ticket',
+    aEmail:'Please enter your email address.',
+    aSubject:'Please enter a subject.',
+    aType:'Please select a request type.',
+    aCat:'Please select a system/category.',
+    aDesc:'Please add a description.',
+    aFileBig:(n)=>`"${n}" is too large (max 10MB).`,
+    typeGroups:[
+      {g:'Access & Permissions',opts:[
+        {v:'access-grant', t:'🔑 Access / Permission Grant'},
+        {v:'access-revoke',t:'🔒 Access / Permission Revoke'},
+        {v:'access-reset', t:'🔄 Password / Login Reset'},
+      ]},
+      {g:'Issues & Bugs',opts:[
+        {v:'bug',        t:'🐛 Issue / Bug'},
+        {v:'error',      t:'⚠️ Error / System Down'},
+        {v:'performance',t:'🐢 Performance / Slowness'},
+      ]},
+      {g:'People',opts:[
+        {v:'new-employee',t:'👤 New Employee Setup'},
+        {v:'offboarding', t:'🚪 Employee Offboarding'},
+        {v:'role-change', t:'🔀 Role / Department Change'},
+      ]},
+      {g:'Applications & Data',opts:[
+        {v:'app-update', t:'📲 Application Update / Upgrade'},
+        {v:'field-edit', t:'✏️ Request / Field Edit'},
+        {v:'field-add',  t:'➕ Request / Add Field or Feature'},
+        {v:'data-issue', t:'📊 Data Issue / Discrepancy'},
+        {v:'integration',t:'🔗 Integration / Sync Issue'},
+      ]},
+      {g:'Students',opts:[
+        {v:'student-issue', t:'🎓 Student Issue'},
+        {v:'student-access',t:'🎓 Student Access / Portal'},
+        {v:'student-data',  t:'🎓 Student Data Correction'},
+      ]},
+      {g:'Requests',opts:[
+        {v:'report-request',t:'📋 Report Request'},
+        {v:'training',      t:'📚 Training Request'},
+        {v:'procurement',   t:'🛒 Software / Tool Procurement'},
+        {v:'automation',    t:'⚡ Automation Request'},
+        {v:'dashboard',     t:'📊 Dashboard / Analytics Request'},
+      ]},
+      {g:'',opts:[{v:'other',t:'💬 Other'}]},
+    ],
+    cats:['Salesforce','Element 451','Microsoft Fabric','SharePoint','Microsoft 365 / Outlook','Teams','Power BI','Anthology / Banner','PHSU Website','Other'],
+    extras:{
+      'access-grant': {l:'Who needs access + which system?',        p:'Employee name and system they need access to'},
+      'access-revoke':{l:'Who should have access removed?',         p:'Employee name and system to revoke'},
+      'access-reset': {l:'Account / Username',                      p:'Username or email to reset'},
+      'new-employee': {l:'New Employee Details',                    p:'Full name, role, start date, email, systems needed'},
+      'offboarding':  {l:'Employee Leaving Details',                p:'Name, last day, systems to deactivate'},
+      'role-change':  {l:'Change Details',                          p:'Employee name, old role → new role, effective date'},
+      'field-edit':   {l:'Field / Record to Edit',                  p:'Object, field name, current value → correct value'},
+      'field-add':    {l:'Feature / Field Description',             p:'Describe the field or feature and why it\'s needed'},
+      'student-issue':{l:"Student's Name / ID",                     p:'Student full name, ID number, and program'},
+      'student-access':{l:"Student's Name / ID",                    p:'Student name, ID, portal/system they cannot access'},
+      'student-data': {l:'Data Correction Details',                 p:'Student ID, field to correct, current → correct value'},
+      'report-request':{l:'Report Requirements',                    p:'What data, filters, date range, format (Excel/dashboard)'},
+      'app-update':   {l:'Application + Update Details',            p:'App name, current version, what needs updating'},
+      'integration':  {l:'Integration Details',                     p:'Which systems, what data, current vs expected behavior'},
+      'automation':   {l:'Automation Description',                  p:'Trigger, what it should do, expected outcome'},
+      'dashboard':    {l:'Dashboard Requirements',                  p:'Metrics, data sources, format preference'},
+      'procurement':  {l:'Tool Requested',                          p:'Tool name, use case, estimated cost, number of users'},
+      'training':     {l:'Training Topic',                          p:'System or skill, who needs it, preferred format/date'},
+    },
+  },
+  es: {
+    pageTitle:'PHSU Soporte TI — Enviar Solicitud',
+    topbarHint:'Portal de Soporte',
+    hTitle:'🎫 Enviar una Solicitud de Soporte',
+    hDesc:'Completa este formulario para solicitar soporte técnico, reportar un problema o enviar una solicitud de sistema. Nuestro equipo responderá según la prioridad.',
+    hSla:'Crítico: 2hrs · Alto: 8hrs · Medio: 24hrs · Bajo: 48hrs',
+    lEmail:'Tu Correo Electrónico',
+    lEmailNote:'— te identificaremos automáticamente',
+    emailPh:'tunombre@psm.edu',
+    empFound:(n,r,d)=>`✓ ${n} · ${r} · ${d}`,
+    empGuest:'ℹ Correo no encontrado en el directorio — se enviará como invitado.',
+    lSubject:'Asunto *',
+    subjectPh:'Descripción breve del problema o solicitud',
+    lType:'Tipo de Solicitud *',
+    typePh:'Selecciona el tipo…',
+    lCat:'Sistema / Categoría *',
+    catPh:'Selecciona el sistema…',
+    lPriority:'Prioridad *',
+    priLow:'🔵 Baja', priMed:'🟡 Media', priHigh:'🔴 Alta', priCrit:'🚨 Crítica',
+    priGuide:'<strong>Crítica</strong> = sistema caído / pérdida de datos &nbsp;·&nbsp; <strong>Alta</strong> = bloquea el trabajo &nbsp;·&nbsp; <strong>Media</strong> = degradado &nbsp;·&nbsp; <strong>Baja</strong> = pregunta / mejora',
+    lDesc:'Descripción *',
+    descPh:'Describe el problema o solicitud con detalle.\n• Pasos para reproducirlo\n• Mensajes de error que ves\n• Usuarios afectados\n• Fechas límite relevantes',
+    lAttach:'Capturas / Archivos Adjuntos',
+    lAttachNote:'(opcional)',
+    dropTitle:'Arrastra archivos o haz clic para subir',
+    dropSub:'Pega una captura con Ctrl+V · PNG, JPG, PDF · Máx 10MB',
+    attachCount:(n)=>`${n} archivo(s) adjunto(s)`,
+    btnSubmit:'Enviar Solicitud',
+    footerNote:'Recibirás una confirmación por correo una vez enviada tu solicitud.',
+    sTitle:'¡Solicitud Enviada!',
+    sDesc:'Tu solicitud ha sido recibida. Recibirás una confirmación por correo en breve. Nuestro equipo se comunicará contigo según la prioridad.',
+    btnAnother:'Enviar Otra Solicitud',
+    aEmail:'Por favor ingresa tu correo electrónico.',
+    aSubject:'Por favor ingresa un asunto.',
+    aType:'Por favor selecciona el tipo de solicitud.',
+    aCat:'Por favor selecciona el sistema o categoría.',
+    aDesc:'Por favor agrega una descripción.',
+    aFileBig:(n)=>`"${n}" es demasiado grande (máx 10MB).`,
+    typeGroups:[
+      {g:'Acceso y Permisos',opts:[
+        {v:'access-grant', t:'🔑 Otorgar Acceso / Permiso'},
+        {v:'access-revoke',t:'🔒 Revocar Acceso / Permiso'},
+        {v:'access-reset', t:'🔄 Restablecer Contraseña / Sesión'},
+      ]},
+      {g:'Problemas y Errores',opts:[
+        {v:'bug',        t:'🐛 Problema / Error (Bug)'},
+        {v:'error',      t:'⚠️ Error / Sistema Caído'},
+        {v:'performance',t:'🐢 Lentitud / Rendimiento'},
+      ]},
+      {g:'Personal',opts:[
+        {v:'new-employee',t:'👤 Configuración de Nuevo Empleado'},
+        {v:'offboarding', t:'🚪 Baja de Empleado'},
+        {v:'role-change', t:'🔀 Cambio de Rol / Departamento'},
+      ]},
+      {g:'Aplicaciones y Datos',opts:[
+        {v:'app-update', t:'📲 Actualización de Aplicación'},
+        {v:'field-edit', t:'✏️ Solicitud / Editar Campo'},
+        {v:'field-add',  t:'➕ Solicitud / Agregar Campo o Función'},
+        {v:'data-issue', t:'📊 Problema con Datos / Discrepancia'},
+        {v:'integration',t:'🔗 Problema de Integración / Sincronización'},
+      ]},
+      {g:'Estudiantes',opts:[
+        {v:'student-issue', t:'🎓 Problema con Estudiante'},
+        {v:'student-access',t:'🎓 Acceso de Estudiante / Portal'},
+        {v:'student-data',  t:'🎓 Corrección de Datos de Estudiante'},
+      ]},
+      {g:'Solicitudes',opts:[
+        {v:'report-request',t:'📋 Solicitud de Reporte'},
+        {v:'training',      t:'📚 Solicitud de Capacitación'},
+        {v:'procurement',   t:'🛒 Adquisición de Software / Herramienta'},
+        {v:'automation',    t:'⚡ Solicitud de Automatización'},
+        {v:'dashboard',     t:'📊 Solicitud de Panel / Análisis'},
+      ]},
+      {g:'',opts:[{v:'other',t:'💬 Otro'}]},
+    ],
+    cats:['Salesforce','Element 451','Microsoft Fabric','SharePoint','Microsoft 365 / Outlook','Teams','Power BI','Anthology / Banner','Sitio Web PHSU','Otro'],
+    extras:{
+      'access-grant': {l:'¿Quién necesita acceso y a qué sistema?', p:'Nombre del empleado y sistema al que necesita acceso'},
+      'access-revoke':{l:'¿A quién se le debe revocar el acceso?',  p:'Nombre del empleado y sistema a revocar'},
+      'access-reset': {l:'Cuenta / Usuario',                        p:'Usuario o correo de la cuenta a restablecer'},
+      'new-employee': {l:'Datos del Nuevo Empleado',                p:'Nombre completo, rol, fecha de inicio, correo, sistemas necesarios'},
+      'offboarding':  {l:'Datos del Empleado que Sale',             p:'Nombre, último día, sistemas a desactivar'},
+      'role-change':  {l:'Detalles del Cambio',                     p:'Nombre, rol anterior → nuevo rol, fecha efectiva'},
+      'field-edit':   {l:'Campo / Registro a Editar',               p:'Objeto, nombre del campo, valor actual → correcto'},
+      'field-add':    {l:'Descripción del Campo o Función',         p:'Describe el campo o función necesaria y por qué'},
+      'student-issue':{l:'Nombre / ID del Estudiante',              p:'Nombre completo, número de ID y programa'},
+      'student-access':{l:'Nombre / ID del Estudiante',             p:'Nombre, ID, portal/sistema al que no puede acceder'},
+      'student-data': {l:'Detalles de la Corrección',               p:'ID del estudiante, campo a corregir, valor actual → correcto'},
+      'report-request':{l:'Requisitos del Reporte',                 p:'Datos necesarios, filtros, rango de fechas, formato'},
+      'app-update':   {l:'Aplicación + Detalles',                   p:'Nombre de la app, versión actual, qué necesita actualizarse'},
+      'integration':  {l:'Detalles de la Integración',              p:'Qué sistemas, qué datos, comportamiento actual vs esperado'},
+      'automation':   {l:'Descripción de la Automatización',        p:'Disparador, qué debe hacer, resultado esperado'},
+      'dashboard':    {l:'Requisitos del Panel',                    p:'Métricas, fuentes de datos, formato preferido'},
+      'procurement':  {l:'Herramienta Solicitada',                  p:'Nombre, caso de uso, costo estimado, número de usuarios'},
+      'training':     {l:'Tema de Capacitación',                    p:'Sistema o habilidad, quién lo necesita, formato/fecha'},
+    },
+  }
+};
+
+// ── STATE ────────────────────────────────────────────────────
+let lang = 'en';
+let fEmployee = null;
+let fPriority = 'Medium';
+let fAttachments = [];
+let fTicketNum = parseInt(localStorage.getItem('phsu_ticket_num')||'9');
+const AUTO_PRI = {error:'Critical','access-revoke':'High','new-employee':'High',bug:'High','student-issue':'High',offboarding:'High',integration:'High'};
+
+// ── EMPLOYEE DIRECTORY ───────────────────────────────────────
+const EMPLOYEES = [
+  {name:'Ana Jarabo',       email:'ajarabo@psm.edu',      role:'Salesforce Admin / BA',   dept:'IT / Operations'},
+  {name:'Miguel Vega',      email:'mvega@psm.edu',        role:'IT Director',             dept:'IT / Operations'},
+  {name:'José Vega',        email:'jose.vega@psm.edu',    role:'Systems Integrator',      dept:'IT / Operations'},
+  {name:'Carmen Ríos',      email:'carmen.rios@psm.edu',  role:'Data Analyst',            dept:'IT / Operations'},
+  {name:'M. Fitting',       email:'mfitting@psm.edu',     role:'Data Manager',            dept:'IT / Operations'},
+  {name:'Laura Dwyer',      email:'ldwyer@psm.edu',       role:'VP of Enrollment',        dept:'Enrollment'},
+  {name:'Astrid Velasquez', email:'avelasquez@psm.edu',   role:'Admissions Director',     dept:'Admissions'},
+  {name:'Jennifer Stovall', email:'jstovall@psm.edu',     role:'VP Global Recruitment',   dept:'Enrollment'},
+  {name:'E. Vasquez',       email:'e.vasquez@psm.edu',    role:'VP Marketing',            dept:'Marketing'},
+  {name:'K. Ball',          email:'k.ball@psm.edu',       role:'CMO',                     dept:'Marketing'},
+  {name:'J. Molina',        email:'j.molina@psm.edu',     role:'Financial Services Dir.', dept:'Finance'},
+  {name:'Dr. Natalicchio',  email:'president@psm.edu',    role:'President',               dept:'Executive'},
+];
+
+// ── LANGUAGE ─────────────────────────────────────────────────
+function setLang(l) {
+  lang = l;
+  document.documentElement.lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  document.getElementById('btn-es').classList.toggle('active', l==='es');
+  render();
+}
+
+function render() {
+  const t = T[lang];
+  document.title = t.pageTitle;
+  document.getElementById('topbar-hint').textContent = t.topbarHint;
+  document.getElementById('h-title').textContent     = t.hTitle;
+  document.getElementById('h-desc').textContent      = t.hDesc;
+  document.getElementById('h-sla').textContent       = t.hSla;
+
+  // Email label (has child note span)
+  const el = document.getElementById('l-email-label');
+  el.innerHTML = t.lEmail + ' <span class="field-note">' + t.lEmailNote + '</span>';
+  document.getElementById('f-email').placeholder = t.emailPh;
+
+  // Re-render employee strip if visible
+  const found = document.getElementById('f-emp-found');
+  const guest = document.getElementById('f-emp-guest');
+  if (fEmployee && found.classList.contains('found')) found.textContent = t.empFound(fEmployee.name, fEmployee.role, fEmployee.dept);
+  if (guest.classList.contains('guest')) guest.textContent = t.empGuest;
+
+  document.getElementById('l-subject').textContent   = t.lSubject;
+  document.getElementById('f-subject').placeholder   = t.subjectPh;
+  document.getElementById('l-type').textContent      = t.lType;
+  document.getElementById('l-cat').textContent       = t.lCat;
+  document.getElementById('l-priority').textContent  = t.lPriority;
+  document.getElementById('pri-low').textContent     = t.priLow;
+  document.getElementById('pri-med').textContent     = t.priMed;
+  document.getElementById('pri-high').textContent    = t.priHigh;
+  document.getElementById('pri-crit').textContent    = t.priCrit;
+  document.getElementById('pri-guide').innerHTML     = t.priGuide;
+  document.getElementById('l-desc').textContent      = t.lDesc;
+  document.getElementById('f-desc').placeholder      = t.descPh;
+  document.getElementById('l-attach').textContent    = t.lAttach;
+  document.getElementById('l-attach-note').textContent = t.lAttachNote;
+  document.getElementById('drop-title').textContent  = t.dropTitle;
+  document.getElementById('drop-sub').textContent    = t.dropSub;
+  document.getElementById('btn-submit-label').textContent = t.btnSubmit;
+  document.getElementById('footer-note').textContent = t.footerNote;
+  document.getElementById('s-title').textContent     = t.sTitle;
+  document.getElementById('s-desc').textContent      = t.sDesc;
+  document.getElementById('btn-another-label').textContent = t.btnAnother;
+  if (fAttachments.length) document.getElementById('f-attach-count').textContent = t.attachCount(fAttachments.length);
+
+  buildTypeSelect();
+  buildCatSelect();
+  const curType = document.getElementById('f-type').value;
+  if (curType && t.extras[curType]) {
+    const ex = document.getElementById('f-type-extra');
+    const curDetail = document.getElementById('f-type-detail')?.value || '';
+    ex.style.display = 'block';
+    ex.innerHTML = `<label class="field-label">${t.extras[curType].l}</label>
+      <textarea id="f-type-detail" class="field-input" rows="2" style="margin-top:5px;" placeholder="${t.extras[curType].p}">${curDetail}</textarea>`;
+  }
+}
+
+function buildTypeSelect() {
+  const sel = document.getElementById('f-type');
+  const cur = sel.value;
+  sel.innerHTML = '';
+  const ph = document.createElement('option'); ph.value=''; ph.textContent=T[lang].typePh; sel.appendChild(ph);
+  T[lang].typeGroups.forEach(g => {
+    if (g.g) {
+      const grp = document.createElement('optgroup'); grp.label = g.g;
+      g.opts.forEach(o => { const op=document.createElement('option'); op.value=o.v; op.textContent=o.t; grp.appendChild(op); });
+      sel.appendChild(grp);
+    } else {
+      g.opts.forEach(o => { const op=document.createElement('option'); op.value=o.v; op.textContent=o.t; sel.appendChild(op); });
+    }
+  });
+  if (cur) sel.value = cur;
+}
+
+function buildCatSelect() {
+  const sel = document.getElementById('f-cat');
+  const cur = sel.value;
+  sel.innerHTML = '';
+  const ph = document.createElement('option'); ph.value=''; ph.textContent=T[lang].catPh; sel.appendChild(ph);
+  T[lang].cats.forEach(c => { const op=document.createElement('option'); op.value=c; op.textContent=c; sel.appendChild(op); });
+  // restore by matching EN index
+  if (cur) {
+    const idx = T['en'].cats.indexOf(cur);
+    if (idx >= 0 && T[lang].cats[idx]) sel.value = T[lang].cats[idx];
+    else sel.value = cur;
+  }
+}
+
+// ── EMPLOYEE LOOKUP ──────────────────────────────────────────
+function fLookup(val) {
+  const v = val.trim().toLowerCase();
+  const found = document.getElementById('f-emp-found');
+  const guest = document.getElementById('f-emp-guest');
+  found.className='emp-strip'; guest.className='emp-strip'; fEmployee=null;
+  if (!v || !v.includes('@')) return;
+  const emp = EMPLOYEES.find(e => e.email.toLowerCase()===v);
+  if (emp) {
+    fEmployee = emp;
+    found.textContent = T[lang].empFound(emp.name, emp.role, emp.dept);
+    found.className = 'emp-strip found';
+  } else if (v.length > 6) {
+    guest.textContent = T[lang].empGuest;
+    guest.className = 'emp-strip guest';
+  }
+}
+
+// ── TYPE CHANGE ───────────────────────────────────────────────
+function fTypeChanged(val) {
+  const extra = document.getElementById('f-type-extra');
+  const ex = T[lang].extras[val];
+  if (ex) {
+    extra.style.display = 'block';
+    extra.innerHTML = `<label class="field-label">${ex.l}</label>
+      <textarea id="f-type-detail" class="field-input" rows="2" style="margin-top:5px;" placeholder="${ex.p}"></textarea>`;
+  } else { extra.style.display='none'; extra.innerHTML=''; }
+  if (AUTO_PRI[val]) fSetPri(AUTO_PRI[val]);
+}
+
+// ── PRIORITY ─────────────────────────────────────────────────
+function fSetPri(val) {
+  fPriority = val;
+  document.querySelectorAll('.pri-pill').forEach(p => p.classList.toggle('active', p.dataset.val===val));
+}
+
+// ── ATTACHMENTS ──────────────────────────────────────────────
+function fDragOver(e) { e.preventDefault(); document.getElementById('f-dropzone').classList.add('over'); }
+function fDragLeave()  { document.getElementById('f-dropzone').classList.remove('over'); }
+function fDrop(e) { e.preventDefault(); document.getElementById('f-dropzone').classList.remove('over'); [...e.dataTransfer.files].forEach(fAddFile); }
+function fFilesAdded(files) { [...files].forEach(fAddFile); document.getElementById('f-file').value=''; }
+function fAddFile(file) {
+  if (file.size > 10*1024*1024) { alert(T[lang].aFileBig(file.name)); return; }
+  const r = new FileReader();
+  r.onload = e => {
+    const obj={name:file.name,dataUrl:e.target.result,type:file.type};
+    fAttachments.push(obj);
+    fRenderThumb(obj, fAttachments.length-1);
+    document.getElementById('f-attach-count').textContent = T[lang].attachCount(fAttachments.length);
+  };
+  r.readAsDataURL(file);
+}
+function fRenderThumb(obj, idx) {
+  const strip = document.getElementById('f-previews');
+  const wrap = document.createElement('div'); wrap.className='thumb';
+  if (obj.type.startsWith('image/')) { const img=document.createElement('img'); img.src=obj.dataUrl; img.alt=obj.name; wrap.appendChild(img); }
+  else { wrap.textContent = obj.type==='application/pdf'?'📄':'📎'; }
+  const rm = document.createElement('button'); rm.className='thumb-rm'; rm.textContent='×';
+  rm.onclick = e => { e.stopPropagation(); fAttachments.splice(idx,1); strip.innerHTML=''; fAttachments.forEach((a,i)=>fRenderThumb(a,i)); document.getElementById('f-attach-count').textContent=fAttachments.length?T[lang].attachCount(fAttachments.length):''; };
+  wrap.appendChild(rm); strip.appendChild(wrap);
+}
+document.addEventListener('paste', e => {
+  const items=[...(e.clipboardData?.items||[])].filter(i=>i.type.startsWith('image/'));
+  if (!items.length) return; e.preventDefault();
+  items.forEach(item=>{ const f=item.getAsFile(); if(f){ const ext=f.type.split('/')[1]||'png'; fAddFile(new File([f],'screenshot-'+Date.now()+'.'+ext,{type:f.type})); } });
+});
+
+// ── SUBMIT ───────────────────────────────────────────────────
+function fSubmit() {
+  const t       = T[lang];
+  const email   = document.getElementById('f-email').value.trim();
+  const subject = document.getElementById('f-subject').value.trim();
+  const type    = document.getElementById('f-type').value;
+  const cat     = document.getElementById('f-cat').value;
+  const desc    = document.getElementById('f-desc').value.trim();
+  if (!email)   { alert(t.aEmail);   document.getElementById('f-email').focus();   return; }
+  if (!subject) { alert(t.aSubject); document.getElementById('f-subject').focus(); return; }
+  if (!type)    { alert(t.aType);    document.getElementById('f-type').focus();    return; }
+  if (!cat)     { alert(t.aCat);     document.getElementById('f-cat').focus();     return; }
+  if (!desc)    { alert(t.aDesc);    document.getElementById('f-desc').focus();    return; }
+
+  fTicketNum++;
+  localStorage.setItem('phsu_ticket_num', fTicketNum);
+  const ticketId = 'HD-'+String(fTicketNum).padStart(3,'0');
+  const typeLabel = document.getElementById('f-type').options[document.getElementById('f-type').selectedIndex]?.text||type;
+  const typeDetail = document.getElementById('f-type-detail')?.value.trim()||'';
+
+  const tickets = JSON.parse(localStorage.getItem('phsu_submitted_tickets')||'[]');
+  tickets.unshift({id:ticketId,email,subject,type,cat,typeLabel,priority:fPriority,description:desc,typeDetail,requester:fEmployee?`${fEmployee.name} · ${fEmployee.role}`:email,requesterEmail:email,lang,attachments:fAttachments.length,status:'Open',submitted:new Date().toISOString()});
+  localStorage.setItem('phsu_submitted_tickets', JSON.stringify(tickets));
+
+  document.getElementById('f-ticket-ref').textContent = ticketId;
+  document.getElementById('form-body').style.display  = 'none';
+  document.getElementById('f-success').style.display  = 'block';
+
+  const webhook = localStorage.getItem('phsu_make_webhook');
+  if (webhook) {
+    fetch(webhook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'new_ticket',source:'standalone_form',lang,ticketId,subject,category:cat,requestType:typeLabel,priority:fPriority,requesterEmail:email,requestedBy:fEmployee?fEmployee.name:email,description:desc+(typeDetail?'\n\n'+typeDetail:''),attachmentCount:fAttachments.length,submittedAt:new Date().toISOString(),emailSubject:`🎫 [${fPriority}] ${ticketId}: ${subject}`,hubUrl:'https://amjarabo.github.io/phsu-hub'}),mode:'no-cors'}).catch(()=>{});
+  }
+}
+
+function fReset() {
+  document.getElementById('f-success').style.display  = 'none';
+  document.getElementById('form-body').style.display  = 'flex';
+  ['f-email','f-subject','f-desc'].forEach(i=>{ const el=document.getElementById(i); if(el) el.value=''; });
+  ['f-type','f-cat'].forEach(i=>{ const el=document.getElementById(i); if(el) el.value=''; });
+  document.getElementById('f-type-extra').style.display='none';
+  document.getElementById('f-type-extra').innerHTML='';
+  document.getElementById('f-emp-found').className='emp-strip';
+  document.getElementById('f-emp-guest').className='emp-strip';
+  document.getElementById('f-previews').innerHTML='';
+  document.getElementById('f-attach-count').textContent='';
+  fSetPri('Medium'); fEmployee=null; fAttachments=[];
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+(function(){
+  const urlLang = new URLSearchParams(window.location.search).get('lang');
+  const browserLang = (navigator.language||'en').toLowerCase().startsWith('es') ? 'es' : 'en';
+  setLang(urlLang==='es'||urlLang==='en' ? urlLang : browserLang);
+})();
+</script>
+</body>
+</html>
