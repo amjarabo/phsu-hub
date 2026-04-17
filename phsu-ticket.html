@@ -590,7 +590,29 @@ function fSubmit() {
 
   const webhook = localStorage.getItem('phsu_make_webhook') || 'https://hook.us2.make.com/buarpte2pwjfyz9q6hdpreggfvetqqff';
   if (webhook) {
-    fetch(webhook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'new_ticket',source:'standalone_form',lang,ticketId,subject,category:cat,requestType:typeLabel,priority:fPriority,requesterEmail:email,requestedBy:fEmployee?fEmployee.name:email,description:desc+(typeDetail?'\n\n'+typeDetail:''),attachmentCount:fAttachments.length,submittedAt:new Date().toISOString(),emailSubject:`🎫 [${fPriority}] ${ticketId}: ${subject}`,hubUrl:'https://amjarabo.github.io/phsu-hub'}),mode:'no-cors'}).catch(()=>{});
+    fetch(webhook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type:             'new_ticket',
+        source:           'standalone_form',
+        lang:             lang,
+        ticketId:         ticketId,
+        subject:          subject,
+        requestType:      typeLabel,
+        category:         cat,
+        priority:         fPriority,
+        requesterEmail:   email,
+        requestedBy:      fEmployee ? fEmployee.name : email,
+        assignedTo:       'Ana Jarabo',
+        assignedEmail:    'ajarabo@psm.edu',
+        description:      desc + (typeDetail ? '\n\n' + typeDetail : ''),
+        attachmentCount:  fAttachments.length,
+        submittedAt:      new Date().toISOString(),
+        emailSubject:     '🎫 [' + fPriority + '] ' + ticketId + ': ' + subject,
+        hubUrl:           'https://amjarabo.github.io/phsu-hub'
+      })
+    }).catch(()=>{});
   }
 }
 
