@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PHSU Student Search — Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────
+   PHSU brand tokens — pulled directly from the v0.5.2 brand guide.
+   Signature teal / dark teal / orange / cool gray. Light & dark themes.
+   ───────────────────────────────────────── */
+:root{
+  --teal:#00999A;
+  --teal-dk:#024748;
+  --orange:#F7951D;
+  --gray-1:#DBDDDC;
+
+  /* light theme surfaces */
+  --bg:#F4F6F7;
+  --surface:#FFFFFF;
+  --surface-2:#F8FAFB;
+  --border:#E3E8EA;
+  --tx1:#0E1B26;
+  --tx2:#3D4A55;
+  --tx3:#6B7780;
+  --shadow:0 1px 2px rgba(2,71,72,.04), 0 8px 24px rgba(2,71,72,.06);
+
+  --r-sm:6px; --r-md:10px; --r-lg:14px;
+  --t:0.18s ease;
+}
+html[data-theme="dark"]{
+  --bg:#0B1418;
+  --surface:#11202A;
+  --surface-2:#0E1A22;
+  --border:#1F313C;
+  --tx1:#E9F2F4;
+  --tx2:#B5C6CC;
+  --tx3:#7E9098;
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.45);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--tx1);font-family:'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;line-height:1.5}
+.serif{font-family:'Libre Baskerville',Georgia,serif}
+
+/* preview frame — when embedded in the hub this outer chrome is removed and only #panel-student-search ships */
+.preview-frame{max-width:1280px;margin:24px auto;padding:0 20px}
+.preview-banner{background:var(--surface);border:1px dashed var(--border);border-radius:var(--r-md);padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.preview-banner .pb-l{font-size:12px;color:var(--tx3);letter-spacing:.06em;text-transform:uppercase}
+.preview-banner .pb-t{font-weight:600;color:var(--tx1)}
+.theme-toggle{background:none;border:1px solid var(--border);color:var(--tx2);padding:6px 12px;border-radius:999px;font-size:12px;cursor:pointer;font-family:inherit}
+.theme-toggle:hover{border-color:var(--teal);color:var(--teal)}
+
+/* ─────────────────────────────────────────
+   PANEL — drop this whole block into phsu-hub.html
+   ───────────────────────────────────────── */
+.panel{background:transparent}
+.breadcrumb{font-size:12px;color:var(--tx3);margin-bottom:14px;letter-spacing:.02em}
+.breadcrumb .bc-sep{margin:0 6px;opacity:.5}
+
+/* page header */
+.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:22px;flex-wrap:wrap}
+.ph-title{font-family:'Libre Baskerville',Georgia,serif;font-size:28px;font-weight:700;color:var(--tx1);letter-spacing:-.01em;margin:0 0 4px 0}
+.ph-sub{color:var(--tx2);font-size:14px;max-width:62ch}
+
+/* search panel — the hero element. Now a multi-field form. */
+.ss-searchbar{
+  background:linear-gradient(135deg, var(--teal-dk) 0%, var(--teal) 100%);
+  border-radius:var(--r-lg);
+  padding:24px 28px 22px;
+  margin-bottom:22px;
+  position:relative;
+  overflow:hidden;
+  color:#fff;
+  box-shadow:var(--shadow);
+}
+.ss-searchbar::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 85% -10%, rgba(247,149,29,.22) 0%, transparent 55%);
+  pointer-events:none;
+}
+.ss-bar-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:18px;position:relative;flex-wrap:wrap}
+.ss-bar-title{font-family:'Libre Baskerville',Georgia,serif;font-size:22px;margin:0 0 4px;font-weight:700;letter-spacing:-.01em}
+.ss-bar-sub{font-size:13px;opacity:.85}
+
+/* AND/OR toggle, sits in the top-right of the hero */
+.ss-mode{display:inline-flex;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:3px;gap:2px}
+.ss-mode-btn{
+  background:transparent;border:none;color:rgba(255,255,255,.75);
+  padding:6px 14px;font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;cursor:pointer;border-radius:999px;transition:background var(--t), color var(--t);
+}
+.ss-mode-btn[aria-pressed="true"]{background:#fff;color:var(--teal-dk)}
+.ss-mode-btn:hover:not([aria-pressed="true"]){color:#fff}
+.ss-mode-help{font-size:10.5px;opacity:.65;margin-top:4px;text-align:right;letter-spacing:.02em}
+
+/* form grid — 3 cols on desktop, 2 on tablet, 1 on mobile */
+.ss-form{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;position:relative}
+@media (max-width:900px){.ss-form{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:560px){.ss-form{grid-template-columns:1fr}}
+
+.ss-field{display:flex;flex-direction:column;gap:5px;position:relative}
+.ss-field label{
+  font-size:10.5px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:rgba(255,255,255,.85);
+}
+.ss-input{
+  width:100%;
+  background:rgba(255,255,255,.96);
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:var(--r-md);
+  padding:11px 14px;
+  font-size:14px;
+  font-family:inherit;
+  color:#0E1B26;
+  outline:none;
+  transition:box-shadow var(--t), background var(--t);
+}
+.ss-input::placeholder{color:#8A99A2;font-weight:400}
+.ss-input:focus{box-shadow:0 0 0 3px rgba(247,149,29,.4);background:#fff}
+
+/* action row beneath the form */
+.ss-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;flex-wrap:wrap;position:relative}
+.ss-actions-l{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ss-actions-r{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+.ss-go{
+  background:var(--orange);color:#fff;border:none;
+  border-radius:var(--r-md);
+  padding:11px 26px;
+  font-weight:700;font-size:13px;
+  letter-spacing:.04em;cursor:pointer;font-family:inherit;
+  transition:transform var(--t), box-shadow var(--t), background var(--t);
+  text-transform:uppercase;
+}
+.ss-go:hover:not(:disabled){background:#ffa83a;box-shadow:0 6px 16px rgba(247,149,29,.4)}
+.ss-go:active{transform:translateY(1px)}
+.ss-go:disabled{opacity:.45;cursor:not-allowed}
+
+.ss-clear{
+  background:transparent;
+  border:1px solid rgba(255,255,255,.35);
+  color:rgba(255,255,255,.85);
+  border-radius:var(--r-md);
+  padding:11px 18px;
+  font-weight:600;font-size:13px;letter-spacing:.04em;
+  cursor:pointer;font-family:inherit;text-transform:uppercase;
+  transition:background var(--t), border-color var(--t);
+}
+.ss-clear:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.6)}
+
+/* filled-fields indicator */
+.ss-filled-pill{
+  font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
+  color:#fff;padding:5px 11px;border-radius:999px;
+}
+.ss-filled-pill[data-empty="true"]{opacity:.55}
+
+/* hint examples row */
+.ss-hints{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;position:relative;font-size:11px;align-items:center}
+.ss-hints-l{opacity:.7;margin-right:4px;letter-spacing:.04em;text-transform:uppercase}
+.ss-chip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 10px;border-radius:999px;cursor:pointer;font-family:inherit;font-size:11px;transition:background var(--t)}
+.ss-chip:hover{background:rgba(255,255,255,.28)}
+
+/* status row above results */
+.ss-status{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap;font-size:13px;color:var(--tx2)}
+.ss-status-l{display:flex;align-items:center;gap:10px}
+.ss-status-pill{background:var(--surface);border:1px solid var(--border);padding:4px 10px;border-radius:999px;font-size:11px;color:var(--tx3);letter-spacing:.04em;text-transform:uppercase}
+.ss-status-pill b{color:var(--tx1)}
+
+/* results — four columns, one per source. Responsive: 4 → 2×2 → 1 */
+.ss-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media (max-width:1500px){.ss-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:760px){.ss-grid{grid-template-columns:1fr}}
+
+.src-col{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);
+  display:flex;flex-direction:column;
+  min-height:320px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.src-col[data-disabled="true"]{opacity:.7}
+.src-col[data-disabled="true"] .src-head{background:repeating-linear-gradient(135deg,var(--surface-2) 0 8px,var(--surface) 8px 16px)}
+.src-head{
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:var(--surface-2);
+}
+.src-head-l{display:flex;align-items:center;gap:10px;min-width:0}
+.src-logo{
+  width:32px;height:32px;border-radius:8px;
+  display:grid;place-items:center;
+  font-weight:700;font-size:13px;color:#fff;
+  flex-shrink:0;
+}
+.src-logo[data-src="salesforce"]{background:#00A1E0}
+.src-logo[data-src="fabric"]{background:#107C10}
+.src-logo[data-src="element451"]{background:var(--teal)}
+.src-logo[data-src="anthology"]{background:#5C2D91}
+.src-name{font-weight:700;color:var(--tx1);font-size:14px;letter-spacing:-.01em}
+.src-tag{font-size:10px;color:var(--tx3);letter-spacing:.06em;text-transform:uppercase;margin-top:1px}
+.src-count{
+  font-size:11px;font-weight:700;color:var(--tx2);
+  background:var(--bg);border:1px solid var(--border);
+  padding:3px 9px;border-radius:999px;
+  letter-spacing:.04em;
+}
+.src-count[data-state="hit"]{background:rgba(0,153,154,.1);color:var(--teal-dk);border-color:rgba(0,153,154,.3)}
+html[data-theme="dark"] .src-count[data-state="hit"]{background:rgba(0,153,154,.18);color:#67D2D3;border-color:rgba(0,153,154,.4)}
+.src-count[data-state="empty"]{color:var(--tx3)}
+.src-count[data-state="error"]{background:rgba(205,57,21,.1);color:#CD3915;border-color:rgba(205,57,21,.3)}
+.src-count[data-state="soon"]{background:rgba(247,149,29,.12);color:#A05E0E;border-color:rgba(247,149,29,.35);font-size:9.5px}
+html[data-theme="dark"] .src-count[data-state="soon"]{color:#FFB860}
+
+.src-body{padding:14px 16px;flex:1;overflow-y:auto;max-height:560px}
+
+/* result card */
+.s-card{
+  border:1px solid var(--border);
+  border-radius:var(--r-md);
+  padding:14px;
+  margin-bottom:10px;
+  background:var(--surface);
+  transition:border-color var(--t), box-shadow var(--t), transform var(--t);
+}
+.s-card:hover{border-color:var(--teal);box-shadow:0 4px 12px rgba(0,153,154,.12)}
+.s-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.s-name{font-weight:700;color:var(--tx1);font-size:14px;line-height:1.3;margin:0 0 2px;font-family:'Libre Baskerville',Georgia,serif}
+.s-meta{font-size:11px;color:var(--tx3);letter-spacing:.02em}
+.s-status{
+  font-size:10px;font-weight:700;
+  padding:3px 8px;border-radius:999px;
+  letter-spacing:.06em;text-transform:uppercase;
+  white-space:nowrap;
+}
+.s-status[data-tone="active"]{background:rgba(0,153,154,.15);color:var(--teal-dk)}
+.s-status[data-tone="lead"]{background:rgba(247,149,29,.15);color:#B96B0E}
+.s-status[data-tone="prospect"]{background:rgba(125,13,92,.12);color:#7D0D5C}
+.s-status[data-tone="enrolled"]{background:rgba(2,71,72,.12);color:var(--teal-dk)}
+.s-status[data-tone="closed"]{background:rgba(110,110,110,.15);color:var(--tx2)}
+html[data-theme="dark"] .s-status[data-tone="active"]{background:rgba(0,153,154,.25);color:#67D2D3}
+html[data-theme="dark"] .s-status[data-tone="lead"]{background:rgba(247,149,29,.2);color:#FFB860}
+html[data-theme="dark"] .s-status[data-tone="enrolled"]{background:rgba(0,153,154,.2);color:#67D2D3}
+html[data-theme="dark"] .s-status[data-tone="prospect"]{background:rgba(225,136,114,.18);color:#E18872}
+html[data-theme="dark"] .s-status[data-tone="closed"]{background:rgba(180,180,180,.18);color:var(--tx2)}
+
+/* facts grid inside each card */
+.s-facts{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:11.5px;margin-bottom:10px}
+.s-fact{display:flex;flex-direction:column;gap:1px;min-width:0}
+.s-fact-l{color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;font-size:9.5px;font-weight:600}
+.s-fact-v{color:var(--tx1);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s-fact-v[data-mono]{font-family:'SF Mono',Menlo,Consolas,monospace;font-weight:500;font-size:11px}
+
+/* engagement row */
+.s-engage{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.s-eng{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;background:var(--surface-2);border:1px solid var(--border);padding:3px 8px;border-radius:999px;color:var(--tx2);font-weight:600}
+.s-eng b{color:var(--tx1)}
+
+/* health bar */
+.s-health{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:11px}
+.s-health-l{color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;font-size:9.5px;font-weight:600;flex-shrink:0}
+.s-health-track{flex:1;height:6px;background:var(--bg);border-radius:999px;overflow:hidden}
+.s-health-fill{height:100%;border-radius:999px;transition:width .4s ease}
+.s-health-v{font-weight:700;font-size:11px;color:var(--tx1);min-width:32px;text-align:right}
+
+/* card footer */
+.s-card-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:10px;border-top:1px solid var(--border);font-size:11px}
+.s-foot-l{color:var(--tx3);display:flex;flex-direction:column}
+.s-foot-l span{font-weight:600;color:var(--tx2)}
+.s-link{color:var(--teal);text-decoration:none;font-weight:700;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;display:inline-flex;align-items:center;gap:4px;transition:color var(--t)}
+.s-link:hover{color:var(--orange)}
+.s-link::after{content:"→";transition:transform var(--t)}
+.s-link:hover::after{transform:translateX(2px)}
+
+/* states inside a column body */
+.col-state{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 20px;color:var(--tx3);height:100%;min-height:240px}
+.col-state-icon{font-size:34px;margin-bottom:12px;opacity:.5}
+.col-state-title{font-weight:700;color:var(--tx2);font-size:13px;margin-bottom:4px}
+.col-state-sub{font-size:11.5px;line-height:1.5;max-width:24ch}
+.col-state[data-tone="error"] .col-state-icon{color:#CD3915;opacity:.8}
+.col-state[data-tone="error"] .col-state-title{color:#CD3915}
+
+/* skeleton loader */
+.sk-card{padding:14px;margin-bottom:10px;border:1px solid var(--border);border-radius:var(--r-md)}
+.sk-line{height:11px;background:linear-gradient(90deg,var(--border) 0%,var(--surface-2) 50%,var(--border) 100%);background-size:200% 100%;animation:sk 1.4s linear infinite;border-radius:4px;margin-bottom:8px}
+.sk-line.lg{height:14px;width:60%}
+.sk-line.md{width:40%}
+.sk-line.sm{width:75%;height:9px}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* idle (initial) state for the whole results area */
+.ss-idle{
+  background:var(--surface);
+  border:1px dashed var(--border);
+  border-radius:var(--r-lg);
+  padding:60px 30px;
+  text-align:center;
+  color:var(--tx3);
+}
+.ss-idle-icon{font-size:48px;opacity:.4;margin-bottom:12px}
+.ss-idle-title{font-family:'Libre Baskerville',Georgia,serif;font-size:18px;color:var(--tx2);margin-bottom:6px;font-weight:700}
+.ss-idle-sub{font-size:13px;max-width:46ch;margin:0 auto;line-height:1.5}
+
+/* demo-mode banner inside the panel */
+.demo-banner{
+  background:rgba(247,149,29,.08);
+  border:1px solid rgba(247,149,29,.3);
+  color:#A05E0E;
+  font-size:12px;
+  padding:10px 14px;
+  border-radius:var(--r-md);
+  margin-bottom:18px;
+  display:flex;align-items:center;gap:8px;
+}
+html[data-theme="dark"] .demo-banner{background:rgba(247,149,29,.12);color:#FFB860}
+.demo-banner b{font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="preview-frame">
+
+  <div class="preview-banner">
+    <div>
+      <div class="pb-l">Preview · standalone</div>
+      <div class="pb-t">PHSU Operations Hub — Student Search panel</div>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()">Toggle theme</button>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       BEGIN PANEL — copy from here into phsu-hub.html
+       ════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-student-search">
+
+    <div class="breadcrumb">⌂ Home <span class="bc-sep">/</span> <span>Student Search</span></div>
+
+    <div class="ph">
+      <div>
+        <h2 class="ph-title">Student Search</h2>
+        <div class="ph-sub">Search Salesforce, Microsoft Fabric, and Element451 in parallel. Results show a high-level overview from each system with a deep link to the source record.</div>
+      </div>
+    </div>
+
+    <div class="demo-banner" id="demo-banner">
+      <b>Demo mode</b>
+      <span>— results are mocked locally. Wire up <code>SS_CONFIG.proxyUrl</code> in the script to connect to your Power Automate flow.</span>
+    </div>
+
+    <!-- search form -->
+    <div class="ss-searchbar">
+
+      <div class="ss-bar-head">
+        <div>
+          <h3 class="ss-bar-title">Find a student across all systems</h3>
+          <div class="ss-bar-sub">Fill any combination of fields. Empty fields are ignored.</div>
+        </div>
+        <div>
+          <div class="ss-mode" role="group" aria-label="Match mode">
+            <button class="ss-mode-btn" id="ss-mode-and" aria-pressed="true"  onclick="ssSetMode('AND')">Match all</button>
+            <button class="ss-mode-btn" id="ss-mode-or"  aria-pressed="false" onclick="ssSetMode('OR')">Match any</button>
+          </div>
+          <div class="ss-mode-help" id="ss-mode-help">All filled fields must match the same student</div>
+        </div>
+      </div>
+
+      <div class="ss-form">
+        <div class="ss-field">
+          <label for="ss-firstName">First name</label>
+          <input id="ss-firstName" class="ss-input" type="text" autocomplete="off" placeholder="Maria">
+        </div>
+        <div class="ss-field">
+          <label for="ss-lastName">Last name</label>
+          <input id="ss-lastName" class="ss-input" type="text" autocomplete="off" placeholder="Rivera">
+        </div>
+        <div class="ss-field">
+          <label for="ss-email">Email</label>
+          <input id="ss-email" class="ss-input" type="email" autocomplete="off" placeholder="maria.rivera@example.com">
+        </div>
+        <div class="ss-field">
+          <label for="ss-mobile">Mobile</label>
+          <input id="ss-mobile" class="ss-input" type="tel" autocomplete="off" placeholder="+1 (787) 555-0142">
+        </div>
+        <div class="ss-field">
+          <label for="ss-jenzabarId">Jenzabar ID</label>
+          <input id="ss-jenzabarId" class="ss-input" type="text" autocomplete="off" placeholder="JEN-89234">
+        </div>
+        <div class="ss-field">
+          <label for="ss-salesforceId">Salesforce ID</label>
+          <input id="ss-salesforceId" class="ss-input" type="text" autocomplete="off" placeholder="003Hp00001…">
+        </div>
+      </div>
+
+      <div class="ss-actions">
+        <div class="ss-actions-l">
+          <span class="ss-filled-pill" id="ss-filled-pill" data-empty="true">0 fields filled</span>
+        </div>
+        <div class="ss-actions-r">
+          <button class="ss-clear" onclick="ssClearForm()">Clear</button>
+          <button class="ss-go" id="ss-go" onclick="ssRunSearch()" disabled>Search</button>
+        </div>
+      </div>
+
+      <div class="ss-hints">
+        <span class="ss-hints-l">Try:</span>
+        <button class="ss-chip" onclick="ssTryExample('maria-rivera')">Maria Rivera (full)</button>
+        <button class="ss-chip" onclick="ssTryExample('email-only')">Email only</button>
+        <button class="ss-chip" onclick="ssTryExample('phone-only')">Mobile only</button>
+        <button class="ss-chip" onclick="ssTryExample('jenzabar-only')">Jenzabar ID only</button>
+        <button class="ss-chip" onclick="ssTryExample('partial')">Last name only</button>
+        <button class="ss-chip" onclick="ssTryExample('nomatch')">No-match (test)</button>
+      </div>
+    </div>
+
+    <!-- status -->
+    <div class="ss-status" id="ss-status" style="display:none">
+      <div class="ss-status-l">
+        <span>Searched <b id="ss-q-echo"></b></span>
+        <span class="ss-status-pill">Mode: <b id="ss-q-mode">AND</b></span>
+        <span class="ss-status-pill">Time: <b id="ss-q-time">—</b></span>
+      </div>
+      <div class="ss-status-l">
+        <span class="ss-status-pill">Total matches: <b id="ss-q-total">0</b></span>
+      </div>
+    </div>
+
+    <!-- results grid: one column per source -->
+    <div id="ss-idle" class="ss-idle">
+      <div class="ss-idle-icon">⌕</div>
+      <div class="ss-idle-title">Fill any field above to start</div>
+      <div class="ss-idle-sub">All fields are optional. The search will query Salesforce, Microsoft Fabric, and Element451 in parallel and return matching records from each. Anthology will join once its connection is live.</div>
+    </div>
+
+    <div class="ss-grid" id="ss-grid" style="display:none">
+      <!-- Salesforce -->
+      <div class="src-col" data-src="salesforce">
+        <div class="src-head">
+          <div class="src-head-l">
+            <div class="src-logo" data-src="salesforce">SF</div>
+            <div>
+              <div class="src-name">Salesforce</div>
+              <div class="src-tag">CRM · Source of truth</div>
+            </div>
+          </div>
+          <div class="src-count" id="ss-count-salesforce" data-state="empty">0</div>
+        </div>
+        <div class="src-body" id="ss-body-salesforce"></div>
+      </div>
+      <!-- Fabric -->
+      <div class="src-col" data-src="fabric">
+        <div class="src-head">
+          <div class="src-head-l">
+            <div class="src-logo" data-src="fabric">MF</div>
+            <div>
+              <div class="src-name">Microsoft Fabric</div>
+              <div class="src-tag">Lakehouse · Analytics</div>
+            </div>
+          </div>
+          <div class="src-count" id="ss-count-fabric" data-state="empty">0</div>
+        </div>
+        <div class="src-body" id="ss-body-fabric"></div>
+      </div>
+      <!-- Element451 -->
+      <div class="src-col" data-src="element451">
+        <div class="src-head">
+          <div class="src-head-l">
+            <div class="src-logo" data-src="element451">E4</div>
+            <div>
+              <div class="src-name">Element451</div>
+              <div class="src-tag">CRM · Engagement</div>
+            </div>
+          </div>
+          <div class="src-count" id="ss-count-element451" data-state="empty">0</div>
+        </div>
+        <div class="src-body" id="ss-body-element451"></div>
+      </div>
+      <!-- Anthology — disabled until connection is live -->
+      <div class="src-col" data-src="anthology" data-disabled="true">
+        <div class="src-head">
+          <div class="src-head-l">
+            <div class="src-logo" data-src="anthology">AN</div>
+            <div>
+              <div class="src-name">Anthology</div>
+              <div class="src-tag">SIS · Student records</div>
+            </div>
+          </div>
+          <div class="src-count" id="ss-count-anthology" data-state="soon">Coming soon</div>
+        </div>
+        <div class="src-body" id="ss-body-anthology"></div>
+      </div>
+    </div>
+
+  </div>
+  <!-- ════════════════════════════════════════════════ END PANEL ════════════════════════════════════════════════ -->
+
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   STUDENT SEARCH — front-end logic (v2: structured form input)
+   ════════════════════════════════════════════════════════════════
+   Form fields (any combination, all optional):
+      firstName, lastName, email, mobile, jenzabarId, salesforceId
+   Match modes:
+      AND  — every filled field must match the same record
+      OR   — any filled field is enough
+
+   Modes:
+     • DEMO   — uses SS_DEMO_DATA below (default; works in SharePoint immediately)
+     • LIVE   — POSTs the form payload to SS_CONFIG.proxyUrl
+                expected response shape documented in /docs/student-search-backend.md
+   To switch to LIVE: set SS_CONFIG.proxyUrl to your Power Automate HTTP trigger URL.
+   ════════════════════════════════════════════════════════════════ */
+
+const SS_CONFIG = {
+  // ⚠️ set this to your Power Automate / Make HTTPS endpoint to leave demo mode
+  proxyUrl: "",
+  headers: { "Content-Type":"application/json" },
+
+  // sources displayed as columns. Set enabled:false to render the "Coming soon" state.
+  // When Anthology is ready, flip enabled:true and the column starts receiving live data.
+  sources: [
+    { key:"salesforce", label:"Salesforce",       enabled:true  },
+    { key:"fabric",     label:"Microsoft Fabric", enabled:true  },
+    { key:"element451", label:"Element451",       enabled:true  },
+    { key:"anthology",  label:"Anthology",        enabled:false }
+  ],
+
+  // deep-link bases for source records — adjust to your tenant URLs
+  links: {
+    salesforce: id => `https://psm.lightning.force.com/lightning/r/Contact/${id}/view`,
+    fabric:     id => `https://app.fabric.microsoft.com/groups/me/datasets/${id}`,
+    element451: id => `https://psm.elements451.com/admin/people/${id}`,
+    anthology:  id => `https://psm.anthology.com/student/${id}` // confirm path with vendor when wiring up
+  }
+};
+
+const FIELD_IDS = ["firstName","lastName","email","mobile","jenzabarId","salesforceId"];
+const FIELD_LABELS = {
+  firstName:"First name", lastName:"Last name", email:"Email",
+  mobile:"Mobile", jenzabarId:"Jenzabar ID", salesforceId:"Salesforce ID"
+};
+
+let SS_MODE = "AND"; // toggled by the AND/OR buttons
+
+/* ─── DEMO data ───
+   Same three students as before, but each is a single object with all known
+   fields. The demo matcher walks each filled form field against each record.
+   In LIVE mode this whole block is unused — the proxy returns its own results. */
+const SS_DEMO_RECORDS = {
+  salesforce: [
+    {
+      id:"003Hp00001AbcdeIAA",
+      firstName:"Maria", lastName:"Rivera", fullName:"Maria L. Rivera",
+      email:"maria.rivera@example.com",
+      mobile:"+1 (787) 555-0142",
+      jenzabarId:"JEN-89234",
+      salesforceId:"003Hp00001AbcdeIAA",
+      createdDate:"2025-09-14",
+      currentStatus:"Application In Review", statusTone:"active",
+      assignedTo:"Astrid Velazquez (Admissions Director)",
+      successScore:78,
+      counts:{leads:1, applications:2, forms:5, communications:14, events:3},
+      lastActivity:"Form submitted · 2d ago"
+    },
+    {
+      id:"003Hp00002SantsIAA",
+      firstName:"Carlos", lastName:"Santos", fullName:"Carlos D. Santos",
+      email:"santos@example.com",
+      mobile:"+1 (314) 555-0199",
+      jenzabarId:"JEN-44102",
+      salesforceId:"003Hp00002SantsIAA",
+      createdDate:"2024-11-03",
+      currentStatus:"Enrolled · STL", statusTone:"enrolled",
+      assignedTo:"Serenity Lowe (Admissions Mgr STL)",
+      successScore:94,
+      counts:{leads:0, applications:1, forms:9, communications:32, events:12},
+      lastActivity:"Tuition paid · 12d ago"
+    },
+    {
+      id:"003Hp00003JoseRIAA",
+      firstName:"Jose", lastName:"Rivera", fullName:"Jose A. Rivera",
+      email:"jose.rivera@example.com",
+      mobile:"+1 (787) 555-0188",
+      jenzabarId:"JEN-77501",
+      salesforceId:"003Hp00003JoseRIAA",
+      createdDate:"2025-07-22",
+      currentStatus:"Lead — Inquiry", statusTone:"lead",
+      assignedTo:"John Reid (Telecom Mgr)",
+      successScore:42,
+      counts:{leads:2, applications:0, forms:1, communications:6, events:1},
+      lastActivity:"Inquiry form · 18d ago"
+    }
+  ],
+  fabric: [
+    {
+      id:"abc123-fabric-row",
+      firstName:"Maria", lastName:"Rivera", fullName:"Maria L Rivera",
+      email:"maria.rivera@example.com",
+      mobile:"7875550142",
+      jenzabarId:"JEN-89234", salesforceId:"003Hp00001AbcdeIAA",
+      createdDate:"2025-09-14",
+      currentStatus:"Pipeline · Qualified", statusTone:"prospect",
+      assignedTo:"Pipeline · Auto",
+      successScore:82,
+      counts:{leads:1, applications:2, forms:5, communications:14, events:3},
+      lastActivity:"Score recomputed · 4h ago"
+    },
+    {
+      id:"def456-fabric-row",
+      firstName:"Carlos", lastName:"Santos", fullName:"Carlos D Santos",
+      email:"santos@example.com",
+      mobile:"3145550199",
+      jenzabarId:"JEN-44102", salesforceId:"003Hp00002SantsIAA",
+      createdDate:"2024-11-03",
+      currentStatus:"Active Student", statusTone:"enrolled",
+      assignedTo:"Pipeline · Active",
+      successScore:96,
+      counts:{leads:0, applications:1, forms:9, communications:32, events:12},
+      lastActivity:"GPA snapshot · 1d ago"
+    }
+  ],
+  element451: [
+    {
+      id:"e451_p_4421",
+      firstName:"Maria", lastName:"Rivera", fullName:"Maria Rivera",
+      email:"maria.rivera@example.com",
+      mobile:"+1-787-555-0142",
+      jenzabarId:"—", salesforceId:"—",
+      createdDate:"2025-09-12",
+      currentStatus:"Engaged Lead", statusTone:"lead",
+      assignedTo:"John Reid (Telecom Mgr)",
+      successScore:71,
+      counts:{leads:1, applications:1, forms:4, communications:18, events:5},
+      lastActivity:"Email opened · 6h ago"
+    },
+    {
+      id:"e451_p_8821",
+      firstName:"Jose", lastName:"Rivera", fullName:"Jose Rivera",
+      email:"jose.rivera@example.com",
+      mobile:"+1-787-555-0188",
+      jenzabarId:"—", salesforceId:"—",
+      createdDate:"2025-07-20",
+      currentStatus:"Inquiry", statusTone:"prospect",
+      assignedTo:"Auto-pipeline · PR",
+      successScore:38,
+      counts:{leads:2, applications:0, forms:1, communications:9, events:0},
+      lastActivity:"Page visit · 3d ago"
+    }
+  ]
+};
+
+/* ─── helpers ─── */
+function $(id){ return document.getElementById(id); }
+function escHtml(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const digitsOnly = s => String(s||"").replace(/\D+/g,"");
+const norm = s => String(s||"").trim().toLowerCase();
+
+function ssGetForm(){
+  const o = {};
+  for(const k of FIELD_IDS){
+    const v = $("ss-"+k)?.value.trim() ?? "";
+    if(v) o[k] = v;
+  }
+  return o;
+}
+function ssClearForm(){
+  for(const k of FIELD_IDS){ const el = $("ss-"+k); if(el) el.value = ""; }
+  ssUpdateFilledPill();
+  $("ss-go").disabled = true;
+  $("ss-grid").style.display = "none";
+  $("ss-status").style.display = "none";
+  $("ss-idle").style.display = "block";
+}
+function ssUpdateFilledPill(){
+  const filled = ssGetForm();
+  const n = Object.keys(filled).length;
+  const pill = $("ss-filled-pill");
+  pill.textContent = n === 0 ? "0 fields filled" : (n === 1 ? "1 field filled" : n + " fields filled");
+  pill.dataset.empty = (n === 0).toString();
+  $("ss-go").disabled = (n === 0);
+}
+
+function ssSetMode(mode){
+  SS_MODE = mode;
+  $("ss-mode-and").setAttribute("aria-pressed", mode === "AND" ? "true" : "false");
+  $("ss-mode-or").setAttribute("aria-pressed",  mode === "OR"  ? "true" : "false");
+  $("ss-mode-help").textContent = (mode === "AND")
+    ? "All filled fields must match the same student"
+    : "Any single filled field is enough to match";
+}
+
+/* ─── example presets for the chip row ─── */
+const SS_EXAMPLES = {
+  "maria-rivera":  { firstName:"Maria", lastName:"Rivera", email:"maria.rivera@example.com" },
+  "email-only":    { email:"santos@example.com" },
+  "phone-only":    { mobile:"787-555-0142" },
+  "jenzabar-only": { jenzabarId:"JEN-89234" },
+  "partial":       { lastName:"Rivera" },
+  "nomatch":       { lastName:"Doe", email:"doe@nowhere.test" }
+};
+function ssTryExample(key){
+  ssClearForm();
+  const e = SS_EXAMPLES[key] || {};
+  for(const [k,v] of Object.entries(e)){ const el = $("ss-"+k); if(el) el.value = v; }
+  ssUpdateFilledPill();
+  ssRunSearch();
+}
+
+/* ─── matcher used in DEMO mode ───
+   Returns true if the record matches the form according to the current mode.
+   Field-aware: phone strips formatting; IDs are exact match; names/email use contains. */
+function ssDemoMatch(record, form){
+  const checks = [];
+  for(const [k, raw] of Object.entries(form)){
+    const v = raw.trim();
+    if(!v) continue;
+    let pass = false;
+    if(k === "mobile"){
+      pass = digitsOnly(record.mobile).includes(digitsOnly(v));
+    } else if(k === "jenzabarId" || k === "salesforceId"){
+      pass = norm(record[k]) === norm(v);
+    } else if(k === "email"){
+      pass = norm(record.email).includes(norm(v));
+    } else { // firstName, lastName — substring, case-insensitive
+      pass = norm(record[k]).includes(norm(v));
+    }
+    checks.push(pass);
+  }
+  if(checks.length === 0) return false;
+  return SS_MODE === "AND" ? checks.every(Boolean) : checks.some(Boolean);
+}
+
+/* ─── main entry ─── */
+async function ssRunSearch(){
+  const form = ssGetForm();
+  if(Object.keys(form).length === 0) return;
+
+  // status header
+  const echoBits = Object.entries(form).map(([k,v]) => `<b>${escHtml(FIELD_LABELS[k])}</b>=&ldquo;${escHtml(v)}&rdquo;`).join(", ");
+  $("ss-q-echo").innerHTML = echoBits;
+  $("ss-q-mode").textContent = SS_MODE;
+  $("ss-q-time").textContent = "…";
+  $("ss-q-total").textContent = "…";
+  $("ss-status").style.display = "flex";
+  $("ss-idle").style.display = "none";
+  $("ss-grid").style.display = "grid";
+  $("ss-go").disabled = true;
+
+  // skeletons for enabled sources only
+  for(const s of SS_CONFIG.sources){
+    if(!s.enabled){ ssRenderSoonState(s.key); continue; }
+    $("ss-body-"+s.key).innerHTML = ssSkeleton();
+    const c = $("ss-count-"+s.key); c.textContent = "…"; c.dataset.state = "empty";
+  }
+
+  const t0 = performance.now();
+  let result;
+  try {
+    result = SS_CONFIG.proxyUrl ? await ssLiveSearch(form) : await ssDemoSearch(form);
+  } catch(err){
+    result = ssErrorEnvelope(err.message || String(err));
+  }
+  const t1 = performance.now();
+
+  $("ss-q-time").textContent = Math.round(t1 - t0) + " ms";
+  let total = 0;
+  for(const s of SS_CONFIG.sources){
+    if(s.enabled) total += (result[s.key]?.length || 0);
+  }
+  $("ss-q-total").textContent = total;
+
+  for(const s of SS_CONFIG.sources){
+    if(!s.enabled) continue; // soon state already rendered
+    ssRenderColumn(s.key, result[s.key], result[s.key+"_error"]);
+  }
+  $("ss-go").disabled = false;
+}
+
+function ssErrorEnvelope(msg){
+  const e = {};
+  for(const s of SS_CONFIG.sources){
+    if(s.enabled){ e[s.key] = null; e[s.key+"_error"] = msg; }
+  }
+  return e;
+}
+
+/* ─── live mode — sends the structured form payload + mode ─── */
+async function ssLiveSearch(form){
+  const enabledKeys = SS_CONFIG.sources.filter(s => s.enabled).map(s => s.key);
+  const res = await fetch(SS_CONFIG.proxyUrl, {
+    method:"POST", headers:SS_CONFIG.headers,
+    body: JSON.stringify({ fields:form, mode:SS_MODE, sources:enabledKeys })
+  });
+  if(!res.ok) throw new Error("Proxy returned HTTP " + res.status);
+  const out = await res.json();
+  // ensure every enabled source has at least an empty array, never undefined
+  for(const k of enabledKeys){ if(!(k in out)) out[k] = []; }
+  return out;
+}
+
+/* ─── demo mode ─── */
+function ssDemoSearch(form){
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const out = {};
+      for(const src of ["salesforce","fabric","element451"]){
+        out[src] = (SS_DEMO_RECORDS[src] || []).filter(r => ssDemoMatch(r, form));
+      }
+      resolve(out);
+    }, 380 + Math.random()*220);
+  });
+}
+
+/* ─── rendering ─── */
+function ssSkeleton(){
+  return `
+    <div class="sk-card"><div class="sk-line lg"></div><div class="sk-line md"></div><div class="sk-line"></div><div class="sk-line sm"></div></div>
+    <div class="sk-card"><div class="sk-line lg"></div><div class="sk-line md"></div><div class="sk-line"></div><div class="sk-line sm"></div></div>
+  `;
+}
+
+function ssRenderSoonState(srcKey){
+  const body  = $("ss-body-"+srcKey);
+  const count = $("ss-count-"+srcKey);
+  count.textContent = "Coming soon"; count.dataset.state = "soon";
+  body.innerHTML = `
+    <div class="col-state">
+      <div class="col-state-icon">⏳</div>
+      <div class="col-state-title">Connection pending</div>
+      <div class="col-state-sub">This source will join the search once its API connection is configured. The column is reserved.</div>
+    </div>`;
+}
+
+function ssRenderColumn(src, rows, errMsg){
+  const body  = $("ss-body-"+src);
+  const count = $("ss-count-"+src);
+  if(!body || !count) return;
+
+  if(errMsg){
+    count.textContent = "ERR"; count.dataset.state = "error";
+    body.innerHTML = `
+      <div class="col-state" data-tone="error">
+        <div class="col-state-icon">⚠</div>
+        <div class="col-state-title">Couldn't reach this system</div>
+        <div class="col-state-sub">${escHtml(errMsg)}</div>
+      </div>`;
+    return;
+  }
+  if(!rows || rows.length === 0){
+    count.textContent = "0"; count.dataset.state = "empty";
+    body.innerHTML = `
+      <div class="col-state">
+        <div class="col-state-icon">∅</div>
+        <div class="col-state-title">No matches</div>
+        <div class="col-state-sub">No record in this system matches the current ${SS_MODE === "AND" ? "all-fields" : "any-field"} criteria.</div>
+      </div>`;
+    return;
+  }
+  count.textContent = rows.length; count.dataset.state = "hit";
+  body.innerHTML = rows.map(r => ssCardHtml(src, r)).join("");
+}
+
+function ssCardHtml(src, r){
+  const link    = SS_CONFIG.links[src] ? SS_CONFIG.links[src](r.id) : "#";
+  const counts  = r.counts || {};
+  const score   = Math.max(0, Math.min(100, Number(r.successScore)||0));
+  const scoreColor = score>=80 ? "#00999A" : score>=60 ? "#F7951D" : "#CD3915";
+  const created = r.createdDate ? new Date(r.createdDate).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}) : "—";
+  const displayName = r.fullName || [r.firstName, r.lastName].filter(Boolean).join(" ") || "Unknown";
+  const srcLabel = (SS_CONFIG.sources.find(s => s.key === src) || {}).label || src;
+
+  return `
+    <div class="s-card">
+      <div class="s-card-head">
+        <div>
+          <div class="s-name">${escHtml(displayName)}</div>
+          <div class="s-meta">Created ${escHtml(created)} · ${escHtml(r.lastActivity||"—")}</div>
+        </div>
+        <span class="s-status" data-tone="${escHtml(r.statusTone||"active")}">${escHtml(r.currentStatus||"Active")}</span>
+      </div>
+
+      <div class="s-facts">
+        <div class="s-fact"><span class="s-fact-l">Email</span><span class="s-fact-v" title="${escHtml(r.email||"")}">${escHtml(r.email||"—")}</span></div>
+        <div class="s-fact"><span class="s-fact-l">Mobile</span><span class="s-fact-v">${escHtml(r.mobile||"—")}</span></div>
+        <div class="s-fact"><span class="s-fact-l">Jenzabar ID</span><span class="s-fact-v" data-mono>${escHtml(r.jenzabarId||"—")}</span></div>
+        <div class="s-fact"><span class="s-fact-l">Source ID</span><span class="s-fact-v" data-mono title="${escHtml(r.id||"")}">${escHtml((r.id||"—").slice(0,18))}${(r.id||"").length>18?"…":""}</span></div>
+      </div>
+
+      <div class="s-engage">
+        <span class="s-eng">Leads <b>${counts.leads ?? 0}</b></span>
+        <span class="s-eng">Apps <b>${counts.applications ?? 0}</b></span>
+        <span class="s-eng">Forms <b>${counts.forms ?? 0}</b></span>
+        <span class="s-eng">Comms <b>${counts.communications ?? 0}</b></span>
+        <span class="s-eng">Events <b>${counts.events ?? 0}</b></span>
+      </div>
+
+      <div class="s-health">
+        <span class="s-health-l">Success</span>
+        <div class="s-health-track"><div class="s-health-fill" style="width:${score}%;background:${scoreColor}"></div></div>
+        <span class="s-health-v">${score}</span>
+      </div>
+
+      <div class="s-card-foot">
+        <div class="s-foot-l">Assigned to<span>${escHtml(r.assignedTo||"—")}</span></div>
+        <a class="s-link" href="${escHtml(link)}" target="_blank" rel="noopener">Open in ${escHtml(srcLabel)}</a>
+      </div>
+    </div>
+  `;
+}
+
+/* ─── init: enter to search, live filled-fields counter, render disabled cols ─── */
+document.addEventListener("DOMContentLoaded", () => {
+  for(const k of FIELD_IDS){
+    const el = $("ss-"+k);
+    if(!el) continue;
+    el.addEventListener("input", ssUpdateFilledPill);
+    el.addEventListener("keydown", e => { if(e.key === "Enter" && !$("ss-go").disabled) ssRunSearch(); });
+  }
+  // pre-render the disabled "coming soon" state for any source flagged enabled:false
+  for(const s of SS_CONFIG.sources){
+    if(!s.enabled) ssRenderSoonState(s.key);
+  }
+  ssUpdateFilledPill();
+  if(SS_CONFIG.proxyUrl) $("demo-banner").style.display = "none";
+});
+
+/* ─── theme toggle (preview only) ─── */
+function toggleTheme(){
+  const r = document.documentElement;
+  r.dataset.theme = (r.dataset.theme === "dark") ? "" : "dark";
+}
+</script>
+
+</body>
+</html>
